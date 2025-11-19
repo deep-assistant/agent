@@ -51,9 +51,9 @@ export namespace ToolRegistry {
       WebFetchTool,
       WebSearchTool,
       CodeSearchTool,
+      BatchTool,
       TodoWriteTool,
       TodoReadTool,
-      ...(config.experimental?.batch_tool === true ? [BatchTool] : []),
       ...custom,
     ]
   }
