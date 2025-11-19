@@ -21,14 +21,15 @@ async function main() {
     const input = await readStdin()
     const request = JSON.parse(input.trim())
 
-    // Create agent and process request
+    // Create agent and process request (events are emitted during processing)
     const agent = new Agent()
-    const response = await agent.process(request)
+    await agent.process(request)
 
-    // Output JSON response
-    console.log(JSON.stringify(response))
+    // No final output since we stream events
   } catch (error) {
     console.error(JSON.stringify({
+      type: 'error',
+      timestamp: Date.now(),
       error: error instanceof Error ? error.message : String(error)
     }))
     process.exit(1)

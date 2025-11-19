@@ -1,5 +1,5 @@
 // @ts-ignore
-import { $ } from 'command-stream'
+import { $, sh } from 'command-stream'
 import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { glob } from 'glob'
@@ -7,50 +7,177 @@ import { glob } from 'glob'
 export class Agent {
   constructor() {
     this.model = "opencode/zen-grok-code-fast-1"
+    this.sessionID = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   async process(request) {
-    try {
-      const message = request.message || "hi"
+    const message = request.message || "hi"
+    const sessionID = this.sessionID
 
-      // Execute tools if provided
-      let toolResults = []
-      if (request.tools && Array.isArray(request.tools)) {
-        for (const tool of request.tools) {
-          try {
-            const result = await this.executeTool(tool.name, tool.params)
-            toolResults.push({ tool: tool.name, result })
-          } catch (error) {
-            toolResults.push({
-              tool: tool.name,
-              error: error instanceof Error ? error.message : String(error)
-            })
+    // Emit initial step_start for the entire request
+    this.emitEvent('step_start', {
+      part: {
+        sessionID,
+        type: 'step-start',
+        step: 'process_request'
+      }
+    })
+
+    // Execute tools if provided
+    if (request.tools && Array.isArray(request.tools)) {
+      for (const tool of request.tools) {
+        // Emit step_start event for tool
+        this.emitEvent('step_start', {
+          part: {
+            sessionID,
+            type: 'step-start',
+            step: `execute_${tool.name}`
           }
+        })
+
+        try {
+          const startTime = Date.now()
+          const result = await this.executeTool(tool.name, tool.params)
+          const endTime = Date.now()
+
+          // Emit tool_use event
+          this.emitEvent('tool_use', {
+            part: {
+              sessionID,
+              type: 'tool',
+              tool: tool.name,
+              state: {
+                status: 'completed',
+                title: this.getToolTitle(tool.name, tool.params),
+                input: tool.params,
+                output: result.stdout || result.content || JSON.stringify(result)
+              },
+              time: {
+                start: startTime,
+                end: endTime
+              }
+            }
+          })
+
+          // Emit step_finish event for tool
+          this.emitEvent('step_finish', {
+            part: {
+              sessionID,
+              type: 'step-finish',
+              step: `execute_${tool.name}`,
+              reason: 'tool-calls'
+            }
+          })
+
+        } catch (error) {
+          // Emit error event
+          this.emitEvent('error', {
+            error: {
+              name: 'ToolExecutionError',
+              message: error instanceof Error ? error.message : String(error)
+            }
+          })
+
+          // Emit step_finish event even on error
+          this.emitEvent('step_finish', {
+            part: {
+              sessionID,
+              type: 'step-finish',
+              step: `execute_${tool.name}`,
+              reason: 'error'
+            }
+          })
         }
       }
+    }
 
-      // For MVP, just echo back with a simple response
-      // In full implementation, this would call the AI model
-      const response = `Hello! You said: "${message}"`
+    // Emit step_start for text generation
+    this.emitEvent('step_start', {
+      part: {
+        sessionID,
+        type: 'step-start',
+        step: 'generate_response'
+      }
+    })
 
-      return {
-        response,
-        model: this.model,
-        timestamp: Date.now(),
-        toolResults: toolResults.length > 0 ? toolResults : undefined
+    // Emit text response
+    const response = `Hello! You said: "${message}"`
+    const textStartTime = Date.now()
+    this.emitEvent('text', {
+      part: {
+        sessionID,
+        type: 'text',
+        text: response,
+        time: {
+          start: textStartTime,
+          end: textStartTime
+        }
       }
-    } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : String(error)
+    })
+
+    // Emit step_finish for text generation
+    this.emitEvent('step_finish', {
+      part: {
+        sessionID,
+        type: 'step-finish',
+        step: 'generate_response',
+        reason: 'stop'
       }
+    })
+
+    // Emit final step_finish for the entire request
+    this.emitEvent('step_finish', {
+      part: {
+        sessionID,
+        type: 'step-finish',
+        step: 'process_request',
+        reason: 'stop'
+      }
+    })
+
+    // Return final result (for compatibility)
+    return {
+      response,
+      model: this.model,
+      timestamp: Date.now(),
+      sessionID
+    }
+  }
+
+  emitEvent(type, data) {
+    const event = {
+      type,
+      timestamp: Date.now(),
+      sessionID: this.sessionID,
+      ...data
+    }
+    console.log(JSON.stringify(event))
+  }
+
+  getToolTitle(toolName, params) {
+    switch (toolName) {
+      case 'bash':
+        return params.command || 'bash command'
+      case 'read':
+        return `read ${params.filePath}`
+      case 'edit':
+        return `edit ${params.filePath}`
+      case 'list':
+        return `list ${params.path || '.'}`
+      case 'glob':
+        return `glob ${params.pattern}`
+      case 'grep':
+        return `grep ${params.pattern}`
+      default:
+        return `${toolName} ${JSON.stringify(params)}`
     }
   }
 
   async executeTool(toolName, params) {
     switch (toolName) {
       case 'bash':
-        // Use command-stream for bash execution
-        const result = await $(params.command)
+        // Use command-stream for bash execution with captured output
+        const result = await sh(params.command, { mirror: false })
         return { stdout: result.stdout, stderr: result.stderr, code: result.code }
 
       case 'read':
