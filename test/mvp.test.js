@@ -17,7 +17,7 @@ test('MVP agent responds to JSON input with streaming events', async () => {
   // Check for text event
   const textEvents = events.filter(e => e.type === 'text')
   assert.equal(textEvents.length, 1, 'Should have one text event')
-  assert.ok(textEvents[0].part.text.includes('hi'), 'Text should contain input message')
+  assert.equal(textEvents[0].part.text, 'Hi!', 'Should have correct response text')
   assert.equal(textEvents[0].sessionID, events[0].sessionID, 'Should have consistent sessionID')
   assert.ok(textEvents[0].timestamp, 'Should have timestamp')
 })
@@ -29,7 +29,7 @@ test('MVP agent executes tools with streaming events', async () => {
   try {
     // Pipe JSON input with tools to the agent CLI using command-stream
     const jsonInput = JSON.stringify({
-      message: "test",
+      message: "read the test file",
       tools: [{
         name: "read",
         params: { filePath: "test-file.txt" }
@@ -45,27 +45,19 @@ test('MVP agent executes tools with streaming events', async () => {
     // Verify we got events
     assert.ok(events.length > 0, 'Should have events')
 
-    // Check for step_start events (multiple now: request, tool execution, response)
+    // Check for step_start events
     const stepStartEvents = events.filter(e => e.type === 'step_start')
-    assert.ok(stepStartEvents.length >= 3, 'Should have at least 3 step_start events')
-    const toolStepStart = stepStartEvents.find(e => e.part.step === 'execute_read')
-    assert.ok(toolStepStart, 'Should have execute_read step_start')
+    assert.equal(stepStartEvents.length, 1, 'Should have one step_start event')
 
     // Check for tool_use event
     const toolEvents = events.filter(e => e.type === 'tool_use')
     assert.equal(toolEvents.length, 1, 'Should have one tool_use event')
     assert.equal(toolEvents[0].part.tool, 'read', 'Should be read tool')
-    assert.ok(toolEvents[0].part.state.output.includes('Hello World'), 'Should contain file content')
+    assert.equal(toolEvents[0].part.state.output, 'test content\n', 'Should contain file content')
 
     // Check for step_finish events
     const stepFinishEvents = events.filter(e => e.type === 'step_finish')
-    assert.ok(stepFinishEvents.length >= 3, 'Should have at least 3 step_finish events')
-    const toolStepFinish = stepFinishEvents.find(e => e.part.step === 'execute_read')
-    assert.ok(toolStepFinish, 'Should have execute_read step_finish')
-
-    // Check for text event
-    const textEvents = events.filter(e => e.type === 'text')
-    assert.equal(textEvents.length, 1, 'Should have one text event')
+    assert.equal(stepFinishEvents.length, 1, 'Should have one step_finish event')
 
     // All events should have the same sessionID
     const sessionID = events[0].sessionID

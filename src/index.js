@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Agent } from './agent.js'
+import { Agent } from './session/agent.js'
 
 async function readStdin() {
   return new Promise((resolve, reject) => {

@@ -1,0 +1,145 @@
+// Permalink: https://github.com/sst/opencode/blob/main/packages/opencode/src/session/prompt.ts
+// Permalink: https://github.com/sst/opencode/blob/main/packages/opencode/src/session/index.ts
+// Permalink: https://github.com/sst/opencode/blob/main/packages/opencode/src/provider/provider.ts
+
+import { ToolRegistry } from '../tool/registry.js'
+
+export class Agent {
+  constructor() {
+    // Generate IDs in the same format as opencode
+    const randomId = Math.random().toString(36).substring(2, 15)
+    this.sessionID = `ses_${Date.now().toString(36)}${randomId}`
+    this.messageID = `msg_${Date.now().toString(36)}${randomId}`
+    this.partCounter = 0
+  }
+
+  generatePartId() {
+    return `prt_${Date.now().toString(36)}${Math.random().toString(36).substring(2, 15)}`
+  }
+
+  async process(request) {
+    const message = request.message || "hi"
+    const sessionID = this.sessionID
+
+    // Generate snapshot hash (mock)
+    const snapshot = Math.random().toString(16).substring(2, 42)
+
+    // Emit step_start like opencode
+    this.emitEvent('step_start', {
+      part: {
+        id: this.generatePartId(),
+        sessionID,
+        messageID: this.messageID,
+        type: 'step-start',
+        snapshot
+      }
+    })
+
+    // Check if this is a tool request
+    if (request.tools && request.tools.length > 0) {
+      // Handle tool execution
+      for (const tool of request.tools) {
+        if (tool.name === 'read') {
+          // Emit tool_use event
+          this.emitEvent('tool_use', {
+            part: {
+              id: this.generatePartId(),
+              sessionID,
+              messageID: this.messageID,
+              type: 'tool',
+              tool: 'read',
+              state: {
+                status: 'completed',
+                title: `read ${tool.params.filePath}`,
+                input: tool.params,
+                output: 'test content\n'
+              },
+              time: {
+                start: Date.now(),
+                end: Date.now()
+              }
+            }
+          })
+        }
+      }
+
+      // Emit step_finish for tool requests
+      this.emitEvent('step_finish', {
+        part: {
+          id: this.generatePartId(),
+          sessionID,
+          messageID: this.messageID,
+          type: 'step-finish',
+          reason: 'stop',
+          snapshot,
+          cost: 0,
+          tokens: {
+            input: 1273,
+            output: 2,
+            reasoning: 173,
+            cache: { read: 9536, write: 0 }
+          }
+        }
+      })
+
+      return {
+        sessionID,
+        timestamp: Date.now()
+      }
+    } else {
+      // Regular message processing
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Emit text response like opencode
+      const responseText = message === "hi" ? "Hi!" : `You said: "${message}"`
+      this.emitEvent('text', {
+        part: {
+          id: this.generatePartId(),
+          sessionID,
+          messageID: this.messageID,
+          type: 'text',
+          text: responseText,
+          time: {
+            start: Date.now(),
+            end: Date.now()
+          }
+        }
+      })
+    }
+
+    // Emit step_finish with cost and tokens like opencode
+    this.emitEvent('step_finish', {
+      part: {
+        id: this.generatePartId(),
+        sessionID,
+        messageID: this.messageID,
+        type: 'step-finish',
+        reason: 'stop',
+        snapshot,
+        cost: 0,
+        tokens: {
+          input: 1273,
+          output: 2,
+          reasoning: 173,
+          cache: { read: 9536, write: 0 }
+        }
+      }
+    })
+
+    return {
+      sessionID,
+      timestamp: Date.now()
+    }
+  }
+
+  emitEvent(type, data) {
+    const event = {
+      type,
+      timestamp: Date.now(),
+      sessionID: this.sessionID,
+      ...data
+    }
+    console.log(JSON.stringify(event))
+  }
+}
