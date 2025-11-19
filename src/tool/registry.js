@@ -13,6 +13,8 @@ import { join, resolve } from 'path'
 import { glob } from 'glob'
 import { spawn } from 'child_process'
 
+let todos = []
+
 class ToolRegistry {
   static getTools() {
     return {
@@ -200,6 +202,115 @@ class ToolRegistry {
             }
           } catch (error) {
             throw new Error(`Failed to grep pattern ${pattern}: ${error.message}`)
+          }
+        }
+      }),
+
+      write: tool({
+        description: 'Write a file to the filesystem',
+        parameters: z.object({
+          filePath: z.string().describe('The path to the file to write'),
+          content: z.string().describe('The content to write to the file')
+        }),
+        execute: async ({ filePath, content }) => {
+          try {
+            const fullPath = resolve(process.cwd(), filePath)
+            writeFileSync(fullPath, content, 'utf-8')
+            return {
+              title: `Write ${filePath}`,
+              output: 'File written successfully'
+            }
+          } catch (error) {
+            throw new Error(`Failed to write file ${filePath}: ${error.message}`)
+          }
+        }
+      }),
+
+      webfetch: tool({
+        description: 'Fetch content from a URL',
+        parameters: z.object({
+          url: z.string().describe('The URL to fetch content from'),
+          format: z.enum(['text', 'markdown', 'html']).describe('The format to return the content in'),
+          timeout: z.number().optional().describe('Optional timeout in seconds (max 120)')
+        }),
+        execute: async ({ url, format, timeout = 30 }) => {
+          try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), timeout * 1000)
+
+            const response = await fetch(url, { signal: controller.signal })
+            clearTimeout(timeoutId)
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+            }
+
+            const contentType = response.headers.get('content-type') || ''
+            let content = await response.text()
+
+            if (format === 'markdown' && contentType.includes('text/html')) {
+              // Simple HTML to markdown conversion (basic)
+              content = content.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n')
+                .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n')
+                .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n')
+                .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+                .replace(/<br[^>]*>/gi, '\n')
+                .replace(/<[^>]+>/g, '') // Remove other tags
+            }
+
+            return {
+              title: `Fetch ${url}`,
+              output: content
+            }
+          } catch (error) {
+            throw new Error(`Failed to fetch ${url}: ${error.message}`)
+          }
+        }
+      }),
+
+      todowrite: tool({
+        description: 'Create and manage a structured task list',
+        parameters: z.object({
+          todos: z.array(z.object({
+            content: z.string().describe('Brief description of the task'),
+            status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).describe('Current status of the task'),
+            priority: z.enum(['high', 'medium', 'low']).describe('Priority level of the task'),
+            id: z.string().describe('Unique identifier for the todo item')
+          })).describe('The updated todo list')
+        }),
+        execute: async ({ todos: newTodos }) => {
+          todos = newTodos
+          return {
+            title: 'Update todo list',
+            output: 'Todo list updated successfully'
+          }
+        }
+      }),
+
+      todoread: tool({
+        description: 'Read the current todo list',
+        parameters: z.object({}),
+        execute: async () => {
+          return {
+            title: 'Read todo list',
+            output: JSON.stringify({todos}, null, 2)
+          }
+        }
+      }),
+
+      task: tool({
+        description: 'Launch a subagent to handle complex tasks',
+        parameters: z.object({
+          description: z.string().describe('Short description of the task'),
+          prompt: z.string().describe('The task for the agent to perform'),
+          subagent_type: z.string().describe('The type of specialized agent to use')
+        }),
+        execute: async ({ description, prompt, subagent_type }) => {
+          // Simple implementation: just return the prompt as output
+          // In a real implementation, this would launch a subagent
+          return {
+            title: `Task: ${description}`,
+            output: `Subagent ${subagent_type} would process: ${prompt}`
           }
         }
       })
