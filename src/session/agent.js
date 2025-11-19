@@ -77,6 +77,8 @@ export class Agent {
             })
           } catch (error) {
             const errorTime = Date.now()
+            const callID = `call_${Math.floor(Math.random() * 100000000)}`
+
             // Emit tool_use event with error
             this.emitEvent('tool_use', {
               part: {
@@ -84,6 +86,7 @@ export class Agent {
                 sessionID,
                 messageID: this.messageID,
                 type: 'tool',
+                callID,
                 tool: tool.name,
                 state: {
                   status: 'error',

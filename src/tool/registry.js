@@ -79,15 +79,56 @@ class ToolRegistry {
         execute: async ({ filePath, oldString, newString }) => {
           try {
             const fullPath = resolve(process.cwd(), filePath)
-            let content = readFileSync(fullPath, 'utf-8')
-            if (!content.includes(oldString)) {
+            const before = readFileSync(fullPath, 'utf-8')
+            if (!before.includes(oldString)) {
               throw new Error('oldString not found in file')
             }
-            content = content.replace(oldString, newString)
-            writeFileSync(fullPath, content, 'utf-8')
+            const after = before.replace(oldString, newString)
+            writeFileSync(fullPath, after, 'utf-8')
+
+            // Count additions and deletions
+            const beforeLines = before.split('\n')
+            const afterLines = after.split('\n')
+            let additions = 0
+            let deletions = 0
+
+            // Simple diff: count changed lines
+            for (let i = 0; i < Math.max(beforeLines.length, afterLines.length); i++) {
+              if (beforeLines[i] !== afterLines[i]) {
+                if (i < beforeLines.length) deletions++
+                if (i < afterLines.length) additions++
+              }
+            }
+
+            // Generate simple unified diff
+            const diffHeader = `Index: ${fullPath}\n===================================================================\n--- ${fullPath}\n+++ ${fullPath}\n@@ -1,${beforeLines.length} +1,${afterLines.length} @@`
+            const diffLines = []
+            for (let i = 0; i < Math.max(beforeLines.length, afterLines.length); i++) {
+              if (beforeLines[i] !== afterLines[i]) {
+                if (i < beforeLines.length && beforeLines[i] !== undefined) {
+                  diffLines.push(`-${beforeLines[i]}`)
+                }
+                if (i < afterLines.length && afterLines[i] !== undefined) {
+                  diffLines.push(`+${afterLines[i]}`)
+                }
+              }
+            }
+            const diff = `${diffHeader}\n${diffLines.join('\n')}\n`
+
             return {
-              title: `Edit ${filePath}`,
-              output: 'File edited successfully'
+              title: filePath,
+              output: '',
+              metadata: {
+                diagnostics: {},
+                diff: diff,
+                filediff: {
+                  file: fullPath,
+                  before: before,
+                  after: after,
+                  additions: additions,
+                  deletions: deletions
+                }
+              }
             }
           } catch (error) {
             throw new Error(`Failed to edit file ${filePath}: ${error.message}`)
