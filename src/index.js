@@ -30,6 +30,14 @@ async function main() {
         description: 'Model to use in format providerID/modelID',
         default: 'opencode/grok-code'
       })
+      .option('system-message', {
+        type: 'string',
+        description: 'Full override of the system message'
+      })
+      .option('append-system-message', {
+        type: 'string',
+        description: 'Append to the default system message'
+      })
       .help()
       .argv
 
@@ -160,7 +168,9 @@ async function main() {
               model: {
                 providerID,
                 modelID
-              }
+              },
+              system: argv['system-message'],
+              appendSystem: argv['append-system-message']
             })
           }).catch(() => {
             // Ignore errors, we're listening to events

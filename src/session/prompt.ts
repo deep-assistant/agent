@@ -89,6 +89,7 @@ export namespace SessionPrompt {
     agent: z.string().optional(),
     noReply: z.boolean().optional(),
     system: z.string().optional(),
+    appendSystem: z.string().optional(),
     tools: z.record(z.string(), z.boolean()).optional(),
     parts: z.array(
       z.discriminatedUnion("type", [
@@ -745,6 +746,7 @@ export namespace SessionPrompt {
       },
       tools: input.tools,
       system: input.system,
+      appendSystem: input.appendSystem,
       agent: agent.name,
       model: await resolveModel({
         model: input.model,

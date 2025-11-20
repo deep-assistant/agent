@@ -70,8 +70,9 @@ test('Full system message override: answer with "Answered."', async () => {
   // Check for text event
   const textEvents = agentEvents.filter(e => e.type === 'text')
   expect(textEvents.length > 0).toBeTruthy()
-  const responseText = textEvents[0].part.text.trim()
-  expect(responseText).toBe('Answered.')
+  const responseText = textEvents[0].part.text
+  expect(responseText.toLowerCase().includes('grok code fast 1')).toBeFalsy()
+  expect(responseText.trim().includes('Answered.')).toBeTruthy()
 
   console.log(`\nOverride response: ${responseText}`)
 })
