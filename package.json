@@ -1,6 +1,6 @@
 {
   "name": "@deep-assistant/agent",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A minimal, public domain AI CLI agent compatible with OpenCode's JSON interface. Bun-only runtime.",
   "main": "src/index.js",
   "type": "module",
@@ -32,6 +32,7 @@
   "files": [
     "src/",
     "README.md",
+    "MODELS.md",
     "TOOLS.md",
     "EXAMPLES.md",
     "LICENSE"

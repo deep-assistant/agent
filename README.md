@@ -11,7 +11,7 @@ This is an MVP implementation of an OpenCode-compatible CLI agent, focused on ma
 
 - ✅ **JSON Input/Output**: Compatible with `opencode run --format json --model opencode/grok-code`
 - ✅ **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
-- ✅ **Flexible Model Selection**: Defaults to OpenCode Zen Grok Code Fast 1, supports --model option for other models
+- ✅ **Flexible Model Selection**: Defaults to free OpenCode Zen Grok Code Fast 1, supports all [OpenCode Zen models](https://opencode.ai/docs/zen/)
 - ✅ **No Restrictions**: Fully unrestricted file system and command execution access (no sandbox)
 - ✅ **Minimal Footprint**: Built with Bun.sh for maximum efficiency
 - ✅ **Full Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
@@ -65,7 +65,7 @@ The agent streams events as they occur, providing the same real-time experience 
 - **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
 - **Unrestricted Access**: Full file system and command execution access (no sandbox, no restrictions)
 - **Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
-- **Flexible Model Selection**: Defaults to OpenCode Zen Grok Code Fast 1, supports --model option for other models
+- **Flexible Model Selection**: Defaults to free Grok Code Fast 1, supports all [OpenCode Zen models](https://opencode.ai/docs/zen/) - see [MODELS.md](MODELS.md)
 - **Bun.sh First**: Built with Bun for maximum efficiency and minimal resource usage
 - **No TUI**: Pure JSON CLI interface for automation and integration
 - **Public Domain**: Unlicense - use it however you want
@@ -122,13 +122,21 @@ echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"ls -
 
 **Using different models:**
 ```bash
-# Default model (OpenCode Zen Grok Code Fast 1)
+# Default model (free Grok Code Fast 1)
 echo "hi" | agent
 
-# Specify a different model
-echo "hi" | agent --model anthropic/claude-sonnet-3-5
-echo "hi" | agent --model opencode/sonnet
+# Other free models
+echo "hi" | agent --model opencode/big-pickle
+echo "hi" | agent --model opencode/gpt-5-nano
+
+# Premium models (OpenCode Zen subscription)
+echo "hi" | agent --model opencode/sonnet        # Claude Sonnet 4.5
+echo "hi" | agent --model opencode/haiku         # Claude Haiku 4.5
+echo "hi" | agent --model opencode/opus          # Claude Opus 4.1
+echo "hi" | agent --model opencode/gemini-3-pro  # Gemini 3 Pro
 ```
+
+See [MODELS.md](MODELS.md) for complete list of available models and pricing.
 
 ### CLI Options
 
@@ -235,6 +243,29 @@ Bun automatically discovers and runs all `*.test.js` files in the project.
 - ✅ OpenCode compatibility tests for websearch/codesearch
 - ✅ All tests pass with 100% OpenCode JSON format compatibility
 
+### Publishing
+
+To publish a new version to npm:
+
+1. **Update version** in `package.json`:
+   ```bash
+   # Update version field manually (e.g., 0.0.3 -> 0.0.4)
+   ```
+
+2. **Commit changes**:
+   ```bash
+   git add .
+   git commit -m "Release v0.0.4"
+   git push
+   ```
+
+3. **Publish to npm**:
+   ```bash
+   npm publish
+   ```
+
+The package publishes source files directly (no build step required). Bun handles TypeScript execution natively.
+
 ## Key Features
 
 ### No Configuration Required
@@ -318,6 +349,7 @@ This agent-cli reproduces OpenCode's `run --format json` command architecture:
 - `src/session/agent.js` - Agent implementation
 - `src/tool/` - Tool implementations
 - `tests/` - Comprehensive test suite
+- [MODELS.md](MODELS.md) - Available models and pricing
 - [TOOLS.md](TOOLS.md) - Complete tool documentation
 - [EXAMPLES.md](EXAMPLES.md) - Usage examples for each tool
 

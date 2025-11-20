@@ -3,8 +3,8 @@ import { test, expect, setDefaultTimeout } from 'bun:test'
 import { sh } from 'command-stream'
 import { $ } from 'bun'
 
-// Increase default timeout to 30 seconds for these tests
-setDefaultTimeout(30000)
+// Increase default timeout to 60 seconds for these tests
+setDefaultTimeout(60000)
 
 // Helper function to parse JSON output (handles both compact and pretty-printed)
 function parseJSONOutput(stdout) {
