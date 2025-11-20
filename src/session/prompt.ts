@@ -618,8 +618,10 @@ export namespace SessionPrompt {
         return base
       })(),
     )
-    system.push(...(await SystemPrompt.environment()))
-    system.push(...(await SystemPrompt.custom()))
+    if (!input.system) {
+      system.push(...(await SystemPrompt.environment()))
+      system.push(...(await SystemPrompt.custom()))
+    }
     // max 2 system prompt messages for caching purposes
     const [first, ...rest] = system
     system = [first, rest.join("\n")]

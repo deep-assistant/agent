@@ -63,7 +63,7 @@ test('Default system message: ask who are you', async () => {
 test('Full system message override: answer with "Answered."', async () => {
   const projectRoot = process.cwd()
   const input = 'Who are you?'
-  const systemMessage = 'You are a helpful assistant. Answer every message with "Answered."'
+   const systemMessage = 'You are a bot that only responds with "Answered." to any message.'
   const agentResult = await sh(`echo '${input}' | bun run ${projectRoot}/src/index.js --format json --system-message "${systemMessage}"`)
   const agentEvents = parseJSONOutput(agentResult.stdout)
 
