@@ -34,9 +34,17 @@ async function main() {
         type: 'string',
         description: 'Full override of the system message'
       })
+      .option('system-message-file', {
+        type: 'string',
+        description: 'Full override of the system message from file'
+      })
       .option('append-system-message', {
         type: 'string',
         description: 'Append to the default system message'
+      })
+      .option('append-system-message-file', {
+        type: 'string',
+        description: 'Append to the default system message from file'
       })
       .help()
       .argv
@@ -45,6 +53,30 @@ async function main() {
     const modelParts = argv.model.split('/')
     const providerID = modelParts[0] || 'opencode'
     const modelID = modelParts[1] || 'grok-code'
+
+    // Read system message files
+    let systemMessage = argv['system-message']
+    let appendSystemMessage = argv['append-system-message']
+
+    if (argv['system-message-file']) {
+      const resolvedPath = require('path').resolve(process.cwd(), argv['system-message-file'])
+      const file = Bun.file(resolvedPath)
+      if (!(await file.exists())) {
+        console.error(`System message file not found: ${argv['system-message-file']}`)
+        process.exit(1)
+      }
+      systemMessage = await file.text()
+    }
+
+    if (argv['append-system-message-file']) {
+      const resolvedPath = require('path').resolve(process.cwd(), argv['append-system-message-file'])
+      const file = Bun.file(resolvedPath)
+      if (!(await file.exists())) {
+        console.error(`Append system message file not found: ${argv['append-system-message-file']}`)
+        process.exit(1)
+      }
+      appendSystemMessage = await file.text()
+    }
 
     // Initialize logging to redirect to log file instead of stderr
     // This prevents log messages from mixing with JSON output
@@ -169,8 +201,8 @@ async function main() {
                 providerID,
                 modelID
               },
-              system: argv['system-message'],
-              appendSystem: argv['append-system-message']
+              system: systemMessage,
+              appendSystem: appendSystemMessage
             })
           }).catch(() => {
             // Ignore errors, we're listening to events

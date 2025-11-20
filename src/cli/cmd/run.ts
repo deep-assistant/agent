@@ -80,18 +80,26 @@ export const RunCommand = cmd({
       .option("port", {
         type: "number",
         describe: "port for the local server (defaults to random port if no value provided)",
-      })
-      .option("system-message", {
-        type: "string",
-        describe: "full override of the system message",
-      })
-      .option("append-system-message", {
-        type: "string",
-        describe: "append to the default system message",
-      })
+       })
+       .option("system-message", {
+         type: "string",
+         describe: "full override of the system message",
+       })
+       .option("system-message-file", {
+         type: "string",
+         describe: "full override of the system message from file",
+       })
+       .option("append-system-message", {
+         type: "string",
+         describe: "append to the default system message",
+       })
+       .option("append-system-message-file", {
+         type: "string",
+         describe: "append to the default system message from file",
+       })
   },
-  handler: async (args) => {
-    let message = args.message.join(" ")
+   handler: async (args) => {
+     let message = args.message.join(" ")
 
     const fileParts: any[] = []
     if (args.file) {
@@ -120,6 +128,27 @@ export const RunCommand = cmd({
           mime,
         })
       }
+    }
+
+    // Read system message files
+    if (args["system-message-file"]) {
+      const resolvedPath = path.resolve(process.cwd(), args["system-message-file"])
+      const file = Bun.file(resolvedPath)
+      if (!(await file.exists())) {
+        UI.error(`System message file not found: ${args["system-message-file"]}`)
+        process.exit(1)
+      }
+      args["system-message"] = await file.text()
+    }
+
+    if (args["append-system-message-file"]) {
+      const resolvedPath = path.resolve(process.cwd(), args["append-system-message-file"])
+      const file = Bun.file(resolvedPath)
+      if (!(await file.exists())) {
+        UI.error(`Append system message file not found: ${args["append-system-message-file"]}`)
+        process.exit(1)
+      }
+      args["append-system-message"] = await file.text()
     }
 
     if (!process.stdin.isTTY) message += "\n" + (await Bun.stdin.text())

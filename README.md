@@ -144,12 +144,14 @@ See [MODELS.md](MODELS.md) for complete list of available models and pricing.
 agent [options]
 
 Options:
-  --model                 Model to use in format providerID/modelID
-                         Default: opencode/grok-code
-  --system-message        Full override of the system message
-  --append-system-message Append to the default system message
-  --help                  Show help
-  --version               Show version number
+  --model                        Model to use in format providerID/modelID
+                                 Default: opencode/grok-code
+  --system-message               Full override of the system message
+  --system-message-file          Full override of the system message from file
+  --append-system-message        Append to the default system message
+  --append-system-message-file   Append to the default system message from file
+  --help                         Show help
+  --version                      Show version number
 ```
 
 ### Input Formats
