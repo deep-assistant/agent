@@ -8,7 +8,7 @@ import { Log } from "../util/log"
 import { NamedError } from "../util/error"
 import z from "zod/v4"
 import { Instance } from "../project/instance"
-import { withTimeout } from "@/util/timeout"
+import { withTimeout } from "../util/timeout"
 
 export namespace MCP {
   const log = Log.create({ service: "mcp" })

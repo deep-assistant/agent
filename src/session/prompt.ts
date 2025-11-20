@@ -41,10 +41,10 @@ import { Command } from "../command"
 import { $, fileURLToPath } from "bun"
 import { ConfigMarkdown } from "../config/markdown"
 import { SessionSummary } from "./summary"
-import { NamedError } from "@/util/error"
-import { fn } from "@/util/fn"
+import { NamedError } from "../util/error"
+import { fn } from "../util/fn"
 import { SessionProcessor } from "./processor"
-import { TaskTool } from "@/tool/task"
+import { TaskTool } from "../tool/task"
 import { SessionStatus } from "./status"
 
 export namespace SessionPrompt {

@@ -11,7 +11,7 @@ import { Auth } from "../auth"
 import { Instance } from "../project/instance"
 import { Global } from "../global"
 import { Flag } from "../flag/flag"
-import { iife } from "@/util/iife"
+import { iife } from "../util/iife"
 
 export namespace Provider {
   const log = Log.create({ service: "provider" })

@@ -12,9 +12,9 @@ import { SessionPrompt } from "./prompt"
 import { Flag } from "../flag/flag"
 import { Token } from "../util/token"
 import { Log } from "../util/log"
-import { ProviderTransform } from "@/provider/transform"
+import { ProviderTransform } from "../provider/transform"
 import { SessionProcessor } from "./processor"
-import { fn } from "@/util/fn"
+import { fn } from "../util/fn"
 
 export namespace SessionCompaction {
   const log = Log.create({ service: "session.compaction" })

@@ -5,6 +5,8 @@ import { Instance } from './project/instance.ts'
 import { Log } from './util/log.ts'
 import { Bus } from './bus/index.ts'
 import { EOL } from 'os'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 async function readStdin() {
   return new Promise((resolve, reject) => {
@@ -21,6 +23,21 @@ async function readStdin() {
 
 async function main() {
   try {
+    // Parse command line arguments
+    const argv = await yargs(hideBin(process.argv))
+      .option('model', {
+        type: 'string',
+        description: 'Model to use in format providerID/modelID',
+        default: 'opencode/grok-code'
+      })
+      .help()
+      .argv
+
+    // Parse model argument
+    const modelParts = argv.model.split('/')
+    const providerID = modelParts[0] || 'opencode'
+    const modelID = modelParts[1] || 'grok-code'
+
     // Initialize logging to redirect to log file instead of stderr
     // This prevents log messages from mixing with JSON output
     await Log.init({
@@ -130,7 +147,7 @@ async function main() {
             })
           })
 
-          // Send message to session with Grok Code Fast 1 model (opencode/grok-code)
+          // Send message to session with specified model (default: opencode/grok-code)
           const message = request.message || "hi"
           const parts = [{ type: "text", text: message }]
 
@@ -141,8 +158,8 @@ async function main() {
             body: JSON.stringify({
               parts,
               model: {
-                providerID: "opencode",
-                modelID: "grok-code"
+                providerID,
+                modelID
               }
             })
           }).catch(() => {

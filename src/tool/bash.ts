@@ -4,10 +4,10 @@ import { Tool } from "./tool"
 import DESCRIPTION from "./bash.txt"
 import { Log } from "../util/log"
 import { Instance } from "../project/instance"
-import { lazy } from "@/util/lazy"
+import { lazy } from "../util/lazy"
 import { Language } from "web-tree-sitter"
 import { $ } from "bun"
-import { Filesystem } from "@/util/filesystem"
+import { Filesystem } from "../util/filesystem"
 import { fileURLToPath } from "url"
 
 const MAX_OUTPUT_LENGTH = 30_000

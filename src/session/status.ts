@@ -1,5 +1,5 @@
-import { Bus } from "@/bus"
-import { Instance } from "@/project/instance"
+import { Bus } from "../bus"
+import { Instance } from "../project/instance"
 import z from "zod"
 
 export namespace SessionStatus {

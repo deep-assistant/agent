@@ -1,4 +1,4 @@
-import { iife } from "@/util/iife"
+import { iife } from "../util/iife"
 import { MessageV2 } from "./message-v2"
 
 export namespace SessionRetry {

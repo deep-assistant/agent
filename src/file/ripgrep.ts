@@ -8,7 +8,7 @@ import { lazy } from "../util/lazy"
 import { $ } from "bun"
 
 import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
-import { Log } from "@/util/log"
+import { Log } from "../util/log"
 
 export namespace Ripgrep {
   const log = Log.create({ service: "ripgrep" })

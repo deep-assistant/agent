@@ -11,7 +11,7 @@ This is an MVP implementation of an OpenCode-compatible CLI agent, focused on ma
 
 - ✅ **JSON Input/Output**: Compatible with `opencode run --format json --model opencode/grok-code`
 - ✅ **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
-- ✅ **Single Model**: Hardcoded to OpenCode Zen Grok Code Fast 1 (no configuration needed)
+- ✅ **Flexible Model Selection**: Defaults to OpenCode Zen Grok Code Fast 1, supports --model option for other models
 - ✅ **No Restrictions**: Fully unrestricted file system and command execution access (no sandbox)
 - ✅ **Minimal Footprint**: Built with Bun.sh for maximum efficiency
 - ✅ **Full Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
@@ -65,7 +65,7 @@ The agent streams events as they occur, providing the same real-time experience 
 - **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
 - **Unrestricted Access**: Full file system and command execution access (no sandbox, no restrictions)
 - **Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
-- **Hardcoded Model**: OpenCode Zen Grok Code Fast 1 (no configuration, maximum simplicity)
+- **Flexible Model Selection**: Defaults to OpenCode Zen Grok Code Fast 1, supports --model option for other models
 - **Bun.sh First**: Built with Bun for maximum efficiency and minimal resource usage
 - **No TUI**: Pure JSON CLI interface for automation and integration
 - **Public Domain**: Unlicense - use it however you want
@@ -102,6 +102,11 @@ echo "hi" | agent
 echo '{"message":"hi"}' | agent
 ```
 
+**With custom model:**
+```bash
+echo "hi" | agent --model opencode/grok-code
+```
+
 ### More Examples
 
 **Plain Text Input:**
@@ -113,6 +118,28 @@ echo "search the web for TypeScript news" | agent
 **JSON Input with tool calls:**
 ```bash
 echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"ls -la"}}]}' | agent
+```
+
+**Using different models:**
+```bash
+# Default model (OpenCode Zen Grok Code Fast 1)
+echo "hi" | agent
+
+# Specify a different model
+echo "hi" | agent --model anthropic/claude-sonnet-3-5
+echo "hi" | agent --model opencode/sonnet
+```
+
+### CLI Options
+
+```bash
+agent [options]
+
+Options:
+  --model    Model to use in format providerID/modelID
+             Default: opencode/grok-code
+  --help     Show help
+  --version  Show version number
 ```
 
 ### Input Formats

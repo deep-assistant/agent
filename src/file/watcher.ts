@@ -7,7 +7,7 @@ import { FileIgnore } from "./ignore"
 import { Config } from "../config/config"
 // @ts-ignore
 import { createWrapper } from "@parcel/watcher/wrapper"
-import { lazy } from "@/util/lazy"
+import { lazy } from "../util/lazy"
 
 export namespace FileWatcher {
   const log = Log.create({ service: "file.watcher" })

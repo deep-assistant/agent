@@ -12,7 +12,7 @@ import { File } from "../file"
 import { Bus } from "../bus"
 import { FileTime } from "../file/time"
 import { Instance } from "../project/instance"
-import { Snapshot } from "@/snapshot"
+import { Snapshot } from "../snapshot"
 
 function normalizeLineEndings(text: string): string {
   return text.replaceAll("\r\n", "\n")

@@ -1,8 +1,8 @@
-import { Log } from "@/util/log"
+import { Log } from "../util/log"
 import { Context } from "../util/context"
 import { Project } from "./project"
 import { State } from "./state"
-import { iife } from "@/util/iife"
+import { iife } from "../util/iife"
 
 interface Context {
   directory: string
