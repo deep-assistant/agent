@@ -1,6 +1,11 @@
-# agent-cli
+# @deep-assistant/agent
 
 **A minimal, public domain AI CLI agent compatible with OpenCode's JSON interface**
+
+[![npm version](https://badge.fury.io/js/@deep-assistant%2Fagent.svg)](https://www.npmjs.com/package/@deep-assistant/agent)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
+
+> ⚠️ **Bun-only runtime** - This package requires [Bun](https://bun.sh) and does NOT support Node.js or Deno.
 
 This is an MVP implementation of an OpenCode-compatible CLI agent, focused on maximum efficiency and unrestricted execution. We reproduce OpenCode's `run --format json --model opencode/grok-code` mode with:
 
@@ -11,15 +16,15 @@ This is an MVP implementation of an OpenCode-compatible CLI agent, focused on ma
 - ✅ **Minimal Footprint**: Built with Bun.sh for maximum efficiency
 - ✅ **Full Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
 - ✅ **100% OpenCode Compatible**: All tool outputs match OpenCode's JSON format exactly
+- ✅ **Internal HTTP Server**: Uses local HTTP server for session management (not exposed externally)
 - ❌ **No TUI**: Pure JSON CLI interface only
 - ❌ **No Sandbox**: Designed for VMs/containers where full access is acceptable
-- ❌ **No Client/Server**: Local execution only (direct CLI only)
 - ❌ **No LSP**: No Language Server Protocol support for diagnostics
 - ❌ **No Permissions**: No permission system - full unrestricted access
 - ❌ **No IDE Integration**: No IDE/editor integration features
 - ❌ **No Plugins**: No plugin system
 - ❌ **No Share**: No session sharing functionality
-- ❌ **No Web Server**: No HTTP server mode
+- ❌ **No External API**: Server runs only internally, not exposed to network
 - ❌ **No ACP**: No Agent Client Protocol support
 
 ## Project Vision
@@ -30,17 +35,17 @@ We're creating a slimmed-down, public domain version of OpenCode CLI focused on 
 
 ## Design Choices
 
-### Why Bun.sh + JavaScript instead of TypeScript?
+### Why Bun-only? No Node.js or Deno support?
 
-For this MVP, we chose **Bun.sh + JavaScript** over TypeScript for the following reasons:
+This agent is **exclusively built for Bun** for the following reasons:
 
 1. **Faster Development**: No compilation step - direct execution with `bun run`
 2. **Simpler Dependencies**: Fewer dev dependencies, no TypeScript compiler overhead
-3. **MVP Focus**: Type safety is less critical for a proof-of-concept than rapid iteration
-4. **Bun Ecosystem**: Leverages Bun's native ESM support and fast runtime
-5. **Minimalism**: Aligns with the project's goal of being the "slimmest possible AI CLI agent"
+3. **Performance**: Bun's fast runtime and native ESM support
+4. **Minimalism**: Single runtime target keeps the codebase simple
+5. **Bun Ecosystem**: Leverages Bun-specific features and optimizations
 
-If the project grows and requires type safety, TypeScript can be reintroduced later.
+**Not supporting Node.js or Deno is intentional** to keep the project focused and minimal. If you need Node.js/Deno compatibility, consider using [OpenCode](https://github.com/sst/opencode) instead.
 
 ### Architecture: Reproducing OpenCode's JSON Event Streaming
 
@@ -67,14 +72,21 @@ The agent streams events as they occur, providing the same real-time experience 
 
 ## Installation
 
-```bash
-# Using bun (recommended)
-bun install
-bun link
+**Requirements:**
+- [Bun](https://bun.sh) >= 1.0.0 (Node.js and Deno are NOT supported)
 
-# Or using npm
-npm install -g .
+```bash
+# Install Bun first if you haven't already
+curl -fsSL https://bun.sh/install | bash
+
+# Install the package globally
+bun install -g @deep-assistant/agent
+
+# Or install locally in your project
+bun add @deep-assistant/agent
 ```
+
+After installation, the `agent` command will be available globally.
 
 ## Usage
 
@@ -82,32 +94,32 @@ npm install -g .
 
 **Plain text (easiest):**
 ```bash
-echo "hi" | bun run src/index.js
+echo "hi" | agent
 ```
 
 **Simple JSON message:**
 ```bash
-echo '{"message":"hi"}' | bun run src/index.js
+echo '{"message":"hi"}' | agent
 ```
 
 ### More Examples
 
 **Plain Text Input:**
 ```bash
-echo "hello world" | bun run src/index.js
-echo "search the web for TypeScript news" | bun run src/index.js
+echo "hello world" | agent
+echo "search the web for TypeScript news" | agent
 ```
 
 **JSON Input with tool calls:**
 ```bash
-echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"ls -la"}}]}' | bun run src/index.js
+echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"ls -la"}}]}' | agent
 ```
 
 ### Input Formats
 
 **Plain Text (auto-converted):**
 ```bash
-echo "your message here" | bun run src/index.js
+echo "your message here" | agent
 ```
 
 **JSON Format:**
@@ -160,13 +172,34 @@ See [EXAMPLES.md](EXAMPLES.md) for detailed usage examples of each tool with bot
 # Run all tests
 bun test
 
-# Run specific tool tests
+# Run specific test file
 bun test tests/websearch.tools.test.js
 bun test tests/batch.tools.test.js
-
-# Run plain text input tests
 bun test tests/plaintext.input.test.js
 ```
+
+## Maintenance
+
+### Development
+
+Run the agent in development mode:
+```bash
+bun run dev
+```
+
+Or run directly:
+```bash
+bun run src/index.js
+```
+
+### Testing
+
+Simply run:
+```bash
+bun test
+```
+
+Bun automatically discovers and runs all `*.test.js` files in the project.
 
 ### Test Coverage
 
@@ -200,11 +233,46 @@ echo '{"message":"hello"}' | bun run src/index.js
 
 Plain text is automatically converted to `{"message":"your text"}` format.
 
-### Pretty-Printed Output
-JSON output is pretty-printed by default for better readability. For automation/scripts, use compact mode:
+### JSON Event Streaming Output
+JSON output is pretty-printed for easy readability while maintaining OpenCode compatibility:
 ```bash
-export AGENT_CLI_COMPACT=1
-echo "hi" | bun run src/index.js
+echo "hi" | agent
+```
+
+Output (pretty-printed JSON events):
+```json
+{
+  "type": "step_start",
+  "timestamp": 1763618628840,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
+  "part": {
+    "id": "prt_a9fdca4e8001APEs6AriJx67me",
+    "type": "step-start",
+    ...
+  }
+}
+{
+  "type": "text",
+  "timestamp": 1763618629886,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
+  "part": {
+    "id": "prt_a9fdca85c001bVEimWb9L3ya6T",
+    "type": "text",
+    "text": "Hi! How can I help with your coding tasks today?",
+    ...
+  }
+}
+{
+  "type": "step_finish",
+  "timestamp": 1763618629916,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
+  "part": {
+    "id": "prt_a9fdca8ff0015cBrNxckAXI3aE",
+    "type": "step-finish",
+    "reason": "stop",
+    ...
+  }
+}
 ```
 
 ## Architecture

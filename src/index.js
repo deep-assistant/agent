@@ -1,8 +1,10 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import { Server } from './server/server.ts'
 import { Instance } from './project/instance.ts'
 import { Log } from './util/log.ts'
+import { Bus } from './bus/index.ts'
+import { EOL } from 'os'
 
 async function readStdin() {
   return new Promise((resolve, reject) => {
@@ -62,11 +64,78 @@ async function main() {
             throw new Error("Failed to create session")
           }
 
+          // Subscribe to all bus events to output them in OpenCode format
+          const eventPromise = new Promise((resolve, reject) => {
+            const unsub = Bus.subscribeAll((event) => {
+              // Output events in OpenCode JSON format
+              if (event.type === 'message.part.updated') {
+                const part = event.properties.part
+                if (part.sessionID !== sessionID) return
+
+                // Output different event types (pretty-printed for readability)
+                if (part.type === 'step-start') {
+                  process.stdout.write(JSON.stringify({
+                    type: 'step_start',
+                    timestamp: Date.now(),
+                    sessionID,
+                    part
+                  }, null, 2) + EOL)
+                }
+
+                if (part.type === 'step-finish') {
+                  process.stdout.write(JSON.stringify({
+                    type: 'step_finish',
+                    timestamp: Date.now(),
+                    sessionID,
+                    part
+                  }, null, 2) + EOL)
+                }
+
+                if (part.type === 'text' && part.time?.end) {
+                  process.stdout.write(JSON.stringify({
+                    type: 'text',
+                    timestamp: Date.now(),
+                    sessionID,
+                    part
+                  }, null, 2) + EOL)
+                }
+
+                if (part.type === 'tool' && part.state.status === 'completed') {
+                  process.stdout.write(JSON.stringify({
+                    type: 'tool_use',
+                    timestamp: Date.now(),
+                    sessionID,
+                    part
+                  }, null, 2) + EOL)
+                }
+              }
+
+              // Handle session idle to know when to stop
+              if (event.type === 'session.idle' && event.properties.sessionID === sessionID) {
+                unsub()
+                resolve()
+              }
+
+              // Handle errors
+              if (event.type === 'session.error') {
+                const props = event.properties
+                if (props.sessionID !== sessionID || !props.error) return
+                process.stdout.write(JSON.stringify({
+                  type: 'error',
+                  timestamp: Date.now(),
+                  sessionID,
+                  error: props.error
+                }, null, 2) + EOL)
+              }
+            })
+          })
+
           // Send message to session with Grok Code Fast 1 model (opencode/grok-code)
           const message = request.message || "hi"
           const parts = [{ type: "text", text: message }]
 
-          const promptRes = await fetch(`http://${server.hostname}:${server.port}/session/${sessionID}/message`, {
+          // Start the prompt (don't wait for response, events come via Bus)
+          fetch(`http://${server.hostname}:${server.port}/session/${sessionID}/message`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -76,18 +145,12 @@ async function main() {
                 modelID: "grok-code"
               }
             })
+          }).catch(() => {
+            // Ignore errors, we're listening to events
           })
 
-          const promptData = await promptRes.text()
-
-          // Output the result with pretty printing (unless AGENT_CLI_COMPACT=1)
-          const compact = process.env.AGENT_CLI_COMPACT === '1'
-          if (compact) {
-            console.log(promptData)
-          } else {
-            const parsed = JSON.parse(promptData)
-            console.log(JSON.stringify(parsed, null, 2))
-          }
+          // Wait for session to become idle
+          await eventPromise
 
           // Stop server
           server.stop()

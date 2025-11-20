@@ -1,16 +1,41 @@
 {
-  "name": "agent-cli",
-  "version": "0.1.0",
-  "description": "AI CLI agent MVP",
+  "name": "@deep-assistant/agent",
+  "version": "0.0.1",
+  "description": "A minimal, public domain AI CLI agent compatible with OpenCode's JSON interface. Bun-only runtime.",
   "main": "src/index.js",
   "type": "module",
   "bin": {
     "agent": "./src/index.js"
   },
   "scripts": {
-    "dev": "bun run src/index.js",
-    "test": "find tests -name '*.test.js' -exec bun test {} \\;"
+    "dev": "bun run src/index.js"
   },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deep-foundation/deep-assistant"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "agent",
+    "opencode",
+    "bun",
+    "assistant",
+    "json-interface"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "TOOLS.md",
+    "EXAMPLES.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",

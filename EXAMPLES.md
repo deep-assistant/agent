@@ -1,6 +1,8 @@
 # Usage Examples
 
-This document provides practical examples for using each tool with both `agent-cli` and `opencode` commands.
+This document provides practical examples for using each tool with both `@deep-assistant/agent` and `opencode` commands.
+
+> ⚠️ **Bun-only** - `@deep-assistant/agent` requires [Bun](https://bun.sh) and does NOT support Node.js or Deno.
 
 ## Table of Contents
 
@@ -14,16 +16,16 @@ This document provides practical examples for using each tool with both `agent-c
 
 ### Simplest Examples - Start Here!
 
-**Plain text (agent-cli only, easiest!):**
+**Plain text (@deep-assistant/agent only, easiest!):**
 ```bash
-echo "hi" | bun run src/index.js
+echo "hi" | agent
 ```
 
-**Simple JSON message (both agent-cli and opencode):**
+**Simple JSON message (both @deep-assistant/agent and opencode):**
 
-agent-cli:
+@deep-assistant/agent:
 ```bash
-echo '{"message":"hi"}' | bun run src/index.js
+echo '{"message":"hi"}' | agent
 ```
 
 opencode:
@@ -31,24 +33,24 @@ opencode:
 echo '{"message":"hi"}' | opencode run --format json --model opencode/grok-code
 ```
 
-### Plain Text Input (agent-cli only)
+### Plain Text Input (@deep-assistant/agent only)
 
 ```bash
 # Simple message
-echo "hello world" | bun run src/index.js
+echo "hello world" | agent
 
 # Ask a question
-echo "what is TypeScript?" | bun run src/index.js
+echo "what is TypeScript?" | agent
 
 # Request web search
-echo "search the web for latest React news" | bun run src/index.js
+echo "search the web for latest React news" | agent
 ```
 
 ### JSON Input Examples
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"hello world"}' | bun run src/index.js
+echo '{"message":"hello world"}' | agent
 ```
 
 **opencode:**
@@ -62,9 +64,9 @@ echo '{"message":"hello world"}' | opencode run --format json --model opencode/g
 
 Execute shell commands.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"echo hello world"}}]}' | bun run src/index.js
+echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"echo hello world"}}]}' | agent
 ```
 
 **opencode:**
@@ -74,16 +76,16 @@ echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"echo
 
 **Example with description:**
 ```bash
-echo '{"message":"list files","tools":[{"name":"bash","params":{"command":"ls -la","description":"List all files in current directory"}}]}' | bun run src/index.js
+echo '{"message":"list files","tools":[{"name":"bash","params":{"command":"ls -la","description":"List all files in current directory"}}]}' | agent
 ```
 
 ### read Tool
 
 Read file contents.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"read file","tools":[{"name":"read","params":{"file_path":"/path/to/file.txt"}}]}' | bun run src/index.js
+echo '{"message":"read file","tools":[{"name":"read","params":{"file_path":"/path/to/file.txt"}}]}' | agent
 ```
 
 **opencode:**
@@ -95,9 +97,9 @@ echo '{"message":"read file","tools":[{"name":"read","params":{"file_path":"/pat
 
 Write content to a file.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"write file","tools":[{"name":"write","params":{"file_path":"/tmp/test.txt","content":"Hello World"}}]}' | bun run src/index.js
+echo '{"message":"write file","tools":[{"name":"write","params":{"file_path":"/tmp/test.txt","content":"Hello World"}}]}' | agent
 ```
 
 **opencode:**
@@ -109,9 +111,9 @@ echo '{"message":"write file","tools":[{"name":"write","params":{"file_path":"/t
 
 Edit file with string replacement.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"edit file","tools":[{"name":"edit","params":{"file_path":"/tmp/test.txt","old_string":"Hello","new_string":"Hi"}}]}' | bun run src/index.js
+echo '{"message":"edit file","tools":[{"name":"edit","params":{"file_path":"/tmp/test.txt","old_string":"Hello","new_string":"Hi"}}]}' | agent
 ```
 
 **opencode:**
@@ -123,9 +125,9 @@ echo '{"message":"edit file","tools":[{"name":"edit","params":{"file_path":"/tmp
 
 List directory contents.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"list directory","tools":[{"name":"list","params":{"path":"."}}]}' | bun run src/index.js
+echo '{"message":"list directory","tools":[{"name":"list","params":{"path":"."}}]}' | agent
 ```
 
 **opencode:**
@@ -139,13 +141,13 @@ echo '{"message":"list directory","tools":[{"name":"list","params":{"path":"."}}
 
 Find files using glob patterns.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
 # Find all JavaScript files
-echo '{"message":"find js files","tools":[{"name":"glob","params":{"pattern":"**/*.js"}}]}' | bun run src/index.js
+echo '{"message":"find js files","tools":[{"name":"glob","params":{"pattern":"**/*.js"}}]}' | agent
 
 # Find TypeScript files in src directory
-echo '{"message":"find ts files","tools":[{"name":"glob","params":{"pattern":"src/**/*.ts"}}]}' | bun run src/index.js
+echo '{"message":"find ts files","tools":[{"name":"glob","params":{"pattern":"src/**/*.ts"}}]}' | agent
 ```
 
 **opencode:**
@@ -157,16 +159,16 @@ echo '{"message":"find js files","tools":[{"name":"glob","params":{"pattern":"**
 
 Search text in files with regex.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
 # Search for pattern in files
-echo '{"message":"search pattern","tools":[{"name":"grep","params":{"pattern":"function","output_mode":"files_with_matches"}}]}' | bun run src/index.js
+echo '{"message":"search pattern","tools":[{"name":"grep","params":{"pattern":"function","output_mode":"files_with_matches"}}]}' | agent
 
 # Search with content display
-echo '{"message":"search TODO","tools":[{"name":"grep","params":{"pattern":"TODO","output_mode":"content"}}]}' | bun run src/index.js
+echo '{"message":"search TODO","tools":[{"name":"grep","params":{"pattern":"TODO","output_mode":"content"}}]}' | agent
 
 # Case-insensitive search in JavaScript files
-echo '{"message":"search error","tools":[{"name":"grep","params":{"pattern":"error","-i":true,"type":"js","output_mode":"content"}}]}' | bun run src/index.js
+echo '{"message":"search error","tools":[{"name":"grep","params":{"pattern":"error","-i":true,"type":"js","output_mode":"content"}}]}' | agent
 ```
 
 **opencode:**
@@ -178,11 +180,11 @@ echo '{"message":"search pattern","tools":[{"name":"grep","params":{"pattern":"T
 
 Search the web using Exa API.
 
-**agent-cli (no environment variable needed!):**
+**@deep-assistant/agent (no environment variable needed!):**
 ```bash
-echo '{"message":"search web","tools":[{"name":"websearch","params":{"query":"TypeScript latest features"}}]}' | bun run src/index.js
+echo '{"message":"search web","tools":[{"name":"websearch","params":{"query":"TypeScript latest features"}}]}' | agent
 
-echo '{"message":"search web","tools":[{"name":"websearch","params":{"query":"React hooks best practices"}}]}' | bun run src/index.js
+echo '{"message":"search web","tools":[{"name":"websearch","params":{"query":"React hooks best practices"}}]}' | agent
 ```
 
 **opencode (requires OPENCODE_EXPERIMENTAL_EXA=true):**
@@ -194,11 +196,11 @@ echo '{"message":"search web","tools":[{"name":"websearch","params":{"query":"Ty
 
 Search code repositories and documentation.
 
-**agent-cli (no environment variable needed!):**
+**@deep-assistant/agent (no environment variable needed!):**
 ```bash
-echo '{"message":"search code","tools":[{"name":"codesearch","params":{"query":"React hooks implementation"}}]}' | bun run src/index.js
+echo '{"message":"search code","tools":[{"name":"codesearch","params":{"query":"React hooks implementation"}}]}' | agent
 
-echo '{"message":"search code","tools":[{"name":"codesearch","params":{"query":"async/await patterns"}}]}' | bun run src/index.js
+echo '{"message":"search code","tools":[{"name":"codesearch","params":{"query":"async/await patterns"}}]}' | agent
 ```
 
 **opencode (requires OPENCODE_EXPERIMENTAL_EXA=true):**
@@ -212,9 +214,9 @@ echo '{"message":"search code","tools":[{"name":"codesearch","params":{"query":"
 
 Batch multiple tool calls together for optimal performance.
 
-**agent-cli (no configuration needed!):**
+**@deep-assistant/agent (no configuration needed!):**
 ```bash
-echo '{"message":"run batch","tools":[{"name":"batch","params":{"tool_calls":[{"tool":"bash","parameters":{"command":"echo hello"}},{"tool":"bash","parameters":{"command":"echo world"}}]}}]}' | bun run src/index.js
+echo '{"message":"run batch","tools":[{"name":"batch","params":{"tool_calls":[{"tool":"bash","parameters":{"command":"echo hello"}},{"tool":"bash","parameters":{"command":"echo world"}}]}}]}' | agent
 ```
 
 **opencode (requires experimental config):**
@@ -231,9 +233,9 @@ echo '{"message":"run batch","tools":[{"name":"batch","params":{"tool_calls":[{"
 
 Launch specialized agents for complex tasks.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"launch task","tools":[{"name":"task","params":{"description":"Analyze codebase","prompt":"Find all TODO comments in JavaScript files","subagent_type":"general-purpose"}}]}' | bun run src/index.js
+echo '{"message":"launch task","tools":[{"name":"task","params":{"description":"Analyze codebase","prompt":"Find all TODO comments in JavaScript files","subagent_type":"general-purpose"}}]}' | agent
 ```
 
 **opencode:**
@@ -247,13 +249,13 @@ echo '{"message":"launch task","tools":[{"name":"task","params":{"description":"
 
 Read and write TODO items for task tracking.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
 # Write todos
-echo '{"message":"add todos","tools":[{"name":"todowrite","params":{"todos":[{"content":"Implement feature X","status":"pending","activeForm":"Implementing feature X"},{"content":"Write tests","status":"pending","activeForm":"Writing tests"}]}}]}' | bun run src/index.js
+echo '{"message":"add todos","tools":[{"name":"todowrite","params":{"todos":[{"content":"Implement feature X","status":"pending","activeForm":"Implementing feature X"},{"content":"Write tests","status":"pending","activeForm":"Writing tests"}]}}]}' | agent
 
 # Read todos
-echo '{"message":"read todos","tools":[{"name":"todoread","params":{}}]}' | bun run src/index.js
+echo '{"message":"read todos","tools":[{"name":"todoread","params":{}}]}' | agent
 ```
 
 **opencode:**
@@ -265,9 +267,9 @@ echo '{"message":"add todos","tools":[{"name":"todowrite","params":{"todos":[{"c
 
 Fetch and process web content.
 
-**agent-cli:**
+**@deep-assistant/agent:**
 ```bash
-echo '{"message":"fetch url","tools":[{"name":"webfetch","params":{"url":"https://example.com","prompt":"Summarize the content"}}]}' | bun run src/index.js
+echo '{"message":"fetch url","tools":[{"name":"webfetch","params":{"url":"https://example.com","prompt":"Summarize the content"}}]}' | agent
 ```
 
 **opencode:**
@@ -277,76 +279,87 @@ echo '{"message":"fetch url","tools":[{"name":"webfetch","params":{"url":"https:
 
 ## Output Format
 
-### Pretty-Printed by Default
+### JSON Event Streaming (Pretty-Printed)
 
-agent-cli outputs pretty-printed JSON for better human readability:
+@deep-assistant/agent outputs JSON events in pretty-printed streaming format for easy readability, 100% compatible with OpenCode's event structure:
 
+```bash
+echo "hi" | agent
+```
+
+Output (pretty-printed JSON events):
 ```json
 {
-  "type": "text",
-  "timestamp": 1763582229355,
-  "sessionID": "ses_mi6fbp514d3kuvvtjwk",
+  "type": "step_start",
+  "timestamp": 1763618628840,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
   "part": {
-    "id": "prt_mi6fbp7vkxvwk17e3c",
+    "id": "prt_a9fdca4e8001APEs6AriJx67me",
+    "type": "step-start",
+    ...
+  }
+}
+{
+  "type": "text",
+  "timestamp": 1763618629886,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
+  "part": {
     "type": "text",
-    "text": "Hi!",
-    "time": {
-      "start": 1763582229355,
-      "end": 1763582229355
-    }
+    "text": "Hi! How can I help with your coding tasks today?",
+    ...
+  }
+}
+{
+  "type": "step_finish",
+  "timestamp": 1763618629916,
+  "sessionID": "ses_560236487ffe3ROK1ThWvPwTEF",
+  "part": {
+    "type": "step-finish",
+    "reason": "stop",
+    ...
   }
 }
 ```
 
-### Compact Mode for Automation
-
-For programmatic use (tests, scripts, automation), use compact mode:
-
-```bash
-export AGENT_CLI_COMPACT=1
-echo "hi" | bun run src/index.js
-```
-
-Compact output (one JSON object per line):
-```json
-{"type":"step_start","timestamp":1234567890,"sessionID":"ses_xxx","part":{...}}
-{"type":"tool_use","timestamp":1234567891,"sessionID":"ses_xxx","part":{...}}
-{"type":"step_finish","timestamp":1234567892,"sessionID":"ses_xxx","part":{...}}
-{"type":"text","timestamp":1234567893,"sessionID":"ses_xxx","part":{"text":"Response"}}
-```
+This format is designed for:
+- **Readability**: Pretty-printed JSON is easy to read and debug
+- **Streaming**: Events output in real-time as they occur
+- **Compatibility**: 100% compatible with OpenCode's event structure
+- **Automation**: Can be parsed using standard JSON tools (see filtering examples below)
 
 ### Filtering Output
 
 Extract specific event types using `jq`:
 
 ```bash
-# Get only text responses (pretty-printed)
-echo '{"message":"hello"}' | bun run src/index.js | jq -r 'select(.type=="text") | .part.text'
-
-# Get only text responses (compact mode)
-AGENT_CLI_COMPACT=1 echo '{"message":"hello"}' | bun run src/index.js | jq -r 'select(.type=="text") | .part.text'
+# Get only text responses
+echo '{"message":"hello"}' | agent | jq -r 'select(.type=="text") | .part.text'
 
 # Get tool use events
-echo '{"message":"run","tools":[{"name":"bash","params":{"command":"ls"}}]}' | bun run src/index.js | jq 'select(.type=="tool_use")'
+echo '{"message":"run","tools":[{"name":"bash","params":{"command":"ls"}}]}' | agent | jq 'select(.type=="tool_use")'
 
 # Get bash tool output
-echo '{"message":"run","tools":[{"name":"bash","params":{"command":"echo test"}}]}' | bun run src/index.js | jq -r 'select(.type=="tool_use" and .part.tool=="bash") | .part.state.output'
+echo '{"message":"run","tools":[{"name":"bash","params":{"command":"echo test"}}]}' | agent | jq -r 'select(.type=="tool_use" and .part.tool=="bash") | .part.state.output'
+
+# Pretty print all events
+echo "hello" | agent | jq
 ```
 
 ## Tips
 
-### Agent-CLI Advantages
+### @deep-assistant/agent Advantages
 
 1. **No Configuration**: WebSearch, CodeSearch, and Batch tools work without any setup
 2. **Plain Text Input**: Can use simple text instead of JSON
 3. **Always Enabled**: All tools available by default
+4. **Bun-only**: Optimized for Bun runtime (no Node.js/Deno overhead)
 
 ### Working with JSON
 
 Use single quotes for the outer shell command and double quotes inside JSON:
 
 ```bash
-echo '{"message":"test","tools":[{"name":"bash","params":{"command":"echo hello"}}]}' | bun run src/index.js
+echo '{"message":"test","tools":[{"name":"bash","params":{"command":"echo hello"}}]}' | agent
 ```
 
 ### Debugging
@@ -354,7 +367,7 @@ echo '{"message":"test","tools":[{"name":"bash","params":{"command":"echo hello"
 Add `| jq` to prettify JSON output:
 
 ```bash
-echo "hello" | bun run src/index.js | jq
+echo "hello" | agent | jq
 ```
 
 ### Chaining Commands
@@ -363,8 +376,8 @@ Process output with standard Unix tools:
 
 ```bash
 # Count events
-echo "hello" | bun run src/index.js | wc -l
+echo "hello" | agent | wc -l
 
 # Filter and format
-echo "hello" | bun run src/index.js | jq -r 'select(.type=="text") | .part.text'
+echo "hello" | agent | jq -r 'select(.type=="text") | .part.text'
 ```
