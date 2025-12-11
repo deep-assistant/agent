@@ -607,10 +607,16 @@ export namespace SessionPrompt {
     providerID: string
     modelID: string
   }) {
+    // When --system-message is provided, use it exclusively without any
+    // additional context (no environment, no custom instructions, no header).
+    // This is critical for models with low token limits (e.g., qwen3-32b with 6K TPM).
+    if (input.system) {
+      return [input.system]
+    }
+
     let system = SystemPrompt.header(input.providerID)
     system.push(
       ...(() => {
-        if (input.system) return [input.system]
         const base = input.agent.prompt ? [input.agent.prompt] : SystemPrompt.provider(input.modelID)
         if (input.appendSystem) {
           return [base[0] + "\n" + input.appendSystem]
@@ -618,10 +624,9 @@ export namespace SessionPrompt {
         return base
       })(),
     )
-    if (!input.system) {
-      system.push(...(await SystemPrompt.environment()))
-      system.push(...(await SystemPrompt.custom()))
-    }
+    system.push(...(await SystemPrompt.environment()))
+    system.push(...(await SystemPrompt.custom()))
+
     // max 2 system prompt messages for caching purposes
     const [first, ...rest] = system
     system = [first, rest.join("\n")]
