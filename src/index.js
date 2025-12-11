@@ -64,10 +64,10 @@ async function readStdin() {
 }
 
 async function runAgentMode(argv) {
-  // Parse model argument
+  // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
   const modelParts = argv.model.split('/')
   const providerID = modelParts[0] || 'opencode'
-  const modelID = modelParts[1] || 'grok-code'
+  const modelID = modelParts.slice(1).join('/') || 'grok-code'
 
   // Validate and get JSON standard
   const jsonStandard = argv['json-standard']

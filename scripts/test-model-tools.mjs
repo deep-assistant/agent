@@ -87,6 +87,23 @@ agent.on('close', (code) => {
   console.log('');
   console.log(`Exit code: ${code}`);
 
+  // Check for errors in output (even if exit code is 0)
+  const errorPatterns = [
+    /\w+Error:/,           // Any JavaScript error (TypeError, ReferenceError, etc.)
+    /Error:/,              // Generic "Error:"
+    /Exception:/,          // Exceptions
+    /ENOENT/,              // File not found
+    /ECONNREFUSED/,        // Connection refused
+  ];
+
+  const hasError = errorPatterns.some(pattern => pattern.test(output));
+
+  if (hasError) {
+    console.log('');
+    console.log('❌ Test FAILED: Error detected in output');
+    process.exit(1);
+  }
+
   // Check for tool_use event in output
   console.log('');
   const toolUseFound = output.includes('"type":"tool_use"') || output.includes('"type": "tool_use"');
