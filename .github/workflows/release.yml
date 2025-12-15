@@ -51,7 +51,7 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Check for changesets
         run: |
@@ -79,7 +79,7 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run ESLint
         run: npm run lint
@@ -139,7 +139,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Update npm for OIDC trusted publishing
         run: node scripts/setup-npm.mjs
@@ -199,7 +199,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Update npm for OIDC trusted publishing
         run: node scripts/setup-npm.mjs
@@ -245,7 +245,7 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Create changeset file
         run: node scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
