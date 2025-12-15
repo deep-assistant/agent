@@ -9,6 +9,7 @@ import { ModelsDev } from "./models"
 import { NamedError } from "../util/error"
 import { Auth } from "../auth"
 import { ClaudeOAuth } from "../auth/claude-oauth"
+import { AuthPlugins } from "../auth/plugins"
 import { Instance } from "../project/instance"
 import { Global } from "../global"
 import { Flag } from "../flag/flag"
@@ -26,7 +27,30 @@ export namespace Provider {
   type Source = "env" | "config" | "custom" | "api"
 
   const CUSTOM_LOADERS: Record<string, CustomLoader> = {
-    async anthropic() {
+    async anthropic(input) {
+      // Check if OAuth credentials are available via the auth plugin
+      const auth = await Auth.get("anthropic")
+      if (auth?.type === "oauth") {
+        log.info("using anthropic oauth credentials")
+        const loaderFn = await AuthPlugins.getLoader("anthropic")
+        if (loaderFn) {
+          const result = await loaderFn(() => Auth.get("anthropic"), input)
+          if (result.fetch) {
+            return {
+              autoload: true,
+              options: {
+                apiKey: result.apiKey || "",
+                fetch: result.fetch,
+                headers: {
+                  "anthropic-beta":
+                    "oauth-2025-04-20,claude-code-20250219,interleaved-thinking-2025-05-14,fine-grained-tool-streaming-2025-05-14",
+                },
+              },
+            }
+          }
+        }
+      }
+      // Default: API key auth
       return {
         autoload: false,
         options: {
@@ -241,6 +265,56 @@ export namespace Provider {
         autoload: false,
         options: {},
       }
+    },
+    /**
+     * GitHub Copilot OAuth provider
+     * Uses OAuth credentials from agent auth login
+     */
+    "github-copilot": async (input) => {
+      const auth = await Auth.get("github-copilot")
+      if (auth?.type === "oauth") {
+        log.info("using github copilot oauth credentials")
+        const loaderFn = await AuthPlugins.getLoader("github-copilot")
+        if (loaderFn) {
+          const result = await loaderFn(() => Auth.get("github-copilot"), input)
+          if (result.fetch) {
+            return {
+              autoload: true,
+              options: {
+                apiKey: result.apiKey || "",
+                baseURL: result.baseURL,
+                fetch: result.fetch,
+              },
+            }
+          }
+        }
+      }
+      return { autoload: false }
+    },
+    /**
+     * GitHub Copilot Enterprise OAuth provider
+     * Uses OAuth credentials from agent auth login with enterprise URL
+     */
+    "github-copilot-enterprise": async (input) => {
+      const auth = await Auth.get("github-copilot-enterprise")
+      if (auth?.type === "oauth") {
+        log.info("using github copilot enterprise oauth credentials")
+        const loaderFn = await AuthPlugins.getLoader("github-copilot")
+        if (loaderFn) {
+          const result = await loaderFn(() => Auth.get("github-copilot-enterprise"), input)
+          if (result.fetch) {
+            return {
+              autoload: true,
+              options: {
+                apiKey: result.apiKey || "",
+                baseURL: result.baseURL,
+                fetch: result.fetch,
+              },
+            }
+          }
+        }
+      }
+      return { autoload: false }
     },
     /**
      * Claude OAuth provider - uses Claude OAuth credentials to access

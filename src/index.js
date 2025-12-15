@@ -71,9 +71,10 @@ async function runAgentMode(argv) {
   let modelID = modelParts.slice(1).join('/') || 'grok-code'
 
   // Handle --use-existing-claude-oauth option
-  // This reads OAuth credentials from ~/.claude/.credentials.json and uses claude-oauth provider
+  // This reads OAuth credentials from ~/.claude/.credentials.json (Claude Code CLI)
+  // For new authentication, use: agent auth login (select Anthropic > Claude Pro/Max)
   if (argv['use-existing-claude-oauth']) {
-    // Import ClaudeOAuth to check for credentials
+    // Import ClaudeOAuth to check for credentials from Claude Code CLI
     const { ClaudeOAuth } = await import('./auth/claude-oauth.ts')
     const creds = await ClaudeOAuth.getCredentials()
 
@@ -81,7 +82,7 @@ async function runAgentMode(argv) {
       console.error(JSON.stringify({
         type: 'error',
         errorType: 'AuthenticationError',
-        message: 'No Claude OAuth credentials found. Please authenticate first with: agent auth claude'
+        message: 'No Claude OAuth credentials found in ~/.claude/.credentials.json. Either authenticate with Claude Code CLI first, or use: agent auth login (select Anthropic > Claude Pro/Max)'
       }))
       process.exit(1)
     }

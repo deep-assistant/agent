@@ -153,10 +153,16 @@ echo "hi" | agent --model groq/llama-3.1-8b-instant     # Llama 3.1 8B (fast)
 echo "hi" | agent --model anthropic/claude-sonnet-4-5  # Claude Sonnet 4.5
 echo "hi" | agent --model anthropic/claude-opus-4-1    # Claude Opus 4.1
 
-# Claude OAuth (requires Claude Pro/Max subscription)
-agent auth claude                                      # Authenticate first
-echo "hi" | agent --use-existing-claude-oauth          # Uses existing credentials
-echo "hi" | agent --model claude-oauth/claude-sonnet-4-5  # Explicit model
+# Anthropic OAuth (requires Claude Pro/Max subscription)
+agent auth login                                       # Select Anthropic > Claude Pro/Max
+echo "hi" | agent --model anthropic/claude-sonnet-4-5  # Uses OAuth credentials
+
+# Use existing Claude Code CLI credentials
+echo "hi" | agent --use-existing-claude-oauth          # Reads from ~/.claude/.credentials.json
+
+# GitHub Copilot (requires Copilot subscription)
+agent auth login                                       # Select GitHub Copilot
+echo "hi" | agent --model github-copilot/gpt-4o        # Uses Copilot
 ```
 
 See [MODELS.md](MODELS.md) for complete list of available models and pricing.
@@ -183,9 +189,10 @@ Options:
   --version                      Show version number
 
 Commands:
-  auth claude          Authenticate with Claude OAuth
-  auth claude-status   Check Claude OAuth authentication status
-  auth claude-refresh  Refresh Claude OAuth token
+  auth login           Authenticate with a provider (Anthropic, GitHub Copilot, etc.)
+  auth logout          Remove credentials for a provider
+  auth list            List configured credentials
+  auth status          Check authentication status (experimental)
   mcp                  MCP server commands
 ```
 

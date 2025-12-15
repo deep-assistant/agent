@@ -1,189 +1,251 @@
-# Claude OAuth Provider
+# Authentication Guide
 
-The Claude OAuth provider allows you to use your Claude Pro or Max subscription with the agent CLI through OAuth 2.0 authentication (PKCE flow).
+The agent CLI supports OAuth authentication for providers that offer subscription-based access, including:
+- **Anthropic** (Claude Pro/Max subscription)
+- **GitHub Copilot** (GitHub.com and Enterprise)
 
 ## Quick Start
 
-### Option 1: Authenticate with Agent CLI (Recommended)
+### Authenticate with a Provider
 
 ```bash
-# Authenticate with Claude OAuth
-agent auth claude
+# Interactive login - select your provider
+agent auth login
 
-# Use with default Claude model
-echo "hello" | agent --use-existing-claude-oauth
-
-# Or specify a model explicitly
-echo "hello" | agent --model claude-oauth/claude-sonnet-4-5
+# Example: Select "Anthropic" > "Claude Pro/Max"
+# Example: Select "GitHub Copilot" > "Login with GitHub Copilot"
 ```
 
-### Option 2: Use Existing Claude Code CLI Credentials
-
-If you already have Claude Code CLI installed and authenticated:
+### Check Authentication Status
 
 ```bash
-# Claude Code CLI stores credentials in ~/.claude/.credentials.json
-# Simply use the --use-existing-claude-oauth flag
-echo "hello" | agent --use-existing-claude-oauth
+# List all configured credentials
+agent auth list
+
+# Check detailed status (experimental)
+agent auth status
 ```
 
-### Option 3: Environment Variable
+### Use Authenticated Providers
 
 ```bash
-export CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat01-..."
-echo "hello" | agent --model claude-oauth/claude-sonnet-4-5
+# Use Claude with OAuth (after agent auth login with Anthropic)
+echo "hello" | agent --model anthropic/claude-sonnet-4-5
+
+# Use GitHub Copilot (after agent auth login with GitHub Copilot)
+echo "hello" | agent --model github-copilot/gpt-4o
 ```
 
-## Authentication Commands
+## Auth Commands
 
-### Login
+### `agent auth login`
+
+Interactive login to any supported provider.
 
 ```bash
-agent auth claude
+agent auth login
 ```
 
 This will:
-1. Generate an authorization URL with PKCE
-2. Open your browser to authenticate with Claude
-3. Ask you to paste the authorization code
-4. Exchange the code for tokens
-5. Store credentials in `~/.claude/.credentials.json`
+1. Show a list of available providers
+2. For OAuth providers (Anthropic, GitHub Copilot): Open browser for authentication
+3. For API key providers: Prompt for API key entry
+4. Store credentials securely in `~/.local/share/agent/auth.json`
 
-### Check Status
+### `agent auth list`
 
-```bash
-agent auth claude-status
-```
-
-Shows current authentication status including:
-- Whether you're authenticated
-- Subscription type
-- Token expiration
-
-### Refresh Token
+List all configured credentials.
 
 ```bash
-agent auth claude-refresh
+agent auth list
+# Output:
+# ◇ Credentials ~/.local/share/agent/auth.json
+# │
+# ◆ Anthropic oauth
+# ◆ GitHub Copilot oauth
+# │
+# └ 2 credentials
 ```
 
-Refreshes your access token using the stored refresh token.
+### `agent auth logout`
 
-## Available Models
+Remove credentials for a provider.
 
-The Claude OAuth provider gives you access to all Anthropic models:
-
-| Model | Model ID | Description |
-|-------|----------|-------------|
-| Claude Sonnet 4.5 | `claude-oauth/claude-sonnet-4-5` | Latest Claude Sonnet |
-| Claude Opus 4.1 | `claude-oauth/claude-opus-4-1` | Most capable Claude model |
-| Claude Haiku 4.5 | `claude-oauth/claude-haiku-4-5` | Fastest Claude model |
-| Claude Sonnet 3.5 v2 | `claude-oauth/claude-3-5-sonnet-20241022` | Previous generation Sonnet |
-
-## Token Storage
-
-OAuth tokens are stored in:
-
-```
-~/.claude/.credentials.json
+```bash
+agent auth logout
+# Select provider to log out from
 ```
 
-This is the same location used by Claude Code CLI, allowing shared authentication.
+### `agent auth status`
 
-The format is:
+Check authentication status for all providers (experimental).
+
+```bash
+agent auth status
+# Shows token expiration, etc.
+```
+
+## Provider-Specific Details
+
+### Anthropic (Claude Pro/Max)
+
+Claude Pro/Max subscribers can authenticate via OAuth:
+
+```bash
+agent auth login
+# Select: Anthropic
+# Select: Claude Pro/Max
+# Follow browser prompts
+# Paste authorization code
+```
+
+**Login methods:**
+- **Claude Pro/Max** - OAuth login for subscription users (recommended)
+- **Create an API Key** - Generate an API key via OAuth
+- **Manually enter API Key** - Enter existing API key
+
+After login, use any Anthropic model:
+```bash
+echo "hello" | agent --model anthropic/claude-sonnet-4-5
+echo "hello" | agent --model anthropic/claude-opus-4-1
+```
+
+### GitHub Copilot
+
+GitHub Copilot subscribers (individual or enterprise) can authenticate:
+
+```bash
+agent auth login
+# Select: GitHub Copilot
+# Select: GitHub.com or GitHub Enterprise
+# Follow device code flow
+```
+
+The device code flow will:
+1. Show a verification URL and code
+2. Wait for you to authorize in browser
+3. Automatically complete once authorized
+
+After login, use GitHub Copilot models:
+```bash
+echo "hello" | agent --model github-copilot/gpt-4o
+echo "hello" | agent --model github-copilot/claude-sonnet-4-5
+```
+
+### Other Providers (API Key)
+
+For providers without OAuth support, enter API keys directly:
+
+```bash
+agent auth login
+# Select provider (OpenAI, Google, OpenRouter, etc.)
+# Enter API key when prompted
+```
+
+Or use environment variables:
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-api03-..."
+export GOOGLE_GENERATIVE_AI_API_KEY="..."
+```
+
+## Using Claude Code CLI Credentials
+
+If you've already authenticated with Claude Code CLI, you can use those credentials:
+
+```bash
+# Claude Code CLI stores credentials in ~/.claude/.credentials.json
+# Use the --use-existing-claude-oauth flag
+echo "hello" | agent --use-existing-claude-oauth
+```
+
+This option:
+- Reads OAuth tokens from `~/.claude/.credentials.json`
+- Automatically uses the `claude-oauth` provider
+- Defaults to `claude-sonnet-4-5` model if no model specified
+
+## Credential Storage
+
+### Agent CLI Credentials
+
+Credentials from `agent auth login` are stored in:
+```
+~/.local/share/agent/auth.json
+```
+
+Format:
 ```json
 {
-  "claudeAiOauth": {
-    "accessToken": "sk-ant-oat01-...",
-    "refreshToken": "sk-ant-ort01-...",
-    "expiresAt": 1765759825273,
-    "scopes": ["org:create_api_key", "user:profile", "user:inference"],
-    "subscriptionType": "max"
+  "anthropic": {
+    "type": "oauth",
+    "refresh": "sk-ant-ort01-...",
+    "access": "sk-ant-oat01-...",
+    "expires": 1765759825273
+  },
+  "github-copilot": {
+    "type": "oauth",
+    "refresh": "gho_...",
+    "access": "...",
+    "expires": 1765759825273
   }
 }
 ```
 
-## CLI Options
+### Claude Code CLI Credentials
 
-| Option | Description |
-|--------|-------------|
-| `--use-existing-claude-oauth` | Use existing credentials from `~/.claude/.credentials.json` |
-| `--model claude-oauth/<model>` | Use specific Claude model with OAuth |
-
-## Differences from Direct Anthropic API
-
-| Feature | Claude OAuth | Anthropic API |
-|---------|--------------|---------------|
-| Token Format | `sk-ant-oat...` (OAuth) | `sk-ant-api...` (API key) |
-| Authentication | Bearer token | x-api-key header |
-| Billing | Claude Pro/Max subscription | Pay-as-you-go through Console |
-| Setup | `agent auth claude` | Generate API key in Console |
-| Environment Variable | `CLAUDE_CODE_OAUTH_TOKEN` | `ANTHROPIC_API_KEY` |
-
-## Technical Details
-
-### OAuth Flow
-
-The implementation uses OAuth 2.0 with PKCE (Proof Key for Code Exchange):
-
-1. **Authorization URL Generation**: Creates URL with PKCE code verifier/challenge
-2. **User Authentication**: User authenticates in browser and authorizes
-3. **Code Exchange**: Authorization code exchanged for access/refresh tokens
-4. **Token Storage**: Tokens saved to `~/.claude/.credentials.json`
-
-### OAuth Endpoints
-
-| Endpoint | URL |
-|----------|-----|
-| Authorization | `https://claude.ai/oauth/authorize` |
-| Token Exchange | `https://console.anthropic.com/v1/oauth/token` |
-| Redirect URI | `https://console.anthropic.com/oauth/code/callback` |
-
-### API Authentication
-
-OAuth tokens require special handling:
-- Uses `Authorization: Bearer <token>` header
-- Requires `anthropic-beta: oauth-2025-04-20` header
-
-## Alternatives
-
-### Direct Anthropic API Key
-
-If you prefer pay-as-you-go billing:
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-api03-..."
-echo "hello" | agent --model anthropic/claude-sonnet-4-5
+Claude Code CLI credentials (used with `--use-existing-claude-oauth`) are in:
+```
+~/.claude/.credentials.json
 ```
 
-Get an API key from the [Anthropic Console](https://console.anthropic.com/).
+## Token Refresh
 
-### OpenCode Provider
+OAuth tokens are automatically refreshed when expired:
+- Anthropic: Uses refresh token to get new access token
+- GitHub Copilot: Uses access token to get Copilot-specific token
 
-The OpenCode provider includes Claude models:
+No manual refresh is needed - the agent handles this automatically.
 
-```bash
-echo "hello" | agent --model opencode/claude-sonnet-4-5
-```
+## Environment Variables
+
+| Provider | Environment Variable |
+|----------|---------------------|
+| Anthropic (API) | `ANTHROPIC_API_KEY` |
+| Anthropic (OAuth) | `CLAUDE_CODE_OAUTH_TOKEN` |
+| OpenAI | `OPENAI_API_KEY` |
+| Google | `GOOGLE_GENERATIVE_AI_API_KEY` |
+| OpenRouter | `OPENROUTER_API_KEY` |
+| GitHub Copilot | (OAuth only, no env var) |
 
 ## Troubleshooting
 
-### "No Claude OAuth credentials found"
+### "No credentials found"
 
-Run `agent auth claude` to authenticate.
+Run `agent auth login` to authenticate with a provider.
 
 ### "Token expired"
 
-Run `agent auth claude-refresh` or re-authenticate with `agent auth claude`.
+Tokens are auto-refreshed. If you see this error, try:
+1. `agent auth logout` for the provider
+2. `agent auth login` to re-authenticate
 
-### "OAuth authentication is currently not supported"
+### "Failed to authorize"
 
-This error may occur if Anthropic's API has restrictions on OAuth tokens. Try:
-1. Ensure you have Claude Pro or Max subscription
-2. Re-authenticate with `agent auth claude`
-3. If issue persists, use the `anthropic` provider with an API key instead
+- Ensure you have an active subscription (Claude Pro/Max, GitHub Copilot)
+- Check your network connection
+- Try again with `agent auth login`
+
+### OAuth vs API Key
+
+| Feature | OAuth | API Key |
+|---------|-------|---------|
+| Billing | Subscription-based | Pay-as-you-go |
+| Setup | Browser authorization | Copy/paste key |
+| Token Format | `sk-ant-oat...` | `sk-ant-api...` |
+| Auto-refresh | Yes | N/A |
 
 ## References
 
-- [Claude Code CLI](https://claude.ai/code) - Official CLI with OAuth
-- [Anthropic Console](https://console.anthropic.com/) - For API key generation
-- [claude-code-login](https://github.com/grll/claude-code-login) - Reference OAuth implementation
+- [Claude Code CLI](https://claude.ai/code) - Official Claude CLI with OAuth
+- [Anthropic Console](https://console.anthropic.com/) - API key management
+- [GitHub Copilot](https://github.com/features/copilot) - GitHub AI assistant
