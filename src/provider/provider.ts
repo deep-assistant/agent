@@ -515,6 +515,19 @@ export namespace Provider {
       };
     }
 
+    // Add gemini-3-pro alias for google provider
+    // The actual model in Google's API is gemini-3-pro-preview, but we add gemini-3-pro as an alias for convenience
+    if (database['google']?.models['gemini-3-pro-preview']) {
+      const gemini3ProPreview =
+        database['google'].models['gemini-3-pro-preview'];
+      database['google'].models['gemini-3-pro'] = {
+        ...gemini3ProPreview,
+        id: 'gemini-3-pro-preview',
+        name: 'Gemini 3 Pro',
+      };
+      realIdByKey.set('google/gemini-3-pro', 'gemini-3-pro-preview');
+    }
+
     for (const [providerID, provider] of configProviders) {
       const existing = database[providerID];
       const parsed: ModelsDev.Provider = {
