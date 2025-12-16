@@ -276,7 +276,7 @@ const AnthropicPlugin: AuthPlugin = {
     }
 
     return {
-      apiKey: '',
+      apiKey: 'oauth-token-used-via-custom-fetch',
       async fetch(input: RequestInfo | URL, init?: RequestInit) {
         let currentAuth = await getAuth();
         if (!currentAuth || currentAuth.type !== 'oauth')
@@ -551,7 +551,7 @@ const GitHubCopilotPlugin: AuthPlugin = {
 
     return {
       baseURL,
-      apiKey: '',
+      apiKey: 'oauth-token-used-via-custom-fetch',
       async fetch(input: RequestInfo | URL, init?: RequestInit) {
         let currentInfo = await getAuth();
         if (!currentInfo || currentInfo.type !== 'oauth')
@@ -776,7 +776,7 @@ const OpenAIPlugin: AuthPlugin = {
     // Note: Full OpenAI Codex support would require additional request transformations
     // For now, this provides basic OAuth token management
     return {
-      apiKey: '',
+      apiKey: 'oauth-token-used-via-custom-fetch',
       baseURL: 'https://chatgpt.com/backend-api',
       async fetch(input: RequestInfo | URL, init?: RequestInit) {
         let currentAuth = await getAuth();
