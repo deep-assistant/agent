@@ -109,11 +109,8 @@ export const RunCommand = cmd({
       });
   },
   handler: async (args) => {
-    // Set verbose mode if requested
-    if (args.verbose) {
-      Flag.setVerbose(true);
-      await Log.init({ print: true, level: 'DEBUG' });
-    }
+    // Note: verbose flag and logging are now initialized in middleware
+    // See src/index.js main() function for the middleware that sets up Flag and Log.init()
     let message = args.message.join(' ');
 
     const fileParts: any[] = [];

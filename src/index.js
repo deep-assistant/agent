@@ -83,10 +83,8 @@ function readStdin() {
 }
 
 async function runAgentMode(argv) {
-  // Set verbose mode if requested via CLI flag
-  if (argv.verbose) {
-    Flag.setVerbose(true);
-  }
+  // Note: verbose flag and logging are now initialized in middleware
+  // See main() function for the middleware that sets up Flag and Log.init()
 
   // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
   const modelParts = argv.model.split('/');
@@ -176,13 +174,7 @@ async function runAgentMode(argv) {
     appendSystemMessage = await file.text();
   }
 
-  // Initialize logging to redirect to log file instead of stderr
-  // This prevents log messages from mixing with JSON output
-  // In verbose mode, print to stderr for debugging
-  await Log.init({
-    print: Flag.OPENCODE_VERBOSE, // Print to stderr only in verbose mode
-    level: Flag.OPENCODE_VERBOSE ? 'DEBUG' : 'INFO',
-  });
+  // Logging is already initialized in middleware, no need to call Log.init() again
 
   // Read input from stdin
   const input = await readStdin();
@@ -562,6 +554,22 @@ async function main() {
         description:
           'Use existing Claude OAuth credentials from ~/.claude/.credentials.json (from Claude Code CLI)',
         default: false,
+      })
+      // Initialize logging early for all CLI commands
+      // This prevents debug output from appearing in CLI unless --verbose is used
+      .middleware(async (argv) => {
+        // Set verbose flag if requested
+        if (argv.verbose) {
+          Flag.setVerbose(true);
+        }
+
+        // Initialize logging system
+        // - If verbose: print logs to stderr for debugging
+        // - Otherwise: write logs to file to keep CLI output clean
+        await Log.init({
+          print: Flag.OPENCODE_VERBOSE,
+          level: Flag.OPENCODE_VERBOSE ? 'DEBUG' : 'INFO',
+        });
       })
       .fail((msg, err, yargs) => {
         // Handle errors from command handlers
