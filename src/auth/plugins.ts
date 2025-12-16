@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import * as http from 'node:http';
+import * as net from 'node:net';
 import { Auth } from './index';
 import { Log } from '../util/log';
 
@@ -860,8 +862,8 @@ const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
  * - Google AI Pro/Ultra OAuth login
  * - Manual API key entry
  *
- * Note: This plugin uses the same OAuth credentials as the official Gemini CLI.
- * After authenticating, you can use Gemini models through the generativelanguage API.
+ * Note: This plugin uses OAuth 2.0 with PKCE for Google AI subscription authentication.
+ * After authenticating, you can use Gemini models with subscription benefits.
  */
 const GooglePlugin: AuthPlugin = {
   provider: 'google',
@@ -873,9 +875,87 @@ const GooglePlugin: AuthPlugin = {
         const pkce = await generatePKCE();
         const state = generateRandomString(16);
 
+        // Start local server to handle OAuth redirect
+        const server = http.createServer();
+        let serverPort = 0;
+        let authCode: string | null = null;
+        let authState: string | null = null;
+
+        const authPromise = new Promise<{ code: string; state: string }>(
+          (resolve, reject) => {
+            server.on('request', (req, res) => {
+              const url = new URL(req.url!, `http://localhost:${serverPort}`);
+              const code = url.searchParams.get('code');
+              const receivedState = url.searchParams.get('state');
+              const error = url.searchParams.get('error');
+
+              if (error) {
+                res.writeHead(400, { 'Content-Type': 'text/html' });
+                res.end(`
+                <html>
+                  <body>
+                    <h1>Authentication Failed</h1>
+                    <p>Error: ${error}</p>
+                    <p>You can close this window.</p>
+                  </body>
+                </html>
+              `);
+                server.close();
+                reject(new Error(`OAuth error: ${error}`));
+                return;
+              }
+
+              if (code && receivedState) {
+                if (receivedState !== state) {
+                  res.writeHead(400, { 'Content-Type': 'text/html' });
+                  res.end('Invalid state parameter');
+                  server.close();
+                  reject(new Error('State mismatch - possible CSRF attack'));
+                  return;
+                }
+
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.end(`
+                <html>
+                  <body>
+                    <h1>Authentication Successful!</h1>
+                    <p>You can close this window and return to the terminal.</p>
+                    <script>window.close();</script>
+                  </body>
+                </html>
+              `);
+                server.close();
+                resolve({ code, state: receivedState });
+                return;
+              }
+
+              res.writeHead(400, { 'Content-Type': 'text/html' });
+              res.end('Missing code or state parameter');
+            });
+
+            server.listen(0, () => {
+              const address = server.address() as net.AddressInfo;
+              serverPort = address.port;
+            });
+
+            server.on('error', reject);
+
+            // Timeout after 5 minutes
+            setTimeout(
+              () => {
+                server.close();
+                reject(new Error('OAuth timeout'));
+              },
+              5 * 60 * 1000
+            );
+          }
+        );
+
+        // Build authorization URL with local redirect URI
+        const redirectUri = `http://localhost:${serverPort}/oauth/callback`;
         const url = new URL(GOOGLE_AUTH_URL);
         url.searchParams.set('client_id', GOOGLE_OAUTH_CLIENT_ID);
-        url.searchParams.set('redirect_uri', 'urn:ietf:wg:oauth:2.0:oob');
+        url.searchParams.set('redirect_uri', redirectUri);
         url.searchParams.set('response_type', 'code');
         url.searchParams.set('scope', GOOGLE_OAUTH_SCOPES.join(' '));
         url.searchParams.set('access_type', 'offline');
@@ -887,50 +967,55 @@ const GooglePlugin: AuthPlugin = {
         return {
           url: url.toString(),
           instructions:
-            'After authorizing, copy the authorization code and paste it here: ',
-          method: 'code' as const,
-          async callback(code?: string): Promise<AuthResult> {
-            if (!code) return { type: 'failed' };
+            'Your browser will open for authentication. Complete the login and return to the terminal.',
+          method: 'auto' as const,
+          async callback(): Promise<AuthResult> {
+            try {
+              const { code } = await authPromise;
 
-            // Exchange authorization code for tokens
-            const tokenResult = await fetch(GOOGLE_TOKEN_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: new URLSearchParams({
-                code: code.trim(),
-                client_id: GOOGLE_OAUTH_CLIENT_ID,
-                client_secret: GOOGLE_OAUTH_CLIENT_SECRET,
-                redirect_uri: 'urn:ietf:wg:oauth:2.0:oob',
-                grant_type: 'authorization_code',
-                code_verifier: pkce.verifier,
-              }),
-            });
-
-            if (!tokenResult.ok) {
-              log.error('google oauth token exchange failed', {
-                status: tokenResult.status,
+              // Exchange authorization code for tokens
+              const tokenResult = await fetch(GOOGLE_TOKEN_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                  code: code,
+                  client_id: GOOGLE_OAUTH_CLIENT_ID,
+                  client_secret: GOOGLE_OAUTH_CLIENT_SECRET,
+                  redirect_uri: redirectUri,
+                  grant_type: 'authorization_code',
+                  code_verifier: pkce.verifier,
+                }),
               });
+
+              if (!tokenResult.ok) {
+                log.error('google oauth token exchange failed', {
+                  status: tokenResult.status,
+                });
+                return { type: 'failed' };
+              }
+
+              const json = await tokenResult.json();
+              if (
+                !json.access_token ||
+                !json.refresh_token ||
+                typeof json.expires_in !== 'number'
+              ) {
+                log.error('google oauth token response missing fields');
+                return { type: 'failed' };
+              }
+
+              return {
+                type: 'success',
+                refresh: json.refresh_token,
+                access: json.access_token,
+                expires: Date.now() + json.expires_in * 1000,
+              };
+            } catch (error) {
+              log.error('google oauth failed', { error });
               return { type: 'failed' };
             }
-
-            const json = await tokenResult.json();
-            if (
-              !json.access_token ||
-              !json.refresh_token ||
-              typeof json.expires_in !== 'number'
-            ) {
-              log.error('google oauth token response missing fields');
-              return { type: 'failed' };
-            }
-
-            return {
-              type: 'success',
-              refresh: json.refresh_token,
-              access: json.access_token,
-              expires: Date.now() + json.expires_in * 1000,
-            };
           },
         };
       },

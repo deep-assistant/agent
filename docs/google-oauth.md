@@ -21,7 +21,7 @@ If you have a Google AI Pro or Google AI Ultra subscription, use OAuth authentic
 3. A browser window will open with Google's login page
 4. Sign in with your Google account that has the subscription
 5. Authorize the application
-6. Copy the authorization code and paste it into the terminal
+6. The browser will automatically close and return you to the terminal
 
 Your credentials will be stored securely and automatically refreshed when needed.
 
@@ -58,6 +58,7 @@ With Google AI Pro/Ultra subscription via OAuth:
 
 - Authorization: `https://accounts.google.com/o/oauth2/v2/auth`
 - Token: `https://oauth2.googleapis.com/token`
+- Redirect: Local server on random available port
 
 ### Scopes
 
