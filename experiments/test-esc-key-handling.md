@@ -1,15 +1,18 @@
 # Test Script: ESC Key Handling in auth login
 
 ## Purpose
+
 This experiment tests that pressing ESC during `agent auth login` exits gracefully without showing error messages or help text.
 
 ## Setup
+
 1. Build the project: `bun install`
 2. Make the CLI executable
 
 ## Test Cases
 
 ### Test 1: ESC on Provider Selection
+
 ```bash
 # Run: agent auth login
 # Action: Press ESC when prompted to select provider
@@ -19,6 +22,7 @@ This experiment tests that pressing ESC during `agent auth login` exits graceful
 ```
 
 ### Test 2: ESC on Login Method Selection
+
 ```bash
 # Run: agent auth login
 # Action: Select "Anthropic" provider, then press ESC when prompted for login method
@@ -28,6 +32,7 @@ This experiment tests that pressing ESC during `agent auth login` exits graceful
 ```
 
 ### Test 3: ESC on API Key Input
+
 ```bash
 # Run: agent auth login
 # Action: Select a provider with API key auth, then press ESC on API key prompt
@@ -39,11 +44,13 @@ This experiment tests that pressing ESC during `agent auth login` exits graceful
 ## Manual Testing Instructions
 
 1. Install dependencies:
+
    ```bash
    bun install
    ```
 
 2. Run the auth login command:
+
    ```bash
    ./src/index.js auth login
    ```
@@ -59,6 +66,7 @@ This experiment tests that pressing ESC during `agent auth login` exits graceful
 ## Expected Behavior Before Fix
 
 Before the fix:
+
 - Pressing ESC would throw `CancelledError`
 - Stack trace would be displayed
 - Help text would be shown
@@ -67,6 +75,7 @@ Before the fix:
 ## Expected Behavior After Fix
 
 After the fix:
+
 - Pressing ESC exits silently
 - No error message or stack trace
 - No help text displayed
@@ -75,12 +84,14 @@ After the fix:
 ## Automated Test (Future)
 
 To create an automated test, we would need to:
+
 1. Spawn the CLI process
 2. Send input to stdin (including ESC key)
 3. Capture stdout/stderr
 4. Verify exit code and output
 
 Example test pseudocode:
+
 ```typescript
 import { spawn } from 'child_process';
 

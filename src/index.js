@@ -586,7 +586,7 @@ async function main() {
         // Handle validation errors (msg without err)
         if (msg) {
           console.error(msg);
-          console.error('\n' + yargs.help());
+          console.error(`\n${yargs.help()}`);
           process.exit(1);
         }
       })
