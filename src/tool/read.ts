@@ -75,6 +75,27 @@ export const ReadTool = Tool.define('read', {
           `Failed to read image: ${filepath}, model may not be able to read images`
         );
       }
+
+      // Image format validation (can be disabled via environment variable)
+      const verifyImages = process.env.VERIFY_IMAGES_AT_READ_TOOL !== 'false';
+      if (verifyImages) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+
+        // Validate image format matches file extension
+        if (!validateImageFormat(bytes, isImage)) {
+          throw new Error(
+            `Image validation failed: ${filepath} has image extension but does not contain valid ${isImage} data.\n` +
+              `The file may be corrupted, misnamed, or contain non-image content (e.g., HTML error page).\n` +
+              `First ${Math.min(bytes.length, 50)} bytes: ${Array.from(
+                bytes.slice(0, 50)
+              )
+                .map((b) => b.toString(16).padStart(2, '0'))
+                .join(' ')}\n` +
+              `To disable image validation, set environment variable: VERIFY_IMAGES_AT_READ_TOOL=false`
+          );
+        }
+      }
+
       const mime = file.type;
       const msg = 'Image read successfully';
       return {
@@ -156,6 +177,60 @@ function isImageFile(filePath: string): string | false {
     default:
       return false;
   }
+}
+
+/**
+ * Validates that file content matches expected image format by checking magic bytes/file signatures.
+ * This prevents sending invalid data to the Claude API which would cause non-recoverable errors.
+ *
+ * @param bytes - File content as Uint8Array
+ * @param expectedFormat - Expected image format ('PNG', 'JPEG', 'GIF', 'BMP', 'WebP')
+ * @returns true if file signature matches expected format, false otherwise
+ */
+function validateImageFormat(
+  bytes: Uint8Array,
+  expectedFormat: string
+): boolean {
+  // Need at least 8 bytes for reliable detection
+  if (bytes.length < 8) {
+    return false;
+  }
+
+  // File signatures (magic bytes) for supported image formats
+  // Reference: https://en.wikipedia.org/wiki/List_of_file_signatures
+  const signatures: Record<string, number[]> = {
+    PNG: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    JPEG: [0xff, 0xd8, 0xff],
+    GIF: [0x47, 0x49, 0x46, 0x38], // GIF8 (GIF87a or GIF89a)
+    BMP: [0x42, 0x4d], // BM
+    WebP: [0x52, 0x49, 0x46, 0x46], // RIFF (need additional check at offset 8)
+  };
+
+  const sig = signatures[expectedFormat];
+  if (!sig) {
+    // Unknown format, skip validation
+    return true;
+  }
+
+  // Check if file starts with expected signature
+  for (let i = 0; i < sig.length; i++) {
+    if (bytes[i] !== sig[i]) {
+      return false;
+    }
+  }
+
+  // Special case for WebP: also check for WEBP at offset 8
+  if (expectedFormat === 'WebP') {
+    const webpSig = [0x57, 0x45, 0x42, 0x50]; // WEBP
+    if (bytes.length < 12) return false;
+    for (let i = 0; i < webpSig.length; i++) {
+      if (bytes[8 + i] !== webpSig[i]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 async function isBinaryFile(
