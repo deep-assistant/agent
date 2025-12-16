@@ -168,6 +168,10 @@ echo "hi" | agent --model anthropic/claude-sonnet-4-5  # Uses OAuth credentials
 # Use existing Claude Code CLI credentials
 echo "hi" | agent --use-existing-claude-oauth          # Reads from ~/.claude/.credentials.json
 
+# Google Gemini (requires GOOGLE_API_KEY)
+echo "hi" | agent --model google/gemini-3-pro          # Gemini 3 Pro
+echo "hi" | agent --model google/gemini-2.5-flash      # Gemini 2.5 Flash
+
 # GitHub Copilot (requires Copilot subscription)
 agent auth login                                       # Select GitHub Copilot
 echo "hi" | agent --model github-copilot/gpt-4o        # Uses Copilot
