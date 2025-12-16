@@ -65,7 +65,6 @@ on:
           - without_tools
           - both
 
-
 jobs:
   test-model:
     runs-on: ubuntu-latest

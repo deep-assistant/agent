@@ -33,13 +33,15 @@ node scripts/test-model-simple.mjs "groq/qwen/qwen3-32b"
 ```
 
 **Input Message**:
+
 ```json
-{"message":"What is 2 + 2? Answer with just the number."}
+{ "message": "What is 2 + 2? Answer with just the number." }
 ```
 
 ### 2. Model Invocation (2025-12-11 19:07:24-26)
 
 The agent attempted to send a request to the Groq API with:
+
 - **Provider**: `groq`
 - **Model**: `qwen/qwen3-32b`
 - **User Message**: "What is 2 + 2? Answer with just the number."
@@ -60,6 +62,7 @@ Groq API returned error:
 ```
 
 **Response Headers**:
+
 - `x-ratelimit-limit-tokens`: 6000
 - `x-ratelimit-remaining-tokens`: 5774
 - `retry-after`: 64
@@ -81,31 +84,33 @@ The system message is assembled in `src/session/prompt.ts:resolveSystemPrompt()`
 
 ```typescript
 async function resolveSystemPrompt(input: {
-  system?: string
-  appendSystem?: string
-  agent: Agent.Info
-  providerID: string
-  modelID: string
+  system?: string;
+  appendSystem?: string;
+  agent: Agent.Info;
+  providerID: string;
+  modelID: string;
 }) {
-  let system = SystemPrompt.header(input.providerID)
+  let system = SystemPrompt.header(input.providerID);
   system.push(
     ...(() => {
-      if (input.system) return [input.system]
-      const base = input.agent.prompt ? [input.agent.prompt] : SystemPrompt.provider(input.modelID)
+      if (input.system) return [input.system];
+      const base = input.agent.prompt
+        ? [input.agent.prompt]
+        : SystemPrompt.provider(input.modelID);
       if (input.appendSystem) {
-        return [base[0] + "\n" + input.appendSystem]
+        return [base[0] + '\n' + input.appendSystem];
       }
-      return base
-    })(),
-  )
+      return base;
+    })()
+  );
   if (!input.system) {
-    system.push(...(await SystemPrompt.environment()))
-    system.push(...(await SystemPrompt.custom()))
+    system.push(...(await SystemPrompt.environment()));
+    system.push(...(await SystemPrompt.custom()));
   }
   // max 2 system prompt messages for caching purposes
-  const [first, ...rest] = system
-  system = [first, rest.join("\n")]
-  return system
+  const [first, ...rest] = system;
+  system = [first, rest.join('\n')];
+  return system;
 }
 ```
 
@@ -140,13 +145,13 @@ When **no `--system-message` override** is provided, the system message includes
 
 ### Token Breakdown
 
-| Component | Estimated Tokens | Purpose |
-|-----------|-----------------|---------|
-| Header Prompt | 0-100 | Provider-specific initialization |
-| Main Prompt | 8,000-9,000 | Agent behavior instructions |
-| Environment | 1,000-2,000 | Context about working directory |
-| Custom Instructions | 1,000-2,000 | Repository-specific rules |
-| **Total** | **~10,000-13,000** | **Complete system message** |
+| Component           | Estimated Tokens   | Purpose                          |
+| ------------------- | ------------------ | -------------------------------- |
+| Header Prompt       | 0-100              | Provider-specific initialization |
+| Main Prompt         | 8,000-9,000        | Agent behavior instructions      |
+| Environment         | 1,000-2,000        | Context about working directory  |
+| Custom Instructions | 1,000-2,000        | Repository-specific rules        |
+| **Total**           | **~10,000-13,000** | **Complete system message**      |
 
 The actual measurement of **12,089 tokens** aligns with this analysis.
 
@@ -174,6 +179,7 @@ Models with TPM limits ≤ 6,000 tokens on free tiers:
 ### Token Limit Standards (2025)
 
 According to [Groq API Rate Limits](https://console.groq.com/docs/rate-limits):
+
 - Free tier models typically have 6,000 TPM limits
 - Paid tiers scale without rate limits
 - Rate limit headers (`x-ratelimit-limit-tokens`) inform current limits
@@ -209,6 +215,7 @@ Research from multiple sources reveals:
 **Status**: ✅ Already implemented in `src/index.js`
 
 The CLI already supports:
+
 - `--system-message <text>`: Full override of system message
 - `--system-message-file <path>`: Override from file
 - `--append-system-message <text>`: Append to default
@@ -217,11 +224,13 @@ The CLI already supports:
 **Implementation**: Update test script to use `--system-message` for models with low token limits.
 
 **Pros**:
+
 - No code changes required
 - Immediate solution
 - Full control over system message
 
 **Cons**:
+
 - Requires manual intervention for each test
 - Doesn't solve the underlying issue
 
@@ -237,11 +246,13 @@ The CLI already supports:
 4. Add configuration option for token budget strategy
 
 **Pros**:
+
 - Automatic handling
 - Works for all models
 - Maintains compatibility
 
 **Cons**:
+
 - Requires significant code changes
 - Complexity in maintaining variants
 
@@ -257,11 +268,13 @@ The CLI already supports:
 4. Document usage in README
 
 **Pros**:
+
 - Simple implementation
 - Backward compatible
 - User has control
 
 **Cons**:
+
 - Loses valuable context
 - May affect agent performance
 
@@ -277,11 +290,13 @@ The CLI already supports:
 4. Cache compressed versions
 
 **Pros**:
+
 - Maintains full context
 - Significant token reduction (up to 80%)
 - Modern approach
 
 **Cons**:
+
 - Additional dependency
 - Processing overhead
 - May affect prompt clarity
@@ -298,11 +313,13 @@ The CLI already supports:
 4. Document template selection rules
 
 **Pros**:
+
 - Optimized for each model
 - No runtime overhead
 - Predictable behavior
 
 **Cons**:
+
 - Maintenance burden
 - Template proliferation
 
@@ -313,11 +330,13 @@ The CLI already supports:
 **Goal**: Make CI tests pass immediately
 
 **Actions**:
+
 1. Update `scripts/test-model-simple.mjs` to detect models with low token limits
 2. Use `--system-message` flag with minimal message for these models
 3. Document the approach in test script comments
 
 **Example**:
+
 ```javascript
 const lowLimitModels = ['groq/qwen/qwen3-32b', 'groq/mixtral-8x7b-32768']
 const useMinimalSystem = lowLimitModels.some(m => modelId.includes(m))
@@ -335,6 +354,7 @@ const agent = spawn('bun', args, { ... })
 **Goal**: Automatically handle token limits without manual configuration
 
 **Actions**:
+
 1. Add model token limit metadata to provider registry
 2. Implement automatic system message sizing
 3. Add `--system-budget` CLI option for manual override
@@ -345,6 +365,7 @@ const agent = spawn('bun', args, { ... })
 **Goal**: Optimize token usage across all models
 
 **Actions**:
+
 1. Research and evaluate compression libraries
 2. Implement optional compression for system messages
 3. Add caching for compressed messages

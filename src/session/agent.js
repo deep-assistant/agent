@@ -2,27 +2,27 @@
 // Permalink: https://github.com/sst/opencode/blob/main/packages/opencode/src/session/index.ts
 // Permalink: https://github.com/sst/opencode/blob/main/packages/opencode/src/provider/provider.ts
 
-import { ToolRegistry } from '../tool/registry.ts'
+import { ToolRegistry } from '../tool/registry.ts';
 
 export class Agent {
   constructor() {
     // Generate IDs in the same format as opencode
-    const randomId = Math.random().toString(36).substring(2, 15)
-    this.sessionID = `ses_${Date.now().toString(36)}${randomId}`
-    this.messageID = `msg_${Date.now().toString(36)}${randomId}`
-    this.partCounter = 0
+    const randomId = Math.random().toString(36).substring(2, 15);
+    this.sessionID = `ses_${Date.now().toString(36)}${randomId}`;
+    this.messageID = `msg_${Date.now().toString(36)}${randomId}`;
+    this.partCounter = 0;
   }
 
   generatePartId() {
-    return `prt_${Date.now().toString(36)}${Math.random().toString(36).substring(2, 15)}`
+    return `prt_${Date.now().toString(36)}${Math.random().toString(36).substring(2, 15)}`;
   }
 
   async process(request) {
-    const message = request.message || "hi"
-    const sessionID = this.sessionID
+    const message = request.message || 'hi';
+    const sessionID = this.sessionID;
 
     // Generate snapshot hash (mock)
-    const snapshot = Math.random().toString(16).substring(2, 42)
+    const snapshot = Math.random().toString(16).substring(2, 42);
 
     // Emit step_start like opencode
     this.emitEvent('step_start', {
@@ -31,21 +31,21 @@ export class Agent {
         sessionID,
         messageID: this.messageID,
         type: 'step-start',
-        snapshot
-      }
-    })
+        snapshot,
+      },
+    });
 
     // Check if this is a tool request
     if (request.tools && request.tools.length > 0) {
       // Handle tool execution
-      const toolsList = await ToolRegistry.tools('', '')
-      const toolsMap = Object.fromEntries(toolsList.map(t => [t.id, t]))
+      const toolsList = await ToolRegistry.tools('', '');
+      const toolsMap = Object.fromEntries(toolsList.map((t) => [t.id, t]));
       for (const tool of request.tools) {
-        const toolFn = toolsMap[tool.name]
+        const toolFn = toolsMap[tool.name];
         if (toolFn) {
           try {
-            const startTime = Date.now()
-            const callID = `call_${Math.floor(Math.random() * 100000000)}`
+            const startTime = Date.now();
+            const callID = `call_${Math.floor(Math.random() * 100000000)}`;
 
             // Create OpenCode-compatible context
             const ctx = {
@@ -54,13 +54,13 @@ export class Agent {
               agent: 'default',
               callID,
               abort: new AbortController().signal,
-              metadata: (data) => {
+              metadata: (_data) => {
                 // Handle metadata updates during execution
-              }
-            }
+              },
+            };
 
-            const result = await toolFn.execute(tool.params, ctx)
-            const endTime = Date.now()
+            const result = await toolFn.execute(tool.params, ctx);
+            const endTime = Date.now();
 
             // Emit tool_use event
             this.emitEvent('tool_use', {
@@ -75,25 +75,29 @@ export class Agent {
                   status: 'completed',
                   input: tool.params,
                   output: result.output,
-                  title: result.title || `${tool.name} ${JSON.stringify(tool.params)}`,
+                  title:
+                    result.title ||
+                    `${tool.name} ${JSON.stringify(tool.params)}`,
                   metadata: result.metadata || {
                     output: result.output,
                     exit: result.exitCode || 0,
-                    ...(tool.params.description && { description: tool.params.description })
+                    ...(tool.params.description && {
+                      description: tool.params.description,
+                    }),
                   },
                   time: {
                     start: startTime,
-                    end: endTime
-                  }
-                }
-              }
-            })
+                    end: endTime,
+                  },
+                },
+              },
+            });
           } catch (error) {
-            const errorTime = Date.now()
-            const callID = `call_${Math.floor(Math.random() * 100000000)}`
+            const errorTime = Date.now();
+            const callID = `call_${Math.floor(Math.random() * 100000000)}`;
 
             // Log full error to stderr for debugging
-            console.error('Tool execution error:', error)
+            console.error('Tool execution error:', error);
 
             // Emit tool_use event with error
             this.emitEvent('tool_use', {
@@ -110,11 +114,11 @@ export class Agent {
                   error: error.message || String(error),
                   time: {
                     start: errorTime,
-                    end: errorTime
-                  }
-                }
-              }
-            })
+                    end: errorTime,
+                  },
+                },
+              },
+            });
           }
         }
       }
@@ -133,23 +137,23 @@ export class Agent {
             input: 1273,
             output: 2,
             reasoning: 173,
-            cache: { read: 9536, write: 0 }
-          }
-        }
-      })
+            cache: { read: 9536, write: 0 },
+          },
+        },
+      });
 
       return {
         sessionID,
-        timestamp: Date.now()
-      }
+        timestamp: Date.now(),
+      };
     }
 
     // Regular message processing
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Emit text response like opencode
-    const responseText = message === "hi" ? "Hi!" : `You said: "${message}"`
+    const responseText = message === 'hi' ? 'Hi!' : `You said: "${message}"`;
     this.emitEvent('text', {
       part: {
         id: this.generatePartId(),
@@ -159,10 +163,10 @@ export class Agent {
         text: responseText,
         time: {
           start: Date.now(),
-          end: Date.now()
-        }
-      }
-    })
+          end: Date.now(),
+        },
+      },
+    });
 
     // Emit step_finish with cost and tokens like opencode
     this.emitEvent('step_finish', {
@@ -178,15 +182,15 @@ export class Agent {
           input: 1273,
           output: 2,
           reasoning: 173,
-          cache: { read: 9536, write: 0 }
-        }
-      }
-    })
+          cache: { read: 9536, write: 0 },
+        },
+      },
+    });
 
     return {
       sessionID,
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    };
   }
 
   emitEvent(type, data) {
@@ -194,11 +198,13 @@ export class Agent {
       type,
       timestamp: Date.now(),
       sessionID: this.sessionID,
-      ...data
-    }
+      ...data,
+    };
     // Pretty-print JSON for human readability, compact for programmatic use
     // Use AGENT_CLI_COMPACT=1 for compact output (tests, automation)
-    const compact = process.env.AGENT_CLI_COMPACT === '1'
-    console.log(compact ? JSON.stringify(event) : JSON.stringify(event, null, 2))
+    const compact = process.env.AGENT_CLI_COMPACT === '1';
+    console.log(
+      compact ? JSON.stringify(event) : JSON.stringify(event, null, 2)
+    );
   }
 }

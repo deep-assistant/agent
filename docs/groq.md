@@ -20,30 +20,30 @@ Groq hosts a variety of models optimized for fast inference. Below are the avail
 
 ### Production Models
 
-| Model | Model ID | Context Window | Tool Use |
-|-------|----------|----------------|----------|
-| Llama 3.3 70B Versatile | `groq/llama-3.3-70b-versatile` | 131,072 tokens | Yes |
-| Llama 3.1 8B Instant | `groq/llama-3.1-8b-instant` | 131,072 tokens | Yes |
-| Llama Guard 4 12B | `groq/meta-llama/llama-guard-4-12b` | 131,072 tokens | Yes |
-| GPT-OSS 120B | `groq/openai/gpt-oss-120b` | 131,072 tokens | Yes |
-| GPT-OSS 20B | `groq/openai/gpt-oss-20b` | 131,072 tokens | Yes |
-| Qwen3 32B | `groq/qwen/qwen3-32b` | 131,072 tokens | Yes |
-| Kimi K2 Instruct | `groq/moonshotai/kimi-k2-instruct-0905` | 131,072 tokens | Yes |
-| Llama 4 Scout | `groq/meta-llama/llama-4-scout-17b-16e-instruct` | 131,072 tokens | Yes |
-| Llama 4 Maverick | `groq/meta-llama/llama-4-maverick-17b-128e-instruct` | 131,072 tokens | Yes |
+| Model                   | Model ID                                             | Context Window | Tool Use |
+| ----------------------- | ---------------------------------------------------- | -------------- | -------- |
+| Llama 3.3 70B Versatile | `groq/llama-3.3-70b-versatile`                       | 131,072 tokens | Yes      |
+| Llama 3.1 8B Instant    | `groq/llama-3.1-8b-instant`                          | 131,072 tokens | Yes      |
+| Llama Guard 4 12B       | `groq/meta-llama/llama-guard-4-12b`                  | 131,072 tokens | Yes      |
+| GPT-OSS 120B            | `groq/openai/gpt-oss-120b`                           | 131,072 tokens | Yes      |
+| GPT-OSS 20B             | `groq/openai/gpt-oss-20b`                            | 131,072 tokens | Yes      |
+| Qwen3 32B               | `groq/qwen/qwen3-32b`                                | 131,072 tokens | Yes      |
+| Kimi K2 Instruct        | `groq/moonshotai/kimi-k2-instruct-0905`              | 131,072 tokens | Yes      |
+| Llama 4 Scout           | `groq/meta-llama/llama-4-scout-17b-16e-instruct`     | 131,072 tokens | Yes      |
+| Llama 4 Maverick        | `groq/meta-llama/llama-4-maverick-17b-128e-instruct` | 131,072 tokens | Yes      |
 
 ### Compound Systems (Agentic)
 
-| Model | Model ID | Context Window | Tool Use |
-|-------|----------|----------------|----------|
-| Compound | `groq/groq/compound` | 131,072 tokens | Yes (server-side) |
+| Model         | Model ID                  | Context Window | Tool Use          |
+| ------------- | ------------------------- | -------------- | ----------------- |
+| Compound      | `groq/groq/compound`      | 131,072 tokens | Yes (server-side) |
 | Compound Mini | `groq/groq/compound-mini` | 131,072 tokens | Yes (server-side) |
 
 ### Speech-to-Text Models
 
-| Model | Model ID | Description |
-|-------|----------|-------------|
-| Whisper Large V3 | `groq/whisper-large-v3` | Speech-to-text |
+| Model                  | Model ID                      | Description              |
+| ---------------------- | ----------------------------- | ------------------------ |
+| Whisper Large V3       | `groq/whisper-large-v3`       | Speech-to-text           |
 | Whisper Large V3 Turbo | `groq/whisper-large-v3-turbo` | Optimized speech-to-text |
 
 ## Usage Examples
@@ -92,6 +92,7 @@ All production text models on Groq support tool use (function calling). The agen
 ### Parallel Tool Calling
 
 The following models support parallel tool calling:
+
 - Llama 3.3 70B Versatile
 - Llama 3.1 8B Instant
 - Qwen3 32B
@@ -103,6 +104,7 @@ The following models support parallel tool calling:
 Groq offers competitive pricing for inference. Check [console.groq.com](https://console.groq.com/docs/pricing) for current pricing information.
 
 Key benefits:
+
 - Ultra-fast inference speeds
 - Competitive token pricing
 - Large context windows (131K tokens)
@@ -110,8 +112,8 @@ Key benefits:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable       | Description                                                                   |
+| -------------- | ----------------------------------------------------------------------------- |
 | `GROQ_API_KEY` | Your Groq API key from [console.groq.com/keys](https://console.groq.com/keys) |
 
 ## Configuration

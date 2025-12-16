@@ -8,6 +8,7 @@
 > 🚨 **SECURITY WARNING: 100% UNSAFE AND AUTONOMOUS** 🚨
 >
 > This agent operates with **ZERO RESTRICTIONS** and **FULL AUTONOMY**:
+>
 > - ❌ **No Sandbox** - Complete unrestricted file system access
 > - ❌ **No Permissions System** - No approval required for any actions
 > - ❌ **No Safety Guardrails** - Can execute ANY command with full privileges
@@ -83,6 +84,7 @@ The agent streams events as they occur, providing the same real-time experience 
 ## Installation
 
 **Requirements:**
+
 - [Bun](https://bun.sh) >= 1.0.0 (Node.js and Deno are NOT supported)
 
 ```bash
@@ -103,16 +105,19 @@ After installation, the `agent` command will be available globally.
 ### Simplest Examples
 
 **Plain text (easiest):**
+
 ```bash
 echo "hi" | agent
 ```
 
 **Simple JSON message:**
+
 ```bash
 echo '{"message":"hi"}' | agent
 ```
 
 **With custom model:**
+
 ```bash
 echo "hi" | agent --model opencode/grok-code
 ```
@@ -120,17 +125,20 @@ echo "hi" | agent --model opencode/grok-code
 ### More Examples
 
 **Plain Text Input:**
+
 ```bash
 echo "hello world" | agent
 echo "search the web for TypeScript news" | agent
 ```
 
 **JSON Input with tool calls:**
+
 ```bash
 echo '{"message":"run command","tools":[{"name":"bash","params":{"command":"ls -la"}}]}' | agent
 ```
 
 **Using different models:**
+
 ```bash
 # Default model (free Grok Code Fast 1)
 echo "hi" | agent
@@ -229,11 +237,13 @@ echo "hi" | agent --json-standard claude
 ### Input Formats
 
 **Plain Text (auto-converted):**
+
 ```bash
 echo "your message here" | agent
 ```
 
 **JSON Format:**
+
 ```json
 {
   "message": "Your message here",
@@ -251,23 +261,27 @@ echo "your message here" | agent
 All 13 tools are **enabled by default** with **no configuration required**. See [TOOLS.md](TOOLS.md) for complete documentation.
 
 ### File Operations
+
 - **`read`** - Read file contents
 - **`write`** - Write files
 - **`edit`** - Edit files with string replacement
 - **`list`** - List directory contents
 
 ### Search Tools
+
 - **`glob`** - File pattern matching (`**/*.js`)
 - **`grep`** - Text search with regex support
 - **`websearch`** ✨ - Web search via Exa API (no config needed!)
 - **`codesearch`** ✨ - Code search via Exa API (no config needed!)
 
 ### Execution Tools
+
 - **`bash`** - Execute shell commands
 - **`batch`** ✨ - Batch multiple tool calls (no config needed!)
 - **`task`** - Launch subagent tasks
 
 ### Utility Tools
+
 - **`todo`** - Task tracking
 - **`webfetch`** - Fetch and process URLs
 
@@ -297,11 +311,13 @@ For detailed testing information including how to run tests manually and trigger
 ### Development
 
 Run the agent in development mode:
+
 ```bash
 bun run dev
 ```
 
 Or run directly:
+
 ```bash
 bun run src/index.js
 ```
@@ -309,6 +325,7 @@ bun run src/index.js
 ### Testing
 
 Simply run:
+
 ```bash
 bun test
 ```
@@ -328,11 +345,13 @@ Bun automatically discovers and runs all `*.test.js` files in the project.
 To publish a new version to npm:
 
 1. **Update version** in `package.json`:
+
    ```bash
    # Update version field manually (e.g., 0.0.3 -> 0.0.4)
    ```
 
 2. **Commit changes**:
+
    ```bash
    git add .
    git commit -m "Release v0.0.4"
@@ -349,18 +368,22 @@ The package publishes source files directly (no build step required). Bun handle
 ## Key Features
 
 ### No Configuration Required
+
 - **WebSearch/CodeSearch**: Work without `OPENCODE_EXPERIMENTAL_EXA` environment variable
 - **Batch Tool**: Always enabled, no experimental flag needed
 - **All Tools**: No config files, API keys handled automatically
 
 ### OpenCode 100% Compatible
+
 - All tools produce JSON output matching OpenCode's exact format
 - WebSearch and CodeSearch tools are verified 100% compatible
 - Tool event structure matches OpenCode specifications
 - Can be used as drop-in replacement for `opencode run --format json`
 
 ### Plain Text Support
+
 Both plain text and JSON input work:
+
 ```bash
 # Plain text
 echo "hello" | bun run src/index.js
@@ -372,12 +395,15 @@ echo '{"message":"hello"}' | bun run src/index.js
 Plain text is automatically converted to `{"message":"your text"}` format.
 
 ### JSON Event Streaming Output
+
 JSON output is pretty-printed for easy readability while maintaining OpenCode compatibility:
+
 ```bash
 echo "hi" | agent
 ```
 
 Output (pretty-printed JSON events):
+
 ```json
 {
   "type": "step_start",
@@ -443,6 +469,7 @@ This repository includes official reference implementations as git submodules to
 - **reference-qwen3-coder** - [Qwen3-Coder](https://github.com/QwenLM/Qwen3-Coder) - Official Qwen3 code model from Alibaba Cloud
 
 To initialize all submodules:
+
 ```bash
 git submodule update --init --recursive
 ```

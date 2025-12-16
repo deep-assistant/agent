@@ -19,6 +19,7 @@
 ## Timeline and Sequence of Events
 
 ### Event 1: Initial Feature Implementation (PR #27)
+
 **Date**: December 10, 2025
 **Commit**: 96dc619 - "feat: Add Groq provider support with documentation and model testing workflow"
 
@@ -29,10 +30,12 @@
 - These shell scripts worked correctly with bash syntax
 
 ### Event 2: Cross-Platform Refactoring (Commit 91f1022)
+
 **Date**: December 10, 2025, 23:26 CET
 **Commit**: 91f1022 - "refactor: Replace shell scripts with cross-platform .mjs scripts in workflow"
 
 **What happened**:
+
 - Developer converted shell scripts to Node.js `.mjs` (ES module) files for cross-platform compatibility
 - Created three new scripts:
   - `scripts/test-model-simple.mjs`
@@ -43,6 +46,7 @@
 
 **The Bug**:
 In both `test-model-simple.mjs` and `test-model-tools.mjs`, the developer:
+
 - Correctly imported some Node.js modules using ES6 syntax (line 8-11):
   ```javascript
   import { spawn } from 'child_process';
@@ -59,6 +63,7 @@ In both `test-model-simple.mjs` and `test-model-tools.mjs`, the developer:
 This mixed syntax is incompatible because `.mjs` files are **always** treated as ES modules in Node.js.
 
 ### Event 3: Commit Merged to Main
+
 **Date**: December 10, 2025
 **Commit**: a9a2cab - "Merge pull request #27 from link-assistant/issue-26-1a4b69adfb64"
 
@@ -66,26 +71,31 @@ This mixed syntax is incompatible because `.mjs` files are **always** treated as
 - No CI checks caught the error before merge
 
 ### Event 4: CI Failure Detected
+
 **Date**: December 10, 2025, 23:53 UTC
 **Run ID**: 20117079839
 
 The model testing workflow ran and failed with:
+
 ```
 ReferenceError: require is not defined in ES module scope, you can use import instead
     at file:///home/runner/work/agent/agent/scripts/test-model-simple.mjs:46:19
 ```
 
 ### Event 5: Issue Created
+
 **Date**: December 11, 2025
 **Issue**: [#28](https://github.com/link-assistant/agent/issues/28)
 
 User reported: "Our scripts are .mjs, not .cjs" with link to failed CI run.
 
 ### Event 6: Resolution
+
 **Date**: December 11, 2025
 **Commit**: bc94206 - "fix: Replace require() with ES module import in .mjs scripts"
 
 Fixed both files by:
+
 1. Adding `createWriteStream` to the fs import statement
 2. Removing the `require('fs')` call
 3. Using the imported `createWriteStream` function directly
@@ -127,12 +137,14 @@ From the [Node.js ES modules documentation](https://nodejs.org/api/esm.html):
 > Files ending with .mjs are always loaded as ES modules regardless of the nearest parent package.json
 
 When Node.js encounters CommonJS syntax in an ES module:
+
 ```javascript
 // This throws ReferenceError in .mjs files
 const logStream = require('fs').createWriteStream(logFile);
 ```
 
 The error message is clear:
+
 ```
 ReferenceError: require is not defined in ES module scope, you can use import instead
 ```
@@ -142,6 +154,7 @@ ReferenceError: require is not defined in ES module scope, you can use import in
 Replace the CommonJS syntax with proper ES module imports:
 
 **Before** (scripts/test-model-simple.mjs:46):
+
 ```javascript
 import { writeFileSync, readFileSync } from 'fs';
 // ... (35 lines later)
@@ -149,6 +162,7 @@ const logStream = require('fs').createWriteStream(logFile);
 ```
 
 **After** (scripts/test-model-simple.mjs:9,46):
+
 ```javascript
 import { writeFileSync, readFileSync, createWriteStream } from 'fs';
 // ... (35 lines later)
@@ -160,6 +174,7 @@ The same fix was applied to `scripts/test-model-tools.mjs`.
 ### Verification
 
 Used Node.js syntax checking to verify the fix:
+
 ```bash
 $ node --check scripts/test-model-simple.mjs
 # (no output = success)
@@ -171,6 +186,7 @@ $ node --check scripts/test-model-tools.mjs
 ## Prevention Strategies
 
 ### Immediate Actions Taken
+
 1. ✅ Fixed both affected files
 2. ✅ Verified syntax with `node --check`
 3. ✅ Created comprehensive case study documentation
@@ -178,14 +194,18 @@ $ node --check scripts/test-model-tools.mjs
 ### Recommended Long-term Improvements
 
 #### 1. Pre-commit Hooks
+
 Add a pre-commit hook to check all `.mjs` files for CommonJS syntax:
+
 ```bash
 # .git/hooks/pre-commit
 find scripts -name "*.mjs" -exec node --check {} \;
 ```
 
 #### 2. CI Pipeline Enhancement
+
 Add a syntax validation step to GitHub Actions workflow before running tests:
+
 ```yaml
 - name: Validate JavaScript syntax
   run: |
@@ -195,7 +215,9 @@ Add a syntax validation step to GitHub Actions workflow before running tests:
 ```
 
 #### 3. ESLint Configuration
+
 Configure ESLint to enforce ES module syntax in `.mjs` files:
+
 ```javascript
 // .eslintrc.js
 module.exports = {
@@ -210,7 +232,8 @@ module.exports = {
           'error',
           {
             selector: 'CallExpression[callee.name="require"]',
-            message: 'require() is not allowed in ES modules. Use import instead.',
+            message:
+              'require() is not allowed in ES modules. Use import instead.',
           },
         ],
       },
@@ -220,13 +243,17 @@ module.exports = {
 ```
 
 #### 4. Documentation
+
 Add a developer guide explaining:
+
 - When to use `.mjs` vs `.cjs` vs `.js`
 - ES module vs CommonJS syntax differences
 - Common migration pitfalls
 
 #### 5. IDE Configuration
+
 Recommend IDE settings in a `.vscode/settings.json` file:
+
 ```json
 {
   "javascript.validate.enable": true,
@@ -237,6 +264,7 @@ Recommend IDE settings in a `.vscode/settings.json` file:
 ## Related Resources
 
 ### Understanding the Error
+
 - [Require is not defined in ES module scope (Treehouse Community)](https://teamtreehouse.com/community/require-is-not-defined-in-es-module-scope)
 - [ReferenceError: require is not defined in ES module scope (AWS re:Post)](https://repost.aws/questions/QU9hDBbz8OTSWY53n5rdL7Wg/referenceerror-require-is-not-defined-in-es-module-scope-you-can-use-import-instead)
 - [How to fix "require is not defined" in JavaScript / Node.js? (CodeDamn)](https://codedamn.com/news/javascript/fix-require-is-not-defined)
@@ -245,6 +273,7 @@ Recommend IDE settings in a `.vscode/settings.json` file:
 - [Why Is Require Not Defined in ES Module Scope? (A Girl Among Geeks)](https://agirlamonggeeks.com/require-is-not-defined-in-es-module-scope/)
 
 ### Best Practices (CommonJS vs ES Modules)
+
 - [CommonJS vs. ES Modules (Better Stack Community)](https://betterstack.com/community/guides/scaling-nodejs/commonjs-vs-esm/)
 - [CommonJS vs. ES modules in Node.js (LogRocket Blog)](https://blog.logrocket.com/commonjs-vs-es-modules-node-js/)
 - [Understanding CommonJS vs. ES Modules in JavaScript (Syncfusion Blogs)](https://www.syncfusion.com/blogs/post/js-commonjs-vs-es-modules)

@@ -18,12 +18,14 @@ async function listAllModels() {
     for (const [provider, providerData] of Object.entries(data)) {
       if (providerData.models) {
         // Iterate through all models for this provider
-        for (const [modelName, modelData] of Object.entries(providerData.models)) {
+        for (const [modelName, modelData] of Object.entries(
+          providerData.models
+        )) {
           models.push({
             id: `${provider}/${modelName}`,
             provider,
             model: modelName,
-            toolCall: modelData.tool_call ?? true
+            toolCall: modelData.tool_call ?? true,
           });
         }
       }
@@ -38,14 +40,18 @@ async function listAllModels() {
     });
 
     // Output for workflow usage (YAML format for GitHub Actions)
-    console.log('# All models from models.dev API (sorted by provider, then model name)');
-    models.forEach(m => {
+    console.log(
+      '# All models from models.dev API (sorted by provider, then model name)'
+    );
+    models.forEach((m) => {
       console.log(`- ${m.id}`);
     });
 
     console.log('\n# Total models:', models.length);
-    console.log('# Providers:', [...new Set(models.map(m => m.provider))].sort().join(', '));
-
+    console.log(
+      '# Providers:',
+      [...new Set(models.map((m) => m.provider))].sort().join(', ')
+    );
   } catch (error) {
     console.error(`Error fetching model data: ${error.message}`);
     process.exit(1);

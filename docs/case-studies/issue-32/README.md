@@ -24,9 +24,9 @@ The CLI argument parser incorrectly handled model IDs containing multiple slashe
 
 ```javascript
 // BEFORE (buggy)
-const modelParts = argv.model.split('/')
-const providerID = modelParts[0] || 'opencode'
-const modelID = modelParts[1] || 'grok-code'
+const modelParts = argv.model.split('/');
+const providerID = modelParts[0] || 'opencode';
+const modelID = modelParts[1] || 'grok-code';
 
 // Input: "groq/qwen/qwen3-32b"
 // Result: providerID="groq", modelID="qwen" ❌
@@ -35,11 +35,12 @@ const modelID = modelParts[1] || 'grok-code'
 This caused the agent to look for model `groq/qwen` instead of `groq/qwen/qwen3-32b`.
 
 **Fix Applied**:
+
 ```javascript
 // AFTER (correct)
-const modelParts = argv.model.split('/')
-const providerID = modelParts[0] || 'opencode'
-const modelID = modelParts.slice(1).join('/') || 'grok-code'
+const modelParts = argv.model.split('/');
+const providerID = modelParts[0] || 'opencode';
+const modelID = modelParts.slice(1).join('/') || 'grok-code';
 
 // Input: "groq/qwen/qwen3-32b"
 // Result: providerID="groq", modelID="qwen/qwen3-32b" ✅
@@ -56,14 +57,14 @@ The test scripts (`scripts/test-model-simple.mjs` and `scripts/test-model-tools.
 ```javascript
 // Check for errors in output (even if exit code is 0)
 const errorPatterns = [
-  /\w+Error:/,           // Any JavaScript error (TypeError, ReferenceError, etc.)
-  /Error:/,              // Generic "Error:"
-  /Exception:/,          // Exceptions
-  /ENOENT/,              // File not found
-  /ECONNREFUSED/,        // Connection refused
+  /\w+Error:/, // Any JavaScript error (TypeError, ReferenceError, etc.)
+  /Error:/, // Generic "Error:"
+  /Exception:/, // Exceptions
+  /ENOENT/, // File not found
+  /ECONNREFUSED/, // Connection refused
 ];
 
-const hasError = errorPatterns.some(pattern => pattern.test(output));
+const hasError = errorPatterns.some((pattern) => pattern.test(output));
 
 if (hasError) {
   console.log('');
@@ -90,6 +91,7 @@ All Groq models with slashes in their model IDs were broken:
 ### Working Models (No slash in model ID)
 
 These models were unaffected:
+
 - ✅ `groq/llama-3.3-70b-versatile`
 - ✅ `groq/llama-3.1-8b-instant`
 - ✅ `groq/qwen-qwq-32b`
@@ -113,6 +115,7 @@ These models were unaffected:
 ### Model Name Research
 
 Confirmed via Groq API documentation and models.dev:
+
 - ✅ Correct model ID: `qwen/qwen3-32b`
 - ✅ Full reference: `groq/qwen/qwen3-32b`
 - ✅ Lowercase is correct (not `QWEN/QWEN3-32B`)

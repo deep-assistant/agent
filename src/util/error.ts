@@ -1,10 +1,13 @@
-import z from "zod"
+import z from 'zod';
 
 export abstract class NamedError extends Error {
-  abstract schema(): z.core.$ZodType
-  abstract toObject(): { name: string; data: any }
+  abstract schema(): z.core.$ZodType;
+  abstract toObject(): { name: string; data: any };
 
-  static create<Name extends string, Data extends z.core.$ZodType>(name: Name, data: Data) {
+  static create<Name extends string, Data extends z.core.$ZodType>(
+    name: Name,
+    data: Data
+  ) {
     const schema = z
       .object({
         name: z.literal(name),
@@ -12,43 +15,45 @@ export abstract class NamedError extends Error {
       })
       .meta({
         ref: name,
-      })
+      });
     const result = class extends NamedError {
-      public static readonly Schema = schema
+      public static readonly Schema = schema;
 
-      public override readonly name = name as Name
+      public override readonly name = name as Name;
 
       constructor(
         public readonly data: z.input<Data>,
-        options?: ErrorOptions,
+        options?: ErrorOptions
       ) {
-        super(name, options)
-        this.name = name
+        super(name, options);
+        this.name = name;
       }
 
       static isInstance(input: any): input is InstanceType<typeof result> {
-        return typeof input === "object" && "name" in input && input.name === name
+        return (
+          typeof input === 'object' && 'name' in input && input.name === name
+        );
       }
 
       schema() {
-        return schema
+        return schema;
       }
 
       toObject() {
         return {
           name: name,
           data: this.data,
-        }
+        };
       }
-    }
-    Object.defineProperty(result, "name", { value: name })
-    return result
+    };
+    Object.defineProperty(result, 'name', { value: name });
+    return result;
   }
 
   public static readonly Unknown = NamedError.create(
-    "UnknownError",
+    'UnknownError',
     z.object({
       message: z.string(),
-    }),
-  )
+    })
+  );
 }

@@ -1,6 +1,7 @@
 # Authentication Guide
 
 The agent CLI supports OAuth authentication for providers that offer subscription-based access, including:
+
 - **Anthropic** (Claude Pro/Max subscription)
 - **GitHub Copilot** (GitHub.com and Enterprise)
 
@@ -47,6 +48,7 @@ agent auth login
 ```
 
 This will:
+
 1. Show a list of available providers
 2. For OAuth providers (Anthropic, GitHub Copilot): Open browser for authentication
 3. For API key providers: Prompt for API key entry
@@ -100,11 +102,13 @@ agent auth login
 ```
 
 **Login methods:**
+
 - **Claude Pro/Max** - OAuth login for subscription users (recommended)
 - **Create an API Key** - Generate an API key via OAuth
 - **Manually enter API Key** - Enter existing API key
 
 After login, use any Anthropic model:
+
 ```bash
 echo "hello" | agent --model anthropic/claude-sonnet-4-5
 echo "hello" | agent --model anthropic/claude-opus-4-1
@@ -122,11 +126,13 @@ agent auth login
 ```
 
 The device code flow will:
+
 1. Show a verification URL and code
 2. Wait for you to authorize in browser
 3. Automatically complete once authorized
 
 After login, use GitHub Copilot models:
+
 ```bash
 echo "hello" | agent --model github-copilot/gpt-4o
 echo "hello" | agent --model github-copilot/claude-sonnet-4-5
@@ -143,6 +149,7 @@ agent auth login
 ```
 
 Or use environment variables:
+
 ```bash
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-api03-..."
@@ -160,6 +167,7 @@ echo "hello" | agent --use-existing-claude-oauth
 ```
 
 This option:
+
 - Reads OAuth tokens from `~/.claude/.credentials.json`
 - Automatically uses the `claude-oauth` provider
 - Defaults to `claude-sonnet-4-5` model if no model specified
@@ -169,11 +177,13 @@ This option:
 ### Agent CLI Credentials
 
 Credentials from `agent auth login` are stored in:
+
 ```
 ~/.local/share/agent/auth.json
 ```
 
 Format:
+
 ```json
 {
   "anthropic": {
@@ -194,6 +204,7 @@ Format:
 ### Claude Code CLI Credentials
 
 Claude Code CLI credentials (used with `--use-existing-claude-oauth`) are in:
+
 ```
 ~/.claude/.credentials.json
 ```
@@ -201,6 +212,7 @@ Claude Code CLI credentials (used with `--use-existing-claude-oauth`) are in:
 ## Token Refresh
 
 OAuth tokens are automatically refreshed when expired:
+
 - Anthropic: Uses refresh token to get new access token
 - GitHub Copilot: Uses access token to get Copilot-specific token
 
@@ -208,14 +220,14 @@ No manual refresh is needed - the agent handles this automatically.
 
 ## Environment Variables
 
-| Provider | Environment Variable |
-|----------|---------------------|
-| Anthropic (API) | `ANTHROPIC_API_KEY` |
-| Anthropic (OAuth) | `CLAUDE_CODE_OAUTH_TOKEN` |
-| OpenAI | `OPENAI_API_KEY` |
-| Google | `GOOGLE_GENERATIVE_AI_API_KEY` |
-| OpenRouter | `OPENROUTER_API_KEY` |
-| GitHub Copilot | (OAuth only, no env var) |
+| Provider          | Environment Variable           |
+| ----------------- | ------------------------------ |
+| Anthropic (API)   | `ANTHROPIC_API_KEY`            |
+| Anthropic (OAuth) | `CLAUDE_CODE_OAUTH_TOKEN`      |
+| OpenAI            | `OPENAI_API_KEY`               |
+| Google            | `GOOGLE_GENERATIVE_AI_API_KEY` |
+| OpenRouter        | `OPENROUTER_API_KEY`           |
+| GitHub Copilot    | (OAuth only, no env var)       |
 
 ## Troubleshooting
 
@@ -226,6 +238,7 @@ Run `agent auth login` to authenticate with a provider.
 ### "Token expired"
 
 Tokens are auto-refreshed. If you see this error, try:
+
 1. `agent auth logout` for the provider
 2. `agent auth login` to re-authenticate
 
@@ -237,12 +250,12 @@ Tokens are auto-refreshed. If you see this error, try:
 
 ### OAuth vs API Key
 
-| Feature | OAuth | API Key |
-|---------|-------|---------|
-| Billing | Subscription-based | Pay-as-you-go |
-| Setup | Browser authorization | Copy/paste key |
-| Token Format | `sk-ant-oat...` | `sk-ant-api...` |
-| Auto-refresh | Yes | N/A |
+| Feature      | OAuth                 | API Key         |
+| ------------ | --------------------- | --------------- |
+| Billing      | Subscription-based    | Pay-as-you-go   |
+| Setup        | Browser authorization | Copy/paste key  |
+| Token Format | `sk-ant-oat...`       | `sk-ant-api...` |
+| Auto-refresh | Yes                   | N/A             |
 
 ## References
 

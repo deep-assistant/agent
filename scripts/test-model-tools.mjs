@@ -7,7 +7,7 @@
  */
 
 import { spawn } from 'child_process';
-import { writeFileSync, readFileSync, createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -46,7 +46,8 @@ if (modelId.startsWith('groq/') && !process.env.GROQ_API_KEY) {
 
 // Create test input - message that should trigger tool use
 const testInput = JSON.stringify({
-  message: 'List the files in the current directory using the bash tool with ls command'
+  message:
+    'List the files in the current directory using the bash tool with ls command',
 });
 
 console.log(`Input: ${testInput}`);
@@ -55,18 +56,20 @@ console.log('');
 // Models with low token limits that need minimal system messages
 // These models have ~6000 TPM limits on free tiers which can't accommodate
 // the full default system message (~12,000 tokens)
-const lowLimitModels = [
-  'qwen3-32b',
-  'mixtral-8x7b-32768',
-];
+const lowLimitModels = ['qwen3-32b', 'mixtral-8x7b-32768'];
 
-const needsMinimalSystem = lowLimitModels.some(model => modelId.includes(model));
+const needsMinimalSystem = lowLimitModels.some((model) =>
+  modelId.includes(model)
+);
 
 // Minimal system message for low-limit models (optimized for token efficiency)
-const minimalSystemMessage = 'You are a helpful AI assistant. Answer questions accurately and concisely.';
+const minimalSystemMessage =
+  'You are a helpful AI assistant. Answer questions accurately and concisely.';
 
 if (needsMinimalSystem) {
-  console.log('ℹ️  Using minimal system message (low token limit model detected)');
+  console.log(
+    'ℹ️  Using minimal system message (low token limit model detected)'
+  );
   console.log('');
 }
 
@@ -133,14 +136,14 @@ agent.on('close', (code) => {
 
   // Check for errors in output (even if exit code is 0)
   const errorPatterns = [
-    /\w+Error:/,           // Any JavaScript error (TypeError, ReferenceError, etc.)
-    /Error:/,              // Generic "Error:"
-    /Exception:/,          // Exceptions
-    /ENOENT/,              // File not found
-    /ECONNREFUSED/,        // Connection refused
+    /\w+Error:/, // Any JavaScript error (TypeError, ReferenceError, etc.)
+    /Error:/, // Generic "Error:"
+    /Exception:/, // Exceptions
+    /ENOENT/, // File not found
+    /ECONNREFUSED/, // Connection refused
   ];
 
-  const hasError = errorPatterns.some(pattern => pattern.test(output));
+  const hasError = errorPatterns.some((pattern) => pattern.test(output));
 
   if (hasError) {
     console.log('');
@@ -150,7 +153,9 @@ agent.on('close', (code) => {
 
   // Check for tool_use event in output
   console.log('');
-  const toolUseFound = output.includes('"type":"tool_use"') || output.includes('"type": "tool_use"');
+  const toolUseFound =
+    output.includes('"type":"tool_use"') ||
+    output.includes('"type": "tool_use"');
 
   if (toolUseFound) {
     console.log('✅ Tool use detected in output');
@@ -166,7 +171,9 @@ agent.on('close', (code) => {
       console.log('✅ Model successfully used tool calling');
     } else {
       console.log('⚠️  Model completed but did not use tool calling');
-      console.log('   This may indicate the model doesn\'t support tools or chose not to use them');
+      console.log(
+        "   This may indicate the model doesn't support tools or chose not to use them"
+      );
     }
     process.exit(0);
   } else {

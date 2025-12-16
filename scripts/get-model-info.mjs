@@ -33,7 +33,9 @@ async function getModelInfo() {
       console.log(`tool_call=${toolCall}`);
       process.exit(0);
     } else {
-      console.error(`Model data not found for ${modelId}, assuming tool_call=true`);
+      console.error(
+        `Model data not found for ${modelId}, assuming tool_call=true`
+      );
       console.log(`model_id=${modelId}`);
       console.log(`tool_call=true`);
       process.exit(0);

@@ -35,6 +35,7 @@
 ```
 
 **Error Details**:
+
 ```
 ProviderModelNotFoundError: ProviderModelNotFoundError
  data: {
@@ -90,6 +91,7 @@ Both tests reported success despite throwing errors.
 **Description**: Points out the false positive and questions model name format
 
 Key observations:
+
 1. CI run wrote it was successful, but actually failed
 2. Error was not treated as failure
 3. Question about model name casing (groq/QWEN/QWEN3-32B vs groq/qwen/qwen3-32b)
@@ -97,24 +99,28 @@ Key observations:
 ## 2025-12-11 (Investigation) - Root Cause Analysis
 
 ### Phase 1: Data Collection
+
 1. ✅ Downloaded CI logs
 2. ✅ Read issue description and CI URL
 3. ✅ Examined workflow configuration
 4. ✅ Reviewed test scripts
 
 ### Phase 2: Error Tracing
+
 1. ✅ Located `ProviderModelNotFoundError` in output
 2. ✅ Identified incorrect model ID: `"qwen"` instead of `"qwen/qwen3-32b"`
 3. ✅ Traced error to `src/provider/provider.ts:532`
 4. ✅ Found model parsing logic in `src/index.js:68-70`
 
 ### Phase 3: Verification
+
 1. ✅ Researched Groq API documentation
 2. ✅ Confirmed model ID via models.dev API
 3. ✅ Verified correct model ID is `qwen/qwen3-32b` (lowercase)
 4. ✅ Found existing correct parser in `provider.ts:620-626`
 
 ### Phase 4: Solution Design
+
 1. ✅ Identified fix for model parsing
 2. ✅ Identified fix for CI exit code handling
 3. ✅ Documented all affected models
@@ -125,13 +131,15 @@ Key observations:
 ### Fix 1: Model Parsing (src/index.js:70)
 
 **Before**:
+
 ```javascript
-const modelID = modelParts[1] || 'grok-code'
+const modelID = modelParts[1] || 'grok-code';
 ```
 
 **After**:
+
 ```javascript
-const modelID = modelParts.slice(1).join('/') || 'grok-code'
+const modelID = modelParts.slice(1).join('/') || 'grok-code';
 ```
 
 **Impact**: Fixes 8 Groq models with multi-slash IDs
@@ -139,6 +147,7 @@ const modelID = modelParts.slice(1).join('/') || 'grok-code'
 ### Fix 2: CI Error Detection (test scripts)
 
 **Added to both test scripts**:
+
 ```javascript
 const errorPatterns = [
   /\w+Error:/,
@@ -148,7 +157,7 @@ const errorPatterns = [
   /ECONNREFUSED/,
 ];
 
-const hasError = errorPatterns.some(pattern => pattern.test(output));
+const hasError = errorPatterns.some((pattern) => pattern.test(output));
 
 if (hasError) {
   console.log('❌ Test FAILED: Error detected in output');
@@ -161,6 +170,7 @@ if (hasError) {
 ### Fix 3: Documentation
 
 Created comprehensive case study with:
+
 - Root cause analysis
 - Timeline of events
 - Technical details
