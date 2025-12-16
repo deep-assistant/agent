@@ -86,6 +86,11 @@ export default [
       'dist/**',
       '*.min.js',
       '.eslintcache',
+      // Ignore git submodules (reference implementations)
+      'original-opencode/**',
+      'reference-gemini-cli/**',
+      'reference-gemini-cookbook/**',
+      'reference-qwen3-coder/**',
     ],
   },
 ];

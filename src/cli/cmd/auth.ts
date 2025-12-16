@@ -132,9 +132,10 @@ export const AuthLoginCommand = cmd({
       vercel: 5,
     };
 
-    let provider = await prompts.autocomplete({
+    // Note: Using `select` instead of `autocomplete` because `autocomplete` is only
+    // available in @clack/prompts v1.0.0-alpha.1+, while this package uses stable v0.11.0
+    let provider = await prompts.select({
       message: 'Select provider',
-      maxItems: 8,
       options: [
         ...pipe(
           providers,

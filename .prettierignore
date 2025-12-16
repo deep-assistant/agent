@@ -5,3 +5,9 @@ dist
 package-lock.json
 bun.lock
 .eslintcache
+
+# Git submodules (reference implementations)
+original-opencode
+reference-gemini-cli
+reference-gemini-cookbook
+reference-qwen3-coder
