@@ -459,45 +459,6 @@ export namespace Provider {
     const config = await Config.get();
     const database = await ModelsDev.get();
 
-    // Add Google provider if not present in models.dev
-    if (!database['google']) {
-      database['google'] = {
-        id: 'google',
-        name: 'Google',
-        env: ['GOOGLE_GENERATIVE_AI_API_KEY'],
-        npm: '@ai-sdk/google',
-        models: {
-          'gemini-3-pro-preview': {
-            id: 'gemini-3-pro-preview',
-            name: 'Gemini 3 Pro Preview',
-            release_date: '2025-11-18',
-            attachment: true,
-            reasoning: false,
-            temperature: true,
-            tool_call: true,
-            cost: {
-              input: 0,
-              output: 0,
-            },
-            limit: {
-              context: 1000000,
-              output: 64000,
-            },
-            modalities: {
-              input: ['text', 'image', 'audio', 'video'],
-              output: ['text'],
-            },
-            experimental: false,
-            options: {},
-            headers: {},
-            provider: {
-              npm: '@ai-sdk/google',
-            },
-          },
-        },
-      };
-    }
-
     const providers: {
       [providerID: string]: {
         source: Source;
@@ -816,19 +777,6 @@ export namespace Provider {
     return state().then((s) => s.providers[providerID]);
   }
 
-  function findSimilarModel(models: Record<string, any>, target: string): string | undefined {
-    const candidates = Object.keys(models);
-    // Simple Levenshtein distance or just check if target is substring
-    for (const candidate of candidates) {
-      if (candidate.includes(target) || target.includes(candidate.split('-').slice(0, -1).join('-'))) {
-        return candidate;
-      }
-    }
-    // For gemini-3-pro, suggest gemini-3-pro-preview
-    if (target === 'gemini-3-pro') return 'gemini-3-pro-preview';
-    return undefined;
-  }
-
   export async function getModel(providerID: string, modelID: string) {
     const key = `${providerID}/${modelID}`;
     const s = await state();
@@ -842,10 +790,7 @@ export namespace Provider {
     const provider = s.providers[providerID];
     if (!provider) throw new ModelNotFoundError({ providerID, modelID });
     const info = provider.info.models[modelID];
-    if (!info) {
-      const suggestion = findSimilarModel(provider.info.models, modelID);
-      throw new ModelNotFoundError({ providerID, modelID, suggestion });
-    }
+    if (!info) throw new ModelNotFoundError({ providerID, modelID });
     const sdk = await getSDK(provider.info, info);
 
     try {
@@ -960,7 +905,6 @@ export namespace Provider {
     z.object({
       providerID: z.string(),
       modelID: z.string(),
-      suggestion: z.string().optional(),
     })
   );
 
