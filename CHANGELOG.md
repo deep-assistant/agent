@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 09b6709: Fix GitHub release formatting to remove incorrect title for major/minor/patch versions and properly link related pull requests
+
 ## 0.1.0
 
 ### Minor Changes
