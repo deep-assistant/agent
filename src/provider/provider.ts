@@ -816,6 +816,19 @@ export namespace Provider {
     return state().then((s) => s.providers[providerID]);
   }
 
+  function findSimilarModel(models: Record<string, any>, target: string): string | undefined {
+    const candidates = Object.keys(models);
+    // Simple Levenshtein distance or just check if target is substring
+    for (const candidate of candidates) {
+      if (candidate.includes(target) || target.includes(candidate.split('-').slice(0, -1).join('-'))) {
+        return candidate;
+      }
+    }
+    // For gemini-3-pro, suggest gemini-3-pro-preview
+    if (target === 'gemini-3-pro') return 'gemini-3-pro-preview';
+    return undefined;
+  }
+
   export async function getModel(providerID: string, modelID: string) {
     const key = `${providerID}/${modelID}`;
     const s = await state();
@@ -829,7 +842,10 @@ export namespace Provider {
     const provider = s.providers[providerID];
     if (!provider) throw new ModelNotFoundError({ providerID, modelID });
     const info = provider.info.models[modelID];
-    if (!info) throw new ModelNotFoundError({ providerID, modelID });
+    if (!info) {
+      const suggestion = findSimilarModel(provider.info.models, modelID);
+      throw new ModelNotFoundError({ providerID, modelID, suggestion });
+    }
     const sdk = await getSDK(provider.info, info);
 
     try {
@@ -944,6 +960,7 @@ export namespace Provider {
     z.object({
       providerID: z.string(),
       modelID: z.string(),
+      suggestion: z.string().optional(),
     })
   );
 

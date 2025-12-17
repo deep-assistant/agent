@@ -43,7 +43,10 @@ export namespace BunProc {
       stderr,
     });
     if (code !== 0) {
-      throw new Error(`Command failed with exit code ${result.exitCode}`);
+      const parts = [`Command failed with exit code ${result.exitCode}`];
+      if (stderr) parts.push(`stderr: ${stderr}`);
+      if (stdout) parts.push(`stdout: ${stdout}`);
+      throw new Error(parts.join('\n'));
     }
     return result;
   }
@@ -57,6 +60,7 @@ export namespace BunProc {
     z.object({
       pkg: z.string(),
       version: z.string(),
+      details: z.string().optional(),
     })
   );
 
@@ -93,7 +97,7 @@ export namespace BunProc {
       cwd: Global.Path.cache,
     }).catch((e) => {
       throw new InstallFailedError(
-        { pkg, version },
+        { pkg, version, details: e instanceof Error ? e.message : String(e) },
         {
           cause: e,
         }
