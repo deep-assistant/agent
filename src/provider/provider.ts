@@ -721,7 +721,17 @@ export namespace Provider {
 
       let installedPath: string;
       if (!pkg.startsWith('file://')) {
+        log.info('installing provider package', {
+          providerID: provider.id,
+          pkg,
+          version: 'latest',
+        });
         installedPath = await BunProc.install(pkg, 'latest');
+        log.info('provider package installed successfully', {
+          providerID: provider.id,
+          pkg,
+          installedPath,
+        });
       } else {
         log.info('loading local provider', { pkg });
         installedPath = pkg;
@@ -769,6 +779,13 @@ export namespace Provider {
       s.sdk.set(key, loaded);
       return loaded as SDK;
     })().catch((e) => {
+      log.error('provider initialization failed', {
+        providerID: provider.id,
+        pkg: model.provider?.npm ?? provider.npm ?? provider.id,
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+        cause: e instanceof Error && e.cause ? String(e.cause) : undefined,
+      });
       throw new InitError({ providerID: provider.id }, { cause: e });
     });
   }

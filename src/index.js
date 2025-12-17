@@ -110,6 +110,13 @@ async function runAgentMode(argv) {
     console.error(`Script path: ${import.meta.path}`);
   }
 
+  // Log dry-run mode if enabled
+  if (Flag.OPENCODE_DRY_RUN) {
+    console.error(
+      `[DRY RUN MODE] No actual API calls or package installations will be made`
+    );
+  }
+
   // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
   const modelParts = argv.model.split('/');
   let providerID = modelParts[0] || 'opencode';
@@ -574,6 +581,12 @@ async function main() {
           'Enable verbose mode to debug API requests (shows system prompt, token counts, etc.)',
         default: false,
       })
+      .option('dry-run', {
+        type: 'boolean',
+        description:
+          'Simulate operations without making actual API calls or package installations (useful for testing)',
+        default: false,
+      })
       .option('use-existing-claude-oauth', {
         type: 'boolean',
         description:
@@ -586,6 +599,11 @@ async function main() {
         // Set verbose flag if requested
         if (argv.verbose) {
           Flag.setVerbose(true);
+        }
+
+        // Set dry-run flag if requested
+        if (argv['dry-run']) {
+          Flag.setDryRun(true);
         }
 
         // Initialize logging system

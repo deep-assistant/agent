@@ -22,9 +22,17 @@ export namespace Flag {
   // Verbose mode - enables detailed logging of API requests
   export let OPENCODE_VERBOSE = truthy('OPENCODE_VERBOSE');
 
+  // Dry run mode - simulate operations without making actual API calls or changes
+  export let OPENCODE_DRY_RUN = truthy('OPENCODE_DRY_RUN');
+
   // Allow setting verbose mode programmatically (e.g., from CLI --verbose flag)
   export function setVerbose(value: boolean) {
     OPENCODE_VERBOSE = value;
+  }
+
+  // Allow setting dry run mode programmatically (e.g., from CLI --dry-run flag)
+  export function setDryRun(value: boolean) {
+    OPENCODE_DRY_RUN = value;
   }
 
   function truthy(key: string) {
