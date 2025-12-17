@@ -2,8 +2,8 @@
 '@link-assistant/agent': patch
 ---
 
-fix: Исправлена команда `agent --version` и добавлено логирование в режиме `--verbose`
+fix: Fixed `agent --version` command and added logging in `--verbose` mode
 
-- Исправлена команда `--version`, которая показывала "unknown" вместо текущей версии пакета
-- Добавлен явный импорт `package.json` с помощью `createRequire` и fallback через `fs`
-- Добавлено логирование версии, команды, рабочей директории и пути к скрипту в режиме `--verbose`
+- Fixed `--version` command that was showing "unknown" instead of the current package version
+- Added explicit import of `package.json` using `createRequire` with fallback via `fs`
+- Added logging of version, command, working directory and script path in `--verbose` mode
