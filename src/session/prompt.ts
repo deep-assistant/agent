@@ -704,7 +704,24 @@ export namespace SessionPrompt {
     // When --system-message is provided, use it exclusively without any
     // additional context (no environment, no custom instructions, no header).
     // This is critical for models with low token limits (e.g., qwen3-32b with 6K TPM).
+    //
+    // Exception: For Anthropic providers using OAuth credentials, we must preserve
+    // the "You are Claude Code" header even when --system-message "" is provided.
+    // This header is required for OAuth token authorization.
+    // See: https://github.com/link-assistant/agent/issues/62
     if (input.system !== undefined) {
+      // If empty system message is provided for Anthropic, preserve the OAuth header
+      if (
+        input.system.trim() === '' &&
+        input.providerID.includes('anthropic')
+      ) {
+        return SystemPrompt.header(input.providerID);
+      }
+      // For non-empty system messages or non-Anthropic providers, use as-is
+      // (but filter out empty strings to prevent cache_control errors)
+      if (input.system.trim() === '') {
+        return [];
+      }
       return [input.system];
     }
 
