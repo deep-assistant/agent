@@ -187,6 +187,49 @@ Research conducted on December 19, 2025, to gather additional facts and data abo
 - **Error Handling**: Addresses common OAuth failure modes from Gemini CLI issues
 - **Security**: Public OAuth credentials for installed applications (standard practice)
 
+### Recent OAuth Issues Identified (2025)
+
+Based on current web research, several OAuth authentication challenges persist in the Gemini ecosystem:
+
+1. **Headless Environment Failures**: OAuth requires browser interaction, problematic for servers/Docker
+   - Issue #1696: Authentication fails on remote servers without browsers
+   - Solution: Add user code fallback for headless environments
+
+2. **Token Exchange Failures**: Recent issues with OAuth token exchange (Issue #8170)
+   - "Failed to exchange authorization code for tokens"
+   - May require additional headers or updated client credentials
+
+3. **Scope Validation Errors**: Invalid scope combinations cause authentication failures
+   - Some endpoints require specific scopes not in standard implementation
+   - generative-language.retriever scope may need verification
+
+4. **Docker Compatibility**: OAuth callback configuration for containerized environments
+   - Issue #2040: Special OAuth redirect handling needed for Docker
+   - Requires configurable callback hosts and ports
+
+5. **Header Requirements**: Missing Accept headers in token requests
+   - Issue #5687: Token endpoint requires 'Accept: application/json' header
+   - May affect token refresh operations
+
+6. **Path Dependencies**: OAuth credential storage path issues
+   - Issue #885af07: Token loading fails unless running from ~/.gemini
+   - Path-dependent credential loading
+
+7. **API Key Fallback Issues**: Some endpoints still require API keys even with OAuth
+   - Forum post: File upload endpoints may require API keys
+   - OAuth-only endpoints causing problems for API key users (Issue #13554)
+
+### Recommendations for Future Updates
+
+1. **Headless Support**: Implement device code flow fallback for environments without browsers
+2. **Enhanced Error Handling**: Add specific error messages for common OAuth failures
+3. **Docker Configuration**: Add environment variables for OAuth callback configuration
+4. **Scope Optimization**: Review and validate required OAuth scopes for all Gemini endpoints
+5. **Token Refresh Monitoring**: Add logging and monitoring for token refresh success/failure
+6. **Fallback Mechanisms**: Maintain API key support for endpoints that don't support OAuth
+7. **Security Headers**: Ensure all OAuth requests include proper headers (Accept, Content-Type)
+8. **Path Independence**: Make OAuth credential storage path-independent
+
 ## Conclusion
 
 The web research confirms that the implemented OAuth solution follows Google's official guidelines. However, the identified issues in the Gemini CLI suggest that there may be ongoing challenges with subscription-based authentication that should be monitored and addressed in future updates.</content>

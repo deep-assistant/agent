@@ -4,6 +4,7 @@ The agent CLI supports OAuth authentication for providers that offer subscriptio
 
 - **Anthropic** (Claude Pro/Max subscription)
 - **GitHub Copilot** (GitHub.com and Enterprise)
+- **Google** (Gemini Pro/Ultra subscription)
 
 ## Quick Start
 
@@ -138,6 +139,29 @@ echo "hello" | agent --model github-copilot/gpt-4o
 echo "hello" | agent --model github-copilot/claude-sonnet-4-5
 ```
 
+### Google (Gemini Pro/Ultra)
+
+Google AI Pro/Ultra subscribers can authenticate via OAuth:
+
+```bash
+agent auth login
+# Select: Google
+# Select: Gemini Subscription (OAuth)
+# Follow browser prompts
+```
+
+**Login methods:**
+
+- **Gemini Subscription (OAuth)** - OAuth login for subscription users (recommended)
+- **Manually enter API Key** - Enter existing API key
+
+After login, use any Google AI model:
+
+```bash
+echo "hello" | agent --model google/gemini-3-pro
+echo "hello" | agent --model google/gemini-2.5-flash
+```
+
 ### Other Providers (API Key)
 
 For providers without OAuth support, enter API keys directly:
@@ -215,6 +239,7 @@ OAuth tokens are automatically refreshed when expired:
 
 - Anthropic: Uses refresh token to get new access token
 - GitHub Copilot: Uses access token to get Copilot-specific token
+- Google: Uses refresh token to get new access token
 
 No manual refresh is needed - the agent handles this automatically.
 
@@ -244,7 +269,7 @@ Tokens are auto-refreshed. If you see this error, try:
 
 ### "Failed to authorize"
 
-- Ensure you have an active subscription (Claude Pro/Max, GitHub Copilot)
+- Ensure you have an active subscription (Claude Pro/Max, GitHub Copilot, Google AI Pro/Ultra)
 - Check your network connection
 - Try again with `agent auth login`
 
