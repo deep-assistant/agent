@@ -5,7 +5,7 @@
     "state": "merged",
     "created_at": "2025-12-16T21:36:27Z",
     "merged_at": "2025-12-17T08:39:33Z",
-    "body": "## Summary\n\n- Implements OAuth authentication for Google AI Pro/Ultra subscribers\n- Uses the same OAuth credentials as the official Gemini CLI (public for installed apps)\n- Allows users to authenticate with `agent auth google` command\n- Creates comprehensive case study documentation in `docs/case-studies/issue-66/`\n\n## Changes\n\n| File | Description |\n|------|-------------|\n| `src/auth/plugins.ts` | Add GooglePlugin with OAuth 2.0 + PKCE flow using local HTTP server for automatic redirect |\n| `src/provider/provider.ts` | Add google provider loader to use OAuth tokens |\n| `docs/google-oauth.md` | Create documentation for Google OAuth setup |\n| `docs/case-studies/issue-66/` | Add case study with research and analysis |\n| `scripts/check-file-size.mjs` | Exclude reference submodules from file size check |\n| `.changeset/add-google-oauth-support.md` | Add changeset for version bump |\n\n## OAuth Implementation Details\n\nThe OAuth flow uses:\n- Standard authorization code flow with PKCE\n- Local HTTP server for automatic OAuth redirect capture (no manual code copy needed)\n- OAuth scopes: cloud-platform, userinfo.email, userinfo.profile\n- Automatic token refresh with 5-minute buffer\n- Bearer token authentication\n- Same credentials as official Gemini CLI (public for desktop apps)\n\n## User Experience\n\n1. User runs `agent auth google`\n2. Selects \"Google AI Pro/Ultra (OAuth)\" option\n3. Browser opens automatically with Google's login page\n4. User completes authentication\n5. Browser automatically closes and returns to terminal\n6. Tokens stored securely and refreshed automatically\n\n## Test plan\n\n- [ ] Run `agent auth google` and verify OAuth flow works\n- [ ] Select \"Google AI Pro/Ultra (OAuth)\" option\n- [ ] Complete authentication in browser\n- [ ] Verify tokens are stored in `~/.local/share/agent/auth.json`\n- [ ] Use Google models and verify subscription-based access\n- [ ] Verify token refresh works when tokens expire\n\nCloses #66\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+    "body": "## Summary\n\n- Implements OAuth authentication for Google AI Pro/Ultra subscribers\n- Uses the same OAuth credentials as the official Gemini CLI (public for installed apps)\n- Allows users to authenticate with `agent auth google` command\n- Creates comprehensive case study documentation in `docs/case-studies/issue-66/`\n\n## Changes\n\n| File | Description |\n|------|-------------|\n| `src/auth/plugins.ts` | Add GooglePlugin with OAuth 2.0 + PKCE flow using local HTTP server for automatic redirect |\n| `src/provider/provider.ts` | Add google provider loader to use OAuth tokens |\n| `docs/google-oauth.md` | Create documentation for Google OAuth setup |\n| `docs/case-studies/issue-66/` | Add case study with research and analysis |\n| `scripts/check-file-size.mjs` | Exclude reference submodules from file size check |\n| `.changeset/add-google-oauth-support.md` | Add changeset for version bump |\n\n## OAuth Implementation Details\n\nThe OAuth flow uses:\n- Standard authorization code flow with PKCE\n- Local HTTP server for automatic OAuth redirect capture (no manual code copy needed)\n- OAuth scopes: cloud-platform, userinfo.email, userinfo.profile\n- Automatic token refresh with 5-minute buffer\n- Bearer token authentication\n- Same credentials as official Gemini CLI (public for desktop apps)\n\n## User Experience\n\n1. User runs `agent auth google`\n2. Selects \"Google AI Pro/Ultra (OAuth)\" option\n3. Browser opens automatically with Google's login page\n4. User completes authentication\n5. Browser automatically closes and returns to terminal\n6. Tokens stored securely and refreshed automatically\n\n## Test plan\n\n- [ ] Run `agent auth google` and verify OAuth flow works\n- [ ] Select \"Google AI Pro/Ultra (OAuth)\" option\n- [ ] Complete authentication in browser\n- [ ] Verify tokens are stored in `~/.local/share/agent/auth.json`\n- [ ] Use Google models and verify subscription-based access\n- [ ] Verify token refresh works when tokens expire\n\nCloses #66",
     "commits": [
       {
         "messageHeadline": "Initial commit with task details",
@@ -52,6 +52,69 @@
         "authoredDate": "2025-12-19T21:11:21Z",
         "committedDate": "2025-12-19T21:11:21Z",
         "oid": "0f8d25c8e3a7eac3a259c96b77c026038fee8d2c"
+      },
+      {
+        "messageHeadline": "feat: implement Google OAuth support for Gemini subscriptions",
+        "messageBody": "- Add google-auth-library dependency for proper OAuth handling\n- Refactor Google OAuth plugin to use OAuth2Client from google-auth-library\n- Implement automatic browser opening for authentication\n- Add local HTTP server for OAuth callback handling\n- Update documentation with implementation details\n- Fix issue #66: Full support for Gemini OAuth (subscriptions login)",
+        "authoredDate": "2025-12-19T21:11:22Z",
+        "committedDate": "2025-12-19T21:11:22Z",
+        "oid": "2f1ac933728da46a489e1e883107aa7e9fb572b2"
+      },
+      {
+        "messageHeadline": "Add google-oauth provider configuration and complete case study",
+        "messageBody": "- Add google-oauth provider that inherits from google but requires OAuth\n- Add CUSTOM_LOADER for google-oauth that only uses OAuth (no API key fallback)\n- Complete case study analysis with root cause, solution, and documentation\n- Update status to resolved",
+        "authoredDate": "2025-12-19T21:11:23Z",
+        "committedDate": "2025-12-19T21:11:23Z",
+        "oid": "62b4ddb5ed4fca30e0af8fe73d61a72925283b7f"
+      },
+      {
+        "messageHeadline": "feat: Add generative-language.retriever scope to Google OAuth",
+        "messageBody": "- Added the generative-language.retriever scope to Google OAuth scopes\n- This scope is required for accessing Gemini models with subscription benefits\n- Updated case study documentation with research findings and timeline\n\nCloses #66",
+        "authoredDate": "2025-12-19T21:11:24Z",
+        "committedDate": "2025-12-19T21:11:24Z",
+        "oid": "d8139c8a82434402f4315f916ba13955f224b468"
+      },
+      {
+        "messageHeadline": "docs: Finalize case study conclusion for issue",
+        "messageBody": "- Added comprehensive conclusion section\n- Documented final implementation status\n- Summarized key achievements and implementation details\n- Marked issue as fully resolved",
+        "authoredDate": "2025-12-19T21:11:25Z",
+        "committedDate": "2025-12-19T21:11:25Z",
+        "oid": "dc267d9f609115b93898dfe3668512fce4456c1c"
+      },
+      {
+        "messageHeadline": "docs: Complete case study for issue",
+        "messageBody": "- Add comprehensive case study analysis with timeline reconstruction\n- Include root cause analysis and solution details\n- Document PR #67 and #74 implementations\n- Add web research findings and technical details\n- Create README and summary for the case study folder\n\nCloses case study requirements for issue #66",
+        "authoredDate": "2025-12-19T21:11:26Z",
+        "committedDate": "2025-12-19T21:11:26Z",
+        "oid": "cf01f557a64f8bb42718c923c206a451277b3869"
+      },
+      {
+        "messageHeadline": "docs: Complete case study for issue",
+        "messageBody": "- Add comprehensive case study analysis with timeline reconstruction\n- Include root cause analysis and solution details\n- Document PR #67 and #74 implementations\n- Add web research findings and technical details\n- Create README and summary for the case study folder\n- Closes case study requirements for issue #66",
+        "authoredDate": "2025-12-19T21:11:27Z",
+        "committedDate": "2025-12-19T21:11:27Z",
+        "oid": "7a31fc478a493bac29ab5449268b778e55f64314"
+      },
+      {
+        "messageHeadline": "docs: Complete case study for Gemini OAuth support (issue",
+        "messageBody": "- Add comprehensive analysis of OAuth implementation\n- Include timeline reconstruction and root cause analysis\n- Document online research findings and related issues\n- Refine OAuth scopes to match reference implementation\n- Remove unnecessary generative-language.retriever scope\n\nThe implementation now fully supports Google AI Pro/Ultra subscriptions\nwith OAuth authentication, providing zero-cost access to Gemini models\nfor subscription users.",
+        "authoredDate": "2025-12-19T21:11:28Z",
+        "committedDate": "2025-12-19T21:11:28Z",
+        "oid": "7d6d37c711f5a0ea525df21c49761f042d3eb1d7"
+      },
+      {
+        "messageHeadline": "docs: Update case study for issue",
+        "messageBody": "- remove invalid generative-language.retriever scope\n- Remove reference to generative-language.retriever scope which is not in Google's official OAuth scopes\n- Update documentation to reflect correct implementation with standard scopes\n- Maintain comprehensive case study analysis and timeline",
+        "authoredDate": "2025-12-19T21:11:29Z",
+        "committedDate": "2025-12-19T21:11:29Z",
+        "oid": "9db761a45a9b8cccd582bc942251d5c344c2a868"
+      },
+      {
+        "messageHeadline": "Merge remote-tracking branch 'origin/issue-66-4b5b645ed022' into issu…",
+        "messageBody": "Resolved merge conflicts in case study files:\n- README.md: Merged detailed analysis with final conclusion\n- issue-data.json: Kept complete issue metadata\n- pr-data.json: Kept comprehensive PR details\n- web-research-findings.md: Kept extensive research findings\n\nAll case study documentation is now complete and up-to-date.",
+        "authoredDate": "2025-12-19T21:11:30Z",
+        "committedDate": "2025-12-19T21:11:30Z",
+        "oid": "c71e29da33ee047f1d4a0e94d5f3d7241034a159"
       }
     ],
     "reviews": []
