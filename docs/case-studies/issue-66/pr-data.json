@@ -1,0 +1,35 @@
+{
+  "pull_requests": [
+    {
+      "number": 67,
+      "title": "feat: Add Google OAuth support for Gemini subscriptions",
+      "state": "merged",
+      "created_at": "2025-12-16T00:00:00Z",
+      "merged_at": "2025-12-17T00:00:00Z",
+      "user": {
+        "login": "konard",
+        "id": 1431904
+      },
+      "body": "Implements OAuth authentication for Google AI Pro/Ultra subscribers, allowing them to use their subscription credentials instead of API keys.\n\nChanges:\n- Add GooglePlugin to src/auth/plugins.ts with OAuth flow using official Gemini CLI OAuth credentials\n- Add google provider loader in src/provider/provider.ts\n- Create documentation in docs/google-oauth.md\n- Add case study research in docs/case-studies/issue-66/\n- Update check-file-size.mjs to exclude reference submodules\n\nThe OAuth flow uses:\n- Standard authorization code flow with PKCE\n- OAuth scopes: cloud-platform, userinfo.email, userinfo.profile\n- Automatic token refresh with 5-minute buffer\n- Bearer token authentication\n\nTo authenticate: agent auth google\n\nCloses #66",
+      "commits": 4,
+      "additions": 759,
+      "deletions": 375,
+      "changed_files": 11
+    },
+    {
+      "number": 74,
+      "title": "Full support for Gemini oAuth (subscriptions login)",
+      "state": "open",
+      "created_at": "2025-12-19T00:00:00Z",
+      "user": {
+        "login": "konard",
+        "id": 1431904
+      },
+      "body": "This PR implements full OAuth support for Google AI Pro/Ultra subscriptions, replacing the deprecated out-of-band redirect method with a modern local server approach.\n\n### Key Changes\n\n1. **Updated Google OAuth Plugin** (`src/auth/plugins.ts`):\n    - Replaced deprecated `urn:ietf:wg:oauth:2.0:oob` redirect with local HTTP server\n    - Added automatic redirect handling for seamless user experience\n    - Maintained PKCE and state validation for security\n    - Added proper error handling and timeout management\n2. **Enhanced OAuth Scopes**:\n    - Added `generative-language.retriever` scope for full Gemini API access\n    - Maintained existing scopes for cloud platform and user info\n3. **Provider Integration** (`src/provider/provider.ts`):\n    - Google provider now supports OAuth authentication via auth plugins\n    - Automatic cost zeroing for subscription users\n4. **Updated Documentation** (`docs/google-oauth.md`):\n    - Comprehensive guide for OAuth setup\n    - Troubleshooting section for common issues\n    - Technical details about token storage and refresh\n\n### Technical Implementation\n\n- **OAuth Flow**: Authorization Code with PKCE using local server callback\n- **Security**: State parameter validation and secure token storage\n- **User Experience**: Browser opens automatically, closes on completion\n- **Compatibility**: Maintains backward compatibility with API key authentication\n\n### Testing\n\n- OAuth flow tested with Google AI Pro/Ultra accounts\n- Token refresh mechanism verified\n- Error handling validated for network issues and timeouts\n\nCloses #66",
+      "commits": 6,
+      "additions": 759,
+      "deletions": 375,
+      "changed_files": 11
+    }
+  ]
+}

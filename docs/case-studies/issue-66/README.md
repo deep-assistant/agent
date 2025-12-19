@@ -227,3 +227,32 @@ User                Browser              Agent               Google OAuth
 7. **Root Cause Identified**: Deprecated OAuth method causing poor UX and reliability issues
 8. **✅ Solution Implemented**: Updated to local server redirect handling
 9. **✅ Issue Resolved**: Full OAuth support for Google AI subscriptions now working
+
+## Compiled Data and Research
+
+### Data Files
+
+- **`issue-data.json`**: Complete issue #66 metadata and content
+- **`pr-data.json`**: Details of PR #67 (merged) and PR #74 (open) implementations
+- **`web-research-findings.md`**: Web research results on Google Gemini OAuth authentication
+- **`issue-screenshot.jpg`**: Original screenshot showing the authentication selection UI
+
+### Web Research Summary
+
+Additional research was conducted to gather current information about Google Gemini OAuth:
+
+- **Official Documentation**: Confirmed OAuth support via https://ai.google.dev/gemini-api/docs/oauth
+- **OAuth Scopes**: Identified required scopes including `generative-language.retriever` for subscriptions
+- **Implementation Examples**: Found Colab notebook and YouTube tutorials for OAuth setup
+- **Known Issues**: Discovered potential authentication problems in Gemini CLI (issue #10110)
+- **Best Practices**: Verified use of PKCE, local server redirect, and proper token refresh
+
+### Reference Code Analysis
+
+- **`./reference-gemini-cli`**: Official Gemini CLI uses public OAuth credentials for desktop apps
+- **`./original-opencode`**: OpenCode implementation lacks Google OAuth (uses Vertex AI instead)
+- **Solution Approach**: Adapted local server OAuth flow from Gemini CLI reference implementation
+
+## Conclusion
+
+Issue #66 has been successfully resolved with full OAuth support for Google AI Pro/Ultra subscriptions. The implementation follows Google's official guidelines and provides a seamless authentication experience comparable to Claude Pro/Max support. All required data has been compiled, analyzed, and documented in this case study folder.
