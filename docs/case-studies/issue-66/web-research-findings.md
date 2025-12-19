@@ -72,12 +72,16 @@
 - **Scope Misconfiguration**: Can lead to insufficient authentication errors
 - **Docker Compatibility**: Requires special OAuth callback configuration
 - **MCP Server OAuth**: Custom MCP servers need OAuth integration for Gemini CLI
+- **Token Exchange Failures**: Recent issues with OAuth token exchange (Issue #8170)
+- **API Key Fallback Issues**: OAuth-only endpoints causing problems for API key users (Issue #13554)
+- **File Upload OAuth**: Some endpoints still require API keys even with OAuth (Forum post)
 
 ### Implementation Status
 
 - **Current Agent Implementation**: Uses google-auth-library with local server callback
-- **Scopes**: Includes generative-language.retriever (not in reference CLI)
+- **Scopes**: Standard Google OAuth scopes (cloud-platform, userinfo.email, userinfo.profile)
 - **Compatibility**: Maintains API key fallback for non-subscription users
 - **Cost Zeroing**: Subscription users get free usage (cost = 0)
-- **Error Handling**: Addresses common OAuth failure modes from Gemini CLI issues</content>
+- **Error Handling**: Addresses common OAuth failure modes from Gemini CLI issues
+- **Security**: Public OAuth credentials for installed applications (standard practice)</content>
   <parameter name="filePath">docs/case-studies/issue-66/web-research-findings.md

@@ -80,8 +80,9 @@ Based on codebase analysis, Google OAuth support appears to be implemented:
 - **Dec 17, 2025**: PR #67 merged into main
 - **Dec 19, 2025**: PR #74 created - "Full support for Gemini oAuth (subscriptions login)"
   - Updated to modern local HTTP server approach
-  - Added `generative-language.retriever` scope for full Gemini API access
-- **Unknown**: Issue closed as resolved
+  - Initially added `generative-language.retriever` scope (later removed as not in official scopes)
+- **Dec 19, 2025**: Issue closed as resolved
+- **2025**: Ongoing OAuth issues in Gemini CLI ecosystem (token exchange failures, API key fallback problems)
 
 ## Root Cause Analysis
 
@@ -123,9 +124,10 @@ The implementation of Google OAuth support for Gemini subscriptions has been suc
 
 - OAuth Plugin: `src/auth/plugins.ts` (GooglePlugin)
 - Provider Support: `src/provider/provider.ts` (google and google-oauth providers)
-- Required Scopes: cloud-platform, userinfo.email, userinfo.profile
+- Required Scopes: cloud-platform, userinfo.email, userinfo.profile (standard Google OAuth scopes)
 - Authentication Flow: Local HTTP server with automatic browser launch
 - Token Storage: Secure encrypted storage with automatic refresh
+- Security: Public OAuth credentials for installed applications (industry standard)
 
 ## Additional Research Insights
 
