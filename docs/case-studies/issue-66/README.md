@@ -1,229 +1,109 @@
-# Case Study: Issue #66 - Full Support for Gemini OAuth (Subscriptions Login)
+# Issue #66: Full support for Gemini oAuth (subscriptions login)
 
-## Issue Summary
+## Issue Description
 
-**Issue**: [#66](https://github.com/link-assistant/agent/issues/66)
-**Title**: Full support for Gemini oAuth (subscriptions login)
-**Status**: Resolved
-**Labels**: bug
+**Status**: Closed  
+**Labels**: bug  
+**Created**: Dec 16, 2025  
+**Closed**: Unknown
 
-### Problem Statement
+### Original Description
 
-The current implementation only supports API token authentication for Google/Gemini. Users with Google AI Pro or Google AI Ultra subscriptions need OAuth-based authentication similar to how Claude Pro/Max subscriptions are handled.
+At the moment we only support API token, but we need to also to support Gemini subscriptions with oAuth (or similar flow) like we do for Claude Pro/Max subscriptions.
 
-### Screenshot Evidence
+We should use reference code at ./original-opencode and ./reference-gemini-cli.
 
-![Current Google Provider Selection](./issue-screenshot.jpg)
+Please download all logs and data related about the issue to this repository, make sure we compile that data to ./docs/case-studies/issue-{id} folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), in which we will reconstruct timeline/sequence of events, find root causes of the problem, and propose possible solutions.
 
-The screenshot shows that when selecting the Google provider, only API key authentication is available:
+### Screenshot
 
-- "You can create an API key at https://aistudio.google.com/app/apikey"
-- "Enter your API key"
+![Screenshot](https://private-user-images.githubusercontent.com/1431904/527282484-3c90f393-d9b5-476f-a9c4-cdafb520907e.jpg?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjYxNzkzNDIsIm5iZiI6MTc2NjE3OTA0MiwicGF0aCI6Ii8xNDMxOTA0LzUyNzI4MjQ4NC0zYzkwZjM5My1kOWI1LTQ3NmYtYTljNC1jZGFmYjUyMDkwN2UuanBnP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI1MTIxOSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNTEyMTlUMjExNzIyWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NTFjZWFlM2NlYTA5NDk0ZGRmYzNmYzIwN2JmNmU2YjBhNmE1OWYxYjJjNDA4ODcyYzdhNjc2ZWI4ZDFkODc4NiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.IrcVvzeHCyywPEuFIDyeXoULxP7m8l3QwdOlVKr9fIc)
 
-## Technical Analysis
+### Related PRs
 
-### Current State
+- [#67](https://github.com/link-assistant/agent/pull/67)
+- [#74](https://github.com/link-assistant/agent/pull/74)
 
-#### Supported OAuth Providers (in `src/auth/plugins.ts`)
+## Analysis
 
-| Provider                   | OAuth Support | Implementation             |
-| -------------------------- | ------------- | -------------------------- |
-| Anthropic (Claude Pro/Max) | Yes           | Full OAuth flow with PKCE  |
-| GitHub Copilot             | Yes           | Device code flow           |
-| OpenAI (ChatGPT Plus/Pro)  | Yes           | OAuth flow with PKCE       |
-| **Google (Gemini)**        | **Partial**   | **Deprecated out-of-band** |
+### Current Implementation Status
 
-#### Google Provider Configuration (in `src/provider/provider.ts`)
+Based on codebase analysis, Google OAuth support appears to be implemented:
 
-Currently, Google is configured as `google-vertex` provider which only supports:
+1. **Auth Plugin**: Google OAuth plugin exists in `src/auth/plugins.ts` with proper OAuth 2.0 flow
+2. **Provider Support**: Both `google` and `google-oauth` providers are configured in `src/provider/provider.ts`
+3. **CLI Integration**: `agent auth login` supports Google OAuth authentication
+4. **Reference Code**: Uses same OAuth credentials as reference-gemini-cli
 
-- Environment variables: `GOOGLE_CLOUD_PROJECT`, `GCP_PROJECT`, `GCLOUD_PROJECT`
-- Environment variables: `GOOGLE_CLOUD_LOCATION`, `VERTEX_LOCATION`
+### Key Components
 
-This is designed for Google Cloud Vertex AI with service account credentials, not for consumer OAuth login.
+- **OAuth Client ID/Secret**: Same as Gemini CLI (public for installed apps)
+- **Scopes**: `https://www.googleapis.com/auth/cloud-platform`, `userinfo.email`, `userinfo.profile`, `generative-language.retriever`
+- **Flow**: OAuth 2.0 with PKCE, local server callback
+- **Token Management**: Automatic refresh using refresh tokens
+- **Authentication**: Bearer token in Authorization header
 
-### Reference Implementations
+### Research Findings
 
-#### 1. Gemini CLI OAuth Implementation (`reference-gemini-cli/packages/core/src/code_assist/oauth2.ts`)
+**Official Google Documentation**:
 
-The official Gemini CLI uses the following OAuth configuration:
+- Google provides official OAuth quickstart for Gemini API: https://ai.google.dev/gemini-api/docs/oauth
+- OAuth is the recommended authentication method for Gemini subscriptions
+- Desktop applications should use installed app flow with public client credentials
 
-```typescript
-// OAuth Client ID
-const OAUTH_CLIENT_ID =
-  '681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com';
+**Scope Requirements**:
 
-// OAuth Client Secret (public for installed applications)
-const OAUTH_CLIENT_SECRET = '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';
+- `generative-language.retriever` scope added in PR #74 and implemented is required for Gemini API access
+- This scope enables access to Gemini models with subscription benefits
+- Without this scope, OAuth authentication may fail or have limited functionality
 
-// OAuth Scopes
-const OAUTH_SCOPE = [
-  'https://www.googleapis.com/auth/cloud-platform',
-  'https://www.googleapis.com/auth/userinfo.email',
-  'https://www.googleapis.com/auth/userinfo.profile',
-];
+**Reference Implementation**:
 
-// Redirect URLs
-const SIGN_IN_SUCCESS_URL =
-  'https://developers.google.com/gemini-code-assist/auth_success_gemini';
-const SIGN_IN_FAILURE_URL =
-  'https://developers.google.com/gemini-code-assist/auth_failure_gemini';
-```
+- Gemini CLI uses identical OAuth credentials and flow
+- Local HTTP server approach (implemented in PR #74) is the modern standard
+- PKCE (Proof Key for Code Exchange) is required for security
 
-**OAuth Flow Used**: Standard OAuth 2.0 Authorization Code flow with PKCE
+### Potential Issues
 
-**Key Features**:
+1. **Token Refresh**: May need verification that refresh tokens work properly
+2. **Scope Requirements**: May need additional scopes for Gemini API access
+3. **Error Handling**: OAuth flow error handling and user feedback
+4. **Integration Testing**: End-to-end testing of OAuth flow
 
-1. Browser-based authorization
-2. Local HTTP server callback on localhost with dynamic port
-3. Token refresh support
-4. User info retrieval from `https://www.googleapis.com/oauth2/v2/userinfo`
-5. Credentials cached locally in `~/.gemini/` directory
+## Timeline Reconstruction
 
-#### 2. Original OpenCode Google Support (`original-opencode/packages/opencode/src/provider/provider.ts`)
-
-OpenCode uses Google as a console-level OAuth provider for user authentication but relies on Vertex AI for model access:
-
-```typescript
-'google-vertex': async () => {
-  const project = process.env['GOOGLE_CLOUD_PROJECT'] ?? process.env['GCP_PROJECT'] ?? process.env['GCLOUD_PROJECT']
-  const location = process.env['GOOGLE_CLOUD_LOCATION'] ?? process.env['VERTEX_LOCATION'] ?? 'us-east5'
-  const autoload = Boolean(project)
-  return {
-    autoload,
-    options: { project, location },
-    async getModel(sdk: any, modelID: string) {
-      return sdk.languageModel(id)
-    },
-  }
-}
-```
+- **Dec 16, 2025**: Issue created requesting Gemini OAuth support
+- **Dec 16, 2025**: PR #67 created - "feat: Add Google OAuth support for Gemini subscriptions"
+  - Initial implementation with OAuth plugin, provider loader, and documentation
+  - Used deprecated out-of-band OAuth flow initially
+  - Blocked by GitHub secret scanning (resolved as credentials are public for desktop apps)
+- **Dec 17, 2025**: PR #67 merged into main
+- **Dec 19, 2025**: PR #74 created - "Full support for Gemini oAuth (subscriptions login)"
+  - Updated to modern local HTTP server approach
+  - Added `generative-language.retriever` scope for full Gemini API access
+- **Unknown**: Issue closed as resolved
 
 ## Root Cause Analysis
 
-### Actual Issue Found
+**Primary Issue**: Lack of OAuth authentication support for Gemini subscriptions
 
-Upon investigation, Google OAuth support was **partially implemented** but had critical flaws:
+**Root Causes**:
 
-1. **Deprecated OAuth Method**: Used Google's deprecated out-of-band redirect (`urn:ietf:wg:oauth:2.0:oob`)
-2. **Poor User Experience**: Required manual copying/pasting of authorization codes
-3. **Reliability Issues**: Out-of-band redirects are unreliable and not recommended by Google
-4. **Implementation Gaps**: Missing proper local server handling for redirects
+1. Only API key authentication was implemented initially
+2. Gemini subscriptions require OAuth flow similar to Claude Pro/Max
+3. No integration with Google's OAuth endpoints for AI subscriptions
 
-### What Was Already Implemented
+**Solutions Implemented**:
 
-- ✅ Google OAuth plugin existed in `src/auth/plugins.ts`
-- ✅ Google provider included in CLI auth selection
-- ✅ OAuth client credentials from Gemini CLI
-- ✅ Basic PKCE implementation
-- ✅ Token storage and refresh logic
-- ❌ **Out-of-band redirect (deprecated)**
-- ❌ **Manual code entry required**
-- ❌ **No automatic redirect handling**
+1. Added Google OAuth plugin with proper OAuth 2.0 flow
+2. Integrated with existing auth system
+3. Added provider support for OAuth credentials
+4. Used reference implementation from Gemini CLI
 
-### Reference Code Analysis
+## Recommendations
 
-The issue referenced `reference-gemini-cli` and `original-opencode`, but:
-
-- `reference-gemini-cli`: Uses Application Default Credentials (ADC), not OAuth for subscriptions
-- `original-opencode`: No Google OAuth implementation
-- **Solution**: Adapted the local server approach from Gemini CLI's MCP OAuth implementation
-
-## Solution Implemented
-
-### ✅ Updated Google OAuth Implementation
-
-**Problem**: Used deprecated out-of-band redirect requiring manual code entry
-
-**Solution**: Implemented local HTTP server for automatic redirect handling
-
-**Key Changes**:
-
-1. **Local Server**: Created HTTP server on random available port for OAuth callback
-2. **Automatic Handling**: Browser opens, user authenticates, redirect handled automatically
-3. **Better UX**: No manual code copying/pasting required
-4. **Security**: Maintained PKCE and state validation
-5. **Error Handling**: Proper timeout and error management
-
-### OAuth Flow (Updated)
-
-```
-User                Browser              Agent               Google OAuth
-  |                    |                   |                      |
-  |--Select Google---->|                   |                      |
-  |                    |                   |                      |
-  |                    |<--Start Local Server--|                      |
-  |                    |                   |                      |
-  |<--Open Auth URL----|------------------->                      |
-  |                    |                   |                      |
-  |----Login/Consent-->|----------------------------------------->|
-  |                    |                   |                      |
-  |<---Redirect--------|<------------------------------------------|
-  |                    |---Capture Code---|                      |
-  |                    |                   |                      |
-  |                    |---Exchange Code-->|--------------------->|
-  |                    |                   |                      |
-  |                    |<--Access+Refresh--|<---------------------|
-  |                    |                   |                      |
-  |<---Success---------|                   |                      |
-```
-
-### Files Modified
-
-1. **`src/auth/plugins.ts`**: Updated Google OAuth plugin with local server
-2. **`docs/google-oauth.md`**: Updated documentation for new flow
-3. **Added imports**: `http` and `net` modules for server functionality
-
-## Implementation Summary
-
-**Status**: ✅ **COMPLETED**
-
-**What Was Done**:
-
-1. ✅ **Fixed Google OAuth Plugin**: Replaced deprecated out-of-band redirect with local server
-2. ✅ **Updated Documentation**: Modified `docs/google-oauth.md` for new flow
-3. ✅ **Added Dependencies**: Imported `http` and `net` modules
-4. ✅ **Maintained Compatibility**: All existing functionality preserved
-5. ✅ **Improved Security**: Better OAuth flow following Google recommendations
-
-**Key Technical Improvements**:
-
-- **OAuth Flow**: Local server redirect instead of deprecated out-of-band
-- **User Experience**: Automatic completion without manual code entry
-- **Reliability**: More robust error handling and timeout management
-- **Security**: Maintained PKCE, state validation, and secure token storage
-
-## Files to Modify
-
-| File                       | Changes                                     |
-| -------------------------- | ------------------------------------------- |
-| `src/auth/plugins.ts`      | Add GooglePlugin with OAuth methods         |
-| `src/provider/provider.ts` | Add `google-oauth` provider configuration   |
-| `docs/google-oauth.md`     | Create documentation for Google OAuth setup |
-
-## References
-
-### External Resources
-
-- [Google Gemini API OAuth Documentation](https://ai.google.dev/gemini-api/docs/oauth)
-- [Gemini CLI Authentication Setup](https://google-gemini.github.io/gemini-cli/docs/get-started/authentication.html)
-- [Google OAuth 2.0 for Mobile & Desktop Apps](https://developers.google.com/identity/protocols/oauth2/native-app)
-
-### Internal References
-
-- Gemini CLI OAuth Implementation: `reference-gemini-cli/packages/core/src/code_assist/oauth2.ts`
-- Original OpenCode Provider: `original-opencode/packages/opencode/src/provider/provider.ts`
-- Current Auth Plugins: `src/auth/plugins.ts`
-- Current Provider Config: `src/provider/provider.ts`
-
-## Timeline of Events
-
-1. **Initial Implementation**: Agent created with API key authentication only
-2. **Claude OAuth Added**: Anthropic OAuth plugin implemented for Claude Pro/Max
-3. **GitHub Copilot Added**: Device code flow OAuth for Copilot
-4. **OpenAI OAuth Added**: ChatGPT Plus/Pro OAuth support
-5. **Partial Google OAuth**: Basic Google OAuth implemented but with deprecated out-of-band redirect
-6. **Issue #66 Opened**: User reported Gemini OAuth not working properly
-7. **Root Cause Identified**: Deprecated OAuth method causing poor UX and reliability issues
-8. **✅ Solution Implemented**: Updated to local server redirect handling
-9. **✅ Issue Resolved**: Full OAuth support for Google AI subscriptions now working
+1. **Test OAuth Flow**: Verify end-to-end OAuth authentication works
+2. **Token Refresh**: Ensure automatic token refresh functions properly
+3. **Error Handling**: Improve error messages for OAuth failures
+4. **Documentation**: Update docs to mention OAuth support for Gemini
+5. **Integration Tests**: Add automated tests for OAuth flow
