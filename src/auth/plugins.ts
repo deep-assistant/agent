@@ -873,154 +873,48 @@ const GooglePlugin: AuthPlugin = {
   provider: 'google',
   methods: [
     {
-      label: 'Google AI Pro/Ultra (OAuth)',
+      label: 'Gemini Subscription (OAuth)',
       type: 'oauth',
       async authorize() {
-        const client = new OAuth2Client({
-          clientId: GOOGLE_OAUTH_CLIENT_ID,
-          clientSecret: GOOGLE_OAUTH_CLIENT_SECRET,
-        });
+        // Import GeminiOAuth dynamically to avoid circular dependencies
+        const { GeminiOAuth } = await import('./gemini-oauth');
 
         const port = await getAvailablePort();
-        const host = process.env['OAUTH_CALLBACK_HOST'] || 'localhost';
-        const redirectUri = `http://localhost:${port}/oauth2callback`;
-        const state = crypto.randomBytes(32).toString('hex');
+        const { url, state } = GeminiOAuth.generateAuthUrl(port);
 
-        const authUrl = client.generateAuthUrl({
-          redirect_uri: redirectUri,
-          access_type: 'offline',
-          scope: GOOGLE_OAUTH_SCOPES,
-          state,
-        });
+        // Save OAuth state
+        await GeminiOAuth.saveState(state);
 
         // Open browser for authentication
-        await open(authUrl);
-
-        const loginCompletePromise = new Promise<void>((resolve, reject) => {
-          const server = http.createServer(async (req, res) => {
-            try {
-              if (req.url!.indexOf('/oauth2callback') === -1) {
-                res.writeHead(301, {
-                  Location:
-                    'https://developers.google.com/gemini-code-assist/auth_failure_gemini',
-                });
-                res.end();
-                reject(
-                  new Error(
-                    'OAuth callback not received. Unexpected request: ' +
-                      req.url
-                  )
-                );
-              }
-
-              const qs = new url.URL(req.url!, 'http://localhost:3000')
-                .searchParams;
-              if (qs.get('error')) {
-                res.writeHead(301, {
-                  Location:
-                    'https://developers.google.com/gemini-code-assist/auth_failure_gemini',
-                });
-                res.end();
-                const errorCode = qs.get('error');
-                const errorDescription =
-                  qs.get('error_description') ||
-                  'No additional details provided';
-                reject(
-                  new Error(
-                    `Google OAuth error: ${errorCode}. ${errorDescription}`
-                  )
-                );
-              } else if (qs.get('state') !== state) {
-                res.end('State mismatch. Possible CSRF attack');
-                reject(
-                  new Error(
-                    'OAuth state mismatch. Possible CSRF attack or browser session issue.'
-                  )
-                );
-              } else if (qs.get('code')) {
-                try {
-                  const { tokens } = await client.getToken({
-                    code: qs.get('code')!,
-                    redirect_uri: redirectUri,
-                  });
-                  client.setCredentials(tokens);
-
-                  res.writeHead(301, {
-                    Location:
-                      'https://developers.google.com/gemini-code-assist/auth_success_gemini',
-                  });
-                  res.end();
-                  resolve();
-                } catch (error) {
-                  res.writeHead(301, {
-                    Location:
-                      'https://developers.google.com/gemini-code-assist/auth_failure_gemini',
-                  });
-                  res.end();
-                  reject(
-                    new Error(
-                      `Failed to exchange authorization code for tokens: ${error}`
-                    )
-                  );
-                }
-              } else {
-                reject(
-                  new Error(
-                    'No authorization code received from Google OAuth. Please try authenticating again.'
-                  )
-                );
-              }
-            } catch (e) {
-              if (e instanceof Error) {
-                reject(e);
-              } else {
-                reject(
-                  new Error(
-                    `Unexpected error during OAuth authentication: ${e}`
-                  )
-                );
-              }
-            } finally {
-              server.close();
-            }
-          });
-
-          server.listen(port, host, () => {
-            // Server started successfully
-          });
-
-          server.on('error', (err) => {
-            reject(new Error(`OAuth callback server error: ${err}`));
-          });
-        });
+        await open(url);
 
         return {
-          url: authUrl,
+          url,
           instructions:
-            'Your browser will open for authentication. Complete the login and return to the terminal.',
-          method: 'auto' as const,
-          async callback(): Promise<AuthResult> {
+            'Your browser will open for Gemini authentication. Complete the login and return to the terminal.',
+          method: 'code' as const,
+          async callback(code: string): Promise<AuthResult> {
             try {
-              await loginCompletePromise;
+              const success = await GeminiOAuth.completeAuth(code);
+              if (!success) {
+                return { type: 'failed' };
+              }
 
-              const credentials = client.credentials;
-              if (
-                !credentials.access_token ||
-                !credentials.refresh_token ||
-                !credentials.expiry_date
-              ) {
-                log.error('google oauth token response missing fields');
+              // Get the stored credentials
+              const creds = await GeminiOAuth.getCredentials();
+              if (!creds?.access_token || !creds?.refresh_token) {
+                log.error('gemini oauth credentials missing after auth');
                 return { type: 'failed' };
               }
 
               return {
                 type: 'success',
-                refresh: credentials.refresh_token,
-                access: credentials.access_token,
-                expires: credentials.expiry_date.getTime(),
+                refresh: creds.refresh_token,
+                access: creds.access_token,
+                expires: creds.expiry_date || Date.now() + 3600 * 1000, // Default 1 hour if not provided
               };
             } catch (error) {
-              log.error('google oauth failed', { error });
+              log.error('gemini oauth failed', { error });
               return { type: 'failed' };
             }
           },
