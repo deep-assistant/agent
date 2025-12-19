@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import * as http from 'node:http';
 import * as net from 'node:net';
 import { Auth } from './index';
@@ -888,17 +887,114 @@ const GooglePlugin: AuthPlugin = {
         // Open browser for authentication
         await open(url);
 
+        const authCompletePromise = new Promise<void>((resolve, reject) => {
+          const server = http.createServer(async (req, res) => {
+            try {
+              if (req.url!.indexOf('/oauth2callback') === -1) {
+                res.writeHead(301, {
+                  Location: GeminiOAuth.Config.failureUrl,
+                });
+                res.end();
+                reject(
+                  new Error(
+                    'OAuth callback not received. Unexpected request: ' +
+                      req.url
+                  )
+                );
+                return;
+              }
+
+              const qs = new URL(req.url!, `http://localhost:${port}`)
+                .searchParams;
+              const code = qs.get('code');
+              const error = qs.get('error');
+
+              if (error) {
+                res.writeHead(301, {
+                  Location: GeminiOAuth.Config.failureUrl,
+                });
+                res.end();
+                const errorDescription =
+                  qs.get('error_description') ||
+                  'No additional details provided';
+                reject(
+                  new Error(`Gemini OAuth error: ${error}. ${errorDescription}`)
+                );
+                return;
+              }
+
+              if (!code) {
+                res.writeHead(400);
+                res.end('Missing authorization code');
+                reject(
+                  new Error('No authorization code received from Gemini OAuth')
+                );
+                return;
+              }
+
+              try {
+                const success = await GeminiOAuth.completeAuth(code);
+                if (!success) {
+                  res.writeHead(301, {
+                    Location: GeminiOAuth.Config.failureUrl,
+                  });
+                  res.end();
+                  reject(
+                    new Error('Failed to complete Gemini OAuth authentication')
+                  );
+                  return;
+                }
+
+                res.writeHead(301, {
+                  Location: GeminiOAuth.Config.successUrl,
+                });
+                res.end();
+                resolve();
+              } catch (authError) {
+                res.writeHead(301, {
+                  Location: GeminiOAuth.Config.failureUrl,
+                });
+                res.end();
+                reject(authError);
+              }
+            } catch (e) {
+              res.writeHead(301, {
+                Location: GeminiOAuth.Config.failureUrl,
+              });
+              res.end();
+              reject(e);
+            } finally {
+              server.close();
+            }
+          });
+
+          const host = process.env['OAUTH_CALLBACK_HOST'] || 'localhost';
+          server.listen(port, host, () => {
+            // Server started successfully
+          });
+
+          server.on('error', (err) => {
+            reject(new Error(`OAuth callback server error: ${err}`));
+          });
+
+          // Timeout after 10 minutes
+          setTimeout(
+            () => {
+              server.close();
+              reject(new Error('OAuth authentication timeout'));
+            },
+            10 * 60 * 1000
+          );
+        });
+
         return {
           url,
           instructions:
             'Your browser will open for Gemini authentication. Complete the login and return to the terminal.',
-          method: 'code' as const,
-          async callback(code: string): Promise<AuthResult> {
+          method: 'auto' as const,
+          async callback(): Promise<AuthResult> {
             try {
-              const success = await GeminiOAuth.completeAuth(code);
-              if (!success) {
-                return { type: 'failed' };
-              }
+              await authCompletePromise;
 
               // Get the stored credentials
               const creds = await GeminiOAuth.getCredentials();
@@ -951,39 +1047,40 @@ const GooglePlugin: AuthPlugin = {
         if (!currentAuth || currentAuth.type !== 'oauth')
           return fetch(input, init);
 
-        // Create OAuth2Client for token management
-        const client = new OAuth2Client({
-          clientId: GOOGLE_OAUTH_CLIENT_ID,
-          clientSecret: GOOGLE_OAUTH_CLIENT_SECRET,
-        });
+        // Import GeminiOAuth dynamically
+        const { GeminiOAuth } = await import('./gemini-oauth');
 
-        client.setCredentials({
-          refresh_token: currentAuth.refresh,
-          access_token: currentAuth.access,
-          expiry_date: currentAuth.expires,
-        });
-
-        // Refresh token if expired (with 5 minute buffer)
+        // Check if we need to refresh the token
         const FIVE_MIN_MS = 5 * 60 * 1000;
         if (
           !currentAuth.access ||
           currentAuth.expires < Date.now() + FIVE_MIN_MS
         ) {
-          log.info('refreshing google oauth token');
+          log.info('refreshing gemini oauth token');
           try {
-            const { credentials } = await client.refreshAccessToken();
-            await Auth.set('google', {
-              type: 'oauth',
-              refresh: credentials.refresh_token || currentAuth.refresh,
-              access: credentials.access_token!,
-              expires: credentials.expiry_date!.getTime(),
-            });
-            currentAuth = {
-              type: 'oauth',
-              refresh: credentials.refresh_token || currentAuth.refresh,
-              access: credentials.access_token!,
-              expires: credentials.expiry_date!.getTime(),
-            };
+            const success = await GeminiOAuth.refreshToken();
+            if (!success) {
+              throw new Error('Token refresh failed');
+            }
+
+            // Get updated credentials
+            const creds = await GeminiOAuth.getCredentials();
+            if (creds?.access_token && creds?.refresh_token) {
+              await Auth.set('google', {
+                type: 'oauth',
+                refresh: creds.refresh_token,
+                access: creds.access_token,
+                expires: creds.expiry_date || Date.now() + 3600 * 1000,
+              });
+              currentAuth = {
+                type: 'oauth',
+                refresh: creds.refresh_token,
+                access: creds.access_token,
+                expires: creds.expiry_date || Date.now() + 3600 * 1000,
+              };
+            } else {
+              throw new Error('Failed to get refreshed credentials');
+            }
           } catch (error) {
             throw new Error(`Token refresh failed: ${error}`);
           }

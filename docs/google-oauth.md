@@ -1,8 +1,8 @@
-# Google AI Pro/Ultra OAuth Authentication
+# Gemini Subscription OAuth Authentication
 
-This guide explains how to authenticate with Google AI using OAuth, which is required for Google AI Pro and Google AI Ultra subscribers.
+This guide explains how to authenticate with Google AI using OAuth, which is required for Gemini subscription users.
 
-**Note:** Full OAuth support for Gemini subscriptions has been implemented using the official Google Auth Library, based on the reference Gemini CLI implementation.
+**Note:** Full OAuth support for Gemini subscriptions has been implemented using a dedicated GeminiOAuth module, similar to Claude OAuth, storing credentials in ~/.gemini/.credentials.json.
 
 ## Quick Start
 
@@ -10,22 +10,22 @@ This guide explains how to authenticate with Google AI using OAuth, which is req
 agent auth google
 ```
 
-Select "Google AI Pro/Ultra (OAuth)" when prompted.
+Select "Gemini Subscription (OAuth)" when prompted.
 
 ## Authentication Methods
 
 ### 1. OAuth Login (Recommended for Subscribers)
 
-If you have a Google AI Pro or Google AI Ultra subscription, use OAuth authentication:
+If you have a Gemini subscription, use OAuth authentication:
 
 1. Run `agent auth google`
-2. Select "Google AI Pro/Ultra (OAuth)"
+2. Select "Gemini Subscription (OAuth)"
 3. A browser window will open with Google's login page
 4. Sign in with your Google account that has the subscription
 5. Authorize the application
 6. The browser will automatically close and return you to the terminal
 
-Your credentials will be stored securely and automatically refreshed when needed.
+Your credentials will be stored securely in `~/.gemini/.credentials.json` and automatically refreshed when needed.
 
 ### 2. API Key (Alternative)
 
@@ -58,7 +58,7 @@ With Google AI Pro/Ultra subscription via OAuth:
 
 ### Implementation
 
-The OAuth implementation uses the official `google-auth-library` package, following the same approach as the reference Gemini CLI. This ensures compatibility and reliability with Google's OAuth services.
+The OAuth implementation uses a dedicated `GeminiOAuth` module that handles PKCE (Proof Key for Code Exchange) flow, similar to the Claude OAuth implementation. This ensures compatibility with Google's OAuth services and follows security best practices.
 
 ### OAuth Endpoints
 
@@ -76,16 +76,15 @@ The following OAuth scopes are requested:
 
 ### Token Storage
 
-OAuth tokens are stored in `~/.local/share/agent/auth.json` with the following structure:
+OAuth tokens are stored in `~/.gemini/.credentials.json` with the following structure:
 
 ```json
 {
-  "google": {
-    "type": "oauth",
-    "refresh": "<refresh_token>",
-    "access": "<access_token>",
-    "expires": <timestamp_ms>
-  }
+  "access_token": "<access_token>",
+  "refresh_token": "<refresh_token>",
+  "expiry_date": <timestamp_ms>,
+  "token_type": "Bearer",
+  "scope": "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
 }
 ```
 
@@ -95,6 +94,8 @@ Tokens are automatically refreshed when:
 
 - The access token is expired
 - Within 5 minutes of expiration (for reliability)
+
+The refresh process uses the stored refresh token to obtain new access tokens without user interaction.
 
 ## Troubleshooting
 
