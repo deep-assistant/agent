@@ -73,19 +73,30 @@ process.on('unhandledRejection', (reason, _promise) => {
   process.exit(1);
 });
 
-function readStdin() {
-  return new Promise((resolve, reject) => {
+function readStdinWithTimeout(timeout = 100) {
+  return new Promise((resolve) => {
     let data = '';
+    let hasData = false;
+    const timer = setTimeout(() => {
+      if (!hasData) {
+        process.stdin.pause();
+        resolve('');
+      }
+    }, timeout);
     const onData = (chunk) => {
+      hasData = true;
+      clearTimeout(timer);
       data += chunk;
     };
     const onEnd = () => {
+      clearTimeout(timer);
       cleanup();
       resolve(data);
     };
-    const onError = (err) => {
+    const onError = () => {
+      clearTimeout(timer);
       cleanup();
-      reject(err);
+      resolve('');
     };
     const cleanup = () => {
       process.stdin.removeListener('data', onData);
@@ -98,7 +109,7 @@ function readStdin() {
   });
 }
 
-async function runAgentMode(argv) {
+async function runAgentMode(argv, request) {
   // Note: verbose flag and logging are now initialized in middleware
   // See main() function for the middleware that sets up Flag and Log.init()
 
@@ -206,21 +217,6 @@ async function runAgentMode(argv) {
   }
 
   // Logging is already initialized in middleware, no need to call Log.init() again
-
-  // Read input from stdin
-  const input = await readStdin();
-  const trimmedInput = input.trim();
-
-  // Try to parse as JSON, if it fails treat it as plain text message
-  let request;
-  try {
-    request = JSON.parse(trimmedInput);
-  } catch (_e) {
-    // Not JSON, treat as plain text message
-    request = {
-      message: trimmedInput,
-    };
-  }
 
   // Wrap in Instance.provide for OpenCode infrastructure
   await Instance.provide({
@@ -533,7 +529,7 @@ async function runDirectMode(
 async function main() {
   try {
     // Parse command line arguments with subcommands
-    const argv = await yargs(hideBin(process.argv))
+    const yargsInstance = yargs(hideBin(process.argv))
       .scriptName('agent')
       .usage('$0 [command] [options]')
       .version(pkg.version)
@@ -641,15 +637,44 @@ async function main() {
           process.exit(1);
         }
       })
-      .help().argv;
+      .help();
+
+    const argv = await yargsInstance.argv;
 
     // If a command was executed (like mcp), yargs handles it
     // Otherwise, check if we should run in agent mode (stdin piped)
     const commandExecuted = argv._ && argv._.length > 0;
 
     if (!commandExecuted) {
-      // No command specified, run in default agent mode (stdin processing)
-      await runAgentMode(argv);
+      // Check if stdin is a TTY (interactive terminal)
+      // If it is, show help instead of waiting for input
+      if (process.stdin.isTTY) {
+        yargsInstance.showHelp();
+        process.exit(0);
+      }
+
+      // stdin is piped, try to read input with timeout
+      const input = await readStdinWithTimeout(100);
+      const trimmedInput = input.trim();
+
+      if (trimmedInput === '') {
+        yargsInstance.showHelp();
+        process.exit(0);
+      }
+
+      // Try to parse as JSON, if it fails treat it as plain text message
+      let request;
+      try {
+        request = JSON.parse(trimmedInput);
+      } catch (_e) {
+        // Not JSON, treat as plain text message
+        request = {
+          message: trimmedInput,
+        };
+      }
+
+      // Run agent mode
+      await runAgentMode(argv, request);
     }
   } catch (error) {
     hasError = true;
