@@ -633,6 +633,18 @@ async function main() {
         description:
           'Optional timeout in milliseconds for stdin reading (default: no timeout)',
       })
+      .option('auto-merge-queued-messages', {
+        type: 'boolean',
+        description:
+          'Enable auto-merging of rapidly arriving input lines into single messages (default: true)',
+        default: true,
+      })
+      .option('interactive', {
+        type: 'boolean',
+        description:
+          'Enable interactive mode to accept manual input as plain text strings (default: true). Use --no-interactive to only accept JSON input.',
+        default: true,
+      })
       // Initialize logging early for all CLI commands
       // This prevents debug output from appearing in CLI unless --verbose is used
       .middleware(async (argv) => {
@@ -719,13 +731,22 @@ async function main() {
 
       // stdin is piped - enter stdin listening mode
       // Output status message to inform user what's happening
+      const isInteractive = argv.interactive !== false;
+      const autoMerge = argv['auto-merge-queued-messages'] !== false;
+
       outputStatus({
         type: 'status',
         mode: 'stdin-stream',
         message:
           'Agent CLI in stdin listening mode. Accepts JSON and plain text input.',
         hint: 'Press CTRL+C to exit. Use --help for options.',
-        acceptedFormats: ['JSON object with "message" field', 'Plain text'],
+        acceptedFormats: isInteractive
+          ? ['JSON object with "message" field', 'Plain text']
+          : ['JSON object with "message" field'],
+        options: {
+          interactive: isInteractive,
+          autoMergeQueuedMessages: autoMerge,
+        },
       });
 
       // Read stdin with optional timeout
@@ -747,7 +768,18 @@ async function main() {
       try {
         request = JSON.parse(trimmedInput);
       } catch (_e) {
-        // Not JSON, treat as plain text message
+        // Not JSON
+        if (!isInteractive) {
+          // In non-interactive mode, only accept JSON
+          outputStatus({
+            type: 'error',
+            message:
+              'Invalid JSON input. In non-interactive mode (--no-interactive), only JSON input is accepted.',
+            hint: 'Use --interactive to accept plain text, or provide valid JSON: {"message": "your text"}',
+          });
+          process.exit(1);
+        }
+        // In interactive mode, treat as plain text message
         request = {
           message: trimmedInput,
         };

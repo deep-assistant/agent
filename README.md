@@ -181,6 +181,18 @@ See [MODELS.md](MODELS.md) for complete list of available models and pricing.
 See [docs/groq.md](docs/groq.md) for Groq provider documentation.
 See [docs/claude-oauth.md](docs/claude-oauth.md) for Claude OAuth provider documentation.
 
+### Direct Prompt Mode
+
+Use `-p`/`--prompt` to send a prompt directly without reading from stdin:
+
+```bash
+# Direct prompt (bypasses stdin)
+agent -p "What is 2+2?"
+
+# Useful in scripts
+result=$(agent -p "Summarize: $(cat file.txt)")
+```
+
 ### CLI Options
 
 ```bash
@@ -197,6 +209,16 @@ Options:
   --system-message-file          Full override of the system message from file
   --append-system-message        Append to the default system message
   --append-system-message-file   Append to the default system message from file
+
+Stdin Mode Options:
+  -p, --prompt                   Direct prompt (bypasses stdin reading)
+  --disable-stdin                Disable stdin streaming (requires --prompt)
+  --stdin-stream-timeout         Timeout in ms for stdin reading (default: none)
+  --interactive                  Accept plain text input (default: true)
+  --no-interactive               Only accept JSON input
+  --auto-merge-queued-messages   Merge rapidly arriving lines (default: true)
+  --no-auto-merge-queued-messages Treat each line as separate message
+
   --help                         Show help
   --version                      Show version number
 
@@ -207,6 +229,8 @@ Commands:
   auth status          Check authentication status (experimental)
   mcp                  MCP server commands
 ```
+
+See [docs/stdin-mode.md](docs/stdin-mode.md) for comprehensive stdin mode documentation.
 
 ### JSON Output Standards
 
