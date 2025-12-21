@@ -110,6 +110,47 @@ printf 'Line 1\nLine 2\nLine 3' | agent --no-auto-merge-queued-messages
 
 **Default:** Auto-merge is enabled (`--auto-merge-queued-messages`)
 
+### `--always-accept-stdin / --no-always-accept-stdin`
+
+Control whether the agent keeps listening for input after processing each message.
+
+```bash
+# Default: continuous listening mode - keeps accepting input until EOF or Ctrl+C
+echo '{"message":"hi"}' | agent
+
+# Single-message mode - exit after first response (legacy behavior)
+echo '{"message":"hi"}' | agent --no-always-accept-stdin
+```
+
+In continuous mode (default):
+
+- The agent keeps the session alive between messages
+- You can send multiple messages and they will be queued
+- The agent maintains conversation context across messages
+- Press Ctrl+C or send EOF to exit
+
+**Default:** Always accept stdin is enabled (`--always-accept-stdin`)
+
+### `--compact-json`
+
+Output compact JSON (single line) instead of pretty-printed JSON.
+
+```bash
+# Default: pretty-printed JSON output
+echo "hi" | agent
+
+# Compact JSON for program-to-program communication
+echo "hi" | agent --compact-json
+```
+
+Compact mode is useful for:
+
+- Parsing output with tools like `jq`
+- Reducing bandwidth in automated pipelines
+- Machine-to-machine communication
+
+**Default:** Pretty-printed JSON (compact-json is disabled)
+
 ## Input Formats
 
 ### Plain Text
@@ -146,36 +187,46 @@ Becomes a single message: "First line\nSecond line\nThird line"
 
 ## Status Messages
 
-When entering stdin listening mode, the CLI outputs a JSON status message:
+When entering stdin listening mode, the CLI outputs a JSON status message (now pretty-printed by default):
 
 ```json
 {
   "type": "status",
   "mode": "stdin-stream",
-  "message": "Agent CLI in stdin listening mode. Accepts JSON and plain text input.",
+  "message": "Agent CLI in continuous listening mode. Accepts JSON and plain text input.",
   "hint": "Press CTRL+C to exit. Use --help for options.",
   "acceptedFormats": ["JSON object with \"message\" field", "Plain text"],
   "options": {
     "interactive": true,
-    "autoMergeQueuedMessages": true
+    "autoMergeQueuedMessages": true,
+    "alwaysAcceptStdin": true,
+    "compactJson": false
   }
 }
 ```
 
 This helps programmatic consumers understand the CLI's current mode.
 
+With `--compact-json`, status messages are output as single-line JSON:
+
+```text
+{"type":"status","mode":"stdin-stream","message":"Agent CLI in continuous listening mode. Accepts JSON and plain text input.","hint":"Press CTRL+C to exit. Use --help for options.","acceptedFormats":["JSON object with \"message\" field","Plain text"],"options":{"interactive":true,"autoMergeQueuedMessages":true,"alwaysAcceptStdin":true,"compactJson":true}}
+```
+
 ## Behavior Matrix
 
-| Scenario                                 | Behavior                             |
-| ---------------------------------------- | ------------------------------------ |
-| `agent` in terminal (TTY)                | Shows help, exits                    |
-| `echo "hi" \| agent`                     | Processes plain text                 |
-| `echo '{"message":"hi"}' \| agent`       | Processes JSON                       |
-| `agent -p "hello"`                       | Processes prompt directly            |
-| `agent --disable-stdin`                  | Shows error, suggests -p             |
-| `agent --no-interactive` with plain text | Rejects, shows error                 |
-| `agent --no-interactive` with JSON       | Processes normally                   |
-| `agent` with stdin open (non-TTY)        | Outputs status JSON, waits for input |
+| Scenario                                      | Behavior                                      |
+| --------------------------------------------- | --------------------------------------------- |
+| `agent` in terminal (TTY)                     | Shows help, exits                             |
+| `echo "hi" \| agent`                          | Continuous mode - waits for more input        |
+| `echo '{"message":"hi"}' \| agent`            | Continuous mode - waits for more input        |
+| `agent -p "hello"`                            | Processes prompt directly, exits              |
+| `agent --disable-stdin`                       | Shows error, suggests -p                      |
+| `agent --no-interactive` with plain text      | Rejects, shows error                          |
+| `agent --no-interactive` with JSON            | Processes normally                            |
+| `agent` with stdin open (non-TTY)             | Outputs status JSON, waits for input          |
+| `echo "hi" \| agent --no-always-accept-stdin` | Single-message mode - exits after response    |
+| `agent --compact-json`                        | All JSON output is single-line (NDJSON style) |
 
 ## Examples
 

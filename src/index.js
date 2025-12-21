@@ -18,6 +18,10 @@ import { AuthCommand } from './cli/cmd/auth.ts';
 import { Flag } from './flag/flag.ts';
 import { FormatError } from './cli/error.ts';
 import { UI } from './cli/ui.ts';
+import {
+  runContinuousServerMode,
+  runContinuousDirectMode,
+} from './cli/continuous-mode.js';
 import { createRequire } from 'module';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -132,30 +136,21 @@ function readStdinWithTimeout(timeout = null) {
  * Output JSON status message to stderr
  * This prevents the status message from interfering with JSON output parsing
  * @param {object} status - Status object to output
+ * @param {boolean} compact - If true, output compact JSON (single line)
  */
-function outputStatus(status) {
-  console.error(JSON.stringify(status));
+function outputStatus(status, compact = false) {
+  const json = compact
+    ? JSON.stringify(status)
+    : JSON.stringify(status, null, 2);
+  console.error(json);
 }
 
-async function runAgentMode(argv, request) {
-  // Note: verbose flag and logging are now initialized in middleware
-  // See main() function for the middleware that sets up Flag and Log.init()
-
-  // Log version and command info in verbose mode
-  if (Flag.OPENCODE_VERBOSE) {
-    console.error(`Agent version: ${pkg.version}`);
-    console.error(`Command: ${process.argv.join(' ')}`);
-    console.error(`Working directory: ${process.cwd()}`);
-    console.error(`Script path: ${import.meta.path}`);
-  }
-
-  // Log dry-run mode if enabled
-  if (Flag.OPENCODE_DRY_RUN) {
-    console.error(
-      `[DRY RUN MODE] No actual API calls or package installations will be made`
-    );
-  }
-
+/**
+ * Parse model configuration from argv
+ * @param {object} argv - Command line arguments
+ * @returns {object} - { providerID, modelID }
+ */
+async function parseModelConfig(argv) {
   // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
   const modelParts = argv.model.split('/');
   let providerID = modelParts[0] || 'opencode';
@@ -170,13 +165,15 @@ async function runAgentMode(argv, request) {
     const creds = await ClaudeOAuth.getCredentials();
 
     if (!creds?.accessToken) {
-      console.error(
-        JSON.stringify({
+      const compactJson = argv['compact-json'] === true;
+      outputStatus(
+        {
           type: 'error',
           errorType: 'AuthenticationError',
           message:
             'No Claude OAuth credentials found in ~/.claude/.credentials.json. Either authenticate with Claude Code CLI first, or use: agent auth login (select Anthropic > Claude Pro/Max)',
-        })
+        },
+        compactJson
       );
       process.exit(1);
     }
@@ -191,26 +188,27 @@ async function runAgentMode(argv, request) {
       modelID = 'claude-sonnet-4-5';
     } else if (!['claude-oauth', 'anthropic'].includes(providerID)) {
       // If user specified a different provider, warn them
-      console.error(
-        JSON.stringify({
+      const compactJson = argv['compact-json'] === true;
+      outputStatus(
+        {
           type: 'warning',
           message: `--use-existing-claude-oauth is set but model uses provider "${providerID}". Using OAuth credentials anyway.`,
-        })
+        },
+        compactJson
       );
       providerID = 'claude-oauth';
     }
   }
 
-  // Validate and get JSON standard
-  const jsonStandard = argv['json-standard'];
-  if (!isValidJsonStandard(jsonStandard)) {
-    console.error(
-      `Invalid JSON standard: ${jsonStandard}. Use "opencode" or "claude".`
-    );
-    process.exit(1);
-  }
+  return { providerID, modelID };
+}
 
-  // Read system message files
+/**
+ * Read system message from files if specified
+ * @param {object} argv - Command line arguments
+ * @returns {object} - { systemMessage, appendSystemMessage }
+ */
+async function readSystemMessages(argv) {
   let systemMessage = argv['system-message'];
   let appendSystemMessage = argv['append-system-message'];
 
@@ -244,6 +242,41 @@ async function runAgentMode(argv, request) {
     appendSystemMessage = await file.text();
   }
 
+  return { systemMessage, appendSystemMessage };
+}
+
+async function runAgentMode(argv, request) {
+  // Note: verbose flag and logging are now initialized in middleware
+  // See main() function for the middleware that sets up Flag and Log.init()
+
+  // Log version and command info in verbose mode
+  if (Flag.OPENCODE_VERBOSE) {
+    console.error(`Agent version: ${pkg.version}`);
+    console.error(`Command: ${process.argv.join(' ')}`);
+    console.error(`Working directory: ${process.cwd()}`);
+    console.error(`Script path: ${import.meta.path}`);
+  }
+
+  // Log dry-run mode if enabled
+  if (Flag.OPENCODE_DRY_RUN) {
+    console.error(
+      `[DRY RUN MODE] No actual API calls or package installations will be made`
+    );
+  }
+
+  const { providerID, modelID } = await parseModelConfig(argv);
+
+  // Validate and get JSON standard
+  const jsonStandard = argv['json-standard'];
+  if (!isValidJsonStandard(jsonStandard)) {
+    console.error(
+      `Invalid JSON standard: ${jsonStandard}. Use "opencode" or "claude".`
+    );
+    process.exit(1);
+  }
+
+  const { systemMessage, appendSystemMessage } = await readSystemMessages(argv);
+
   // Logging is already initialized in middleware, no need to call Log.init() again
 
   // Wrap in Instance.provide for OpenCode infrastructure
@@ -264,6 +297,81 @@ async function runAgentMode(argv, request) {
         // DIRECT MODE: Run everything in single process
         await runDirectMode(
           request,
+          providerID,
+          modelID,
+          systemMessage,
+          appendSystemMessage,
+          jsonStandard
+        );
+      }
+    },
+  });
+
+  // Explicitly exit to ensure process terminates
+  process.exit(hasError ? 1 : 0);
+}
+
+/**
+ * Run agent in continuous stdin mode
+ * Keeps accepting input until EOF or SIGINT
+ * @param {object} argv - Command line arguments
+ */
+async function runContinuousAgentMode(argv) {
+  // Note: verbose flag and logging are now initialized in middleware
+  // See main() function for the middleware that sets up Flag and Log.init()
+
+  const compactJson = argv['compact-json'] === true;
+
+  // Log version and command info in verbose mode
+  if (Flag.OPENCODE_VERBOSE) {
+    console.error(`Agent version: ${pkg.version}`);
+    console.error(`Command: ${process.argv.join(' ')}`);
+    console.error(`Working directory: ${process.cwd()}`);
+    console.error(`Script path: ${import.meta.path}`);
+  }
+
+  // Log dry-run mode if enabled
+  if (Flag.OPENCODE_DRY_RUN) {
+    console.error(
+      `[DRY RUN MODE] No actual API calls or package installations will be made`
+    );
+  }
+
+  const { providerID, modelID } = await parseModelConfig(argv);
+
+  // Validate and get JSON standard
+  const jsonStandard = argv['json-standard'];
+  if (!isValidJsonStandard(jsonStandard)) {
+    outputStatus(
+      {
+        type: 'error',
+        message: `Invalid JSON standard: ${jsonStandard}. Use "opencode" or "claude".`,
+      },
+      compactJson
+    );
+    process.exit(1);
+  }
+
+  const { systemMessage, appendSystemMessage } = await readSystemMessages(argv);
+
+  // Wrap in Instance.provide for OpenCode infrastructure
+  await Instance.provide({
+    directory: process.cwd(),
+    fn: async () => {
+      if (argv.server) {
+        // SERVER MODE: Start server and communicate via HTTP
+        await runContinuousServerMode(
+          argv,
+          providerID,
+          modelID,
+          systemMessage,
+          appendSystemMessage,
+          jsonStandard
+        );
+      } else {
+        // DIRECT MODE: Run everything in single process
+        await runContinuousDirectMode(
+          argv,
           providerID,
           modelID,
           systemMessage,
@@ -645,6 +753,18 @@ async function main() {
           'Enable interactive mode to accept manual input as plain text strings (default: true). Use --no-interactive to only accept JSON input.',
         default: true,
       })
+      .option('always-accept-stdin', {
+        type: 'boolean',
+        description:
+          'Keep accepting stdin input even after the agent finishes work (default: true). Use --no-always-accept-stdin for single-message mode.',
+        default: true,
+      })
+      .option('compact-json', {
+        type: 'boolean',
+        description:
+          'Output compact JSON (single line) instead of pretty-printed JSON (default: false). Useful for program-to-program communication.',
+        default: false,
+      })
       // Initialize logging early for all CLI commands
       // This prevents debug output from appearing in CLI unless --verbose is used
       .middleware(async (argv) => {
@@ -702,6 +822,8 @@ async function main() {
     const commandExecuted = argv._ && argv._.length > 0;
 
     if (!commandExecuted) {
+      const compactJson = argv['compact-json'] === true;
+
       // Check if --prompt flag was provided
       if (argv.prompt) {
         // Direct prompt mode - bypass stdin entirely
@@ -713,12 +835,15 @@ async function main() {
       // Check if --disable-stdin was set without --prompt
       if (argv['disable-stdin']) {
         // Output a helpful message suggesting to use --prompt
-        outputStatus({
-          type: 'error',
-          message:
-            'No prompt provided. Use -p/--prompt to specify a message, or remove --disable-stdin to read from stdin.',
-          hint: 'Example: agent -p "Hello, how are you?"',
-        });
+        outputStatus(
+          {
+            type: 'error',
+            message:
+              'No prompt provided. Use -p/--prompt to specify a message, or remove --disable-stdin to read from stdin.',
+            hint: 'Example: agent -p "Hello, how are you?"',
+          },
+          compactJson
+        );
         process.exit(1);
       }
 
@@ -733,32 +858,49 @@ async function main() {
       // Output status message to inform user what's happening
       const isInteractive = argv.interactive !== false;
       const autoMerge = argv['auto-merge-queued-messages'] !== false;
+      const alwaysAcceptStdin = argv['always-accept-stdin'] !== false;
 
-      outputStatus({
-        type: 'status',
-        mode: 'stdin-stream',
-        message:
-          'Agent CLI in stdin listening mode. Accepts JSON and plain text input.',
-        hint: 'Press CTRL+C to exit. Use --help for options.',
-        acceptedFormats: isInteractive
-          ? ['JSON object with "message" field', 'Plain text']
-          : ['JSON object with "message" field'],
-        options: {
-          interactive: isInteractive,
-          autoMergeQueuedMessages: autoMerge,
+      outputStatus(
+        {
+          type: 'status',
+          mode: 'stdin-stream',
+          message: alwaysAcceptStdin
+            ? 'Agent CLI in continuous listening mode. Accepts JSON and plain text input.'
+            : 'Agent CLI in single-message mode. Accepts JSON and plain text input.',
+          hint: 'Press CTRL+C to exit. Use --help for options.',
+          acceptedFormats: isInteractive
+            ? ['JSON object with "message" field', 'Plain text']
+            : ['JSON object with "message" field'],
+          options: {
+            interactive: isInteractive,
+            autoMergeQueuedMessages: autoMerge,
+            alwaysAcceptStdin,
+            compactJson,
+          },
         },
-      });
+        compactJson
+      );
 
+      // Use continuous mode if --always-accept-stdin is enabled (default)
+      if (alwaysAcceptStdin) {
+        await runContinuousAgentMode(argv);
+        return;
+      }
+
+      // Single-message mode (--no-always-accept-stdin)
       // Read stdin with optional timeout
       const timeout = argv['stdin-stream-timeout'] ?? null;
       const input = await readStdinWithTimeout(timeout);
       const trimmedInput = input.trim();
 
       if (trimmedInput === '') {
-        outputStatus({
-          type: 'status',
-          message: 'No input received. Exiting.',
-        });
+        outputStatus(
+          {
+            type: 'status',
+            message: 'No input received. Exiting.',
+          },
+          compactJson
+        );
         yargsInstance.showHelp();
         process.exit(0);
       }
@@ -771,12 +913,15 @@ async function main() {
         // Not JSON
         if (!isInteractive) {
           // In non-interactive mode, only accept JSON
-          outputStatus({
-            type: 'error',
-            message:
-              'Invalid JSON input. In non-interactive mode (--no-interactive), only JSON input is accepted.',
-            hint: 'Use --interactive to accept plain text, or provide valid JSON: {"message": "your text"}',
-          });
+          outputStatus(
+            {
+              type: 'error',
+              message:
+                'Invalid JSON input. In non-interactive mode (--no-interactive), only JSON input is accepted.',
+              hint: 'Use --interactive to accept plain text, or provide valid JSON: {"message": "your text"}',
+            },
+            compactJson
+          );
           process.exit(1);
         }
         // In interactive mode, treat as plain text message

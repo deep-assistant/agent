@@ -218,6 +218,9 @@ Stdin Mode Options:
   --no-interactive               Only accept JSON input
   --auto-merge-queued-messages   Merge rapidly arriving lines (default: true)
   --no-auto-merge-queued-messages Treat each line as separate message
+  --always-accept-stdin          Keep accepting input after agent finishes (default: true)
+  --no-always-accept-stdin       Single-message mode - exit after first response
+  --compact-json                 Output compact JSON for program-to-program use
 
   --help                         Show help
   --version                      Show version number
