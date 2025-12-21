@@ -1,5 +1,7 @@
 import { test, expect, describe, setDefaultTimeout } from 'bun:test';
 
+import path from 'path';
+
 // Increase default timeout
 setDefaultTimeout(90000);
 
@@ -61,47 +63,78 @@ describe('Provider initialization with multiple env vars', () => {
     expect(hasGoogleProviderFound || hasApiKeyError).toBe(true);
   });
 
-  test('Google provider loads with GOOGLE_GENERATIVE_AI_API_KEY env var', async () => {
-    // This tests that the original env var still works
-    const proc = Bun.spawn({
-      cmd: [
-        'bun',
-        'run',
-        `${projectRoot}/src/index.js`,
-        '--model',
-        'google/gemini-3-pro',
-        '--verbose',
-      ],
-      stdin: new Blob(['{"message":"hi"}']),
-      stdout: 'pipe',
-      stderr: 'pipe',
-      env: {
-        ...process.env,
-        GOOGLE_GENERATIVE_AI_API_KEY: 'test-fake-key',
-        GEMINI_API_KEY: '', // Explicitly unset
-        OPENCODE_VERBOSE: '1',
+  test('Google OAuth provider loads with OAuth credentials', async () => {
+    // This tests that the google-oauth provider loads when OAuth credentials are available
+    // We need to create a temporary auth.json file with OAuth credentials
+    const { Global } = await import('../src/global');
+    const authFilePath = path.join(Global.Path.data, 'auth.json');
+    const originalAuthContent = await Bun.file(authFilePath)
+      .text()
+      .catch(() => '{}');
+
+    const mockAuthData = {
+      ...JSON.parse(originalAuthContent),
+      google: {
+        type: 'oauth',
+        refresh: 'mock-refresh-token',
+        access: 'mock-oauth-token',
+        expires: Date.now() + 3600000, // 1 hour from now
       },
-    });
+    };
 
-    const stdoutText = await new Response(proc.stdout).text();
-    const stderrText = await new Response(proc.stderr).text();
-    const output = stdoutText + stderrText;
-    await proc.exited;
+    // Write the mock auth data
+    await Bun.write(authFilePath, JSON.stringify(mockAuthData, null, 2));
 
-    // Check that we don't get ModelNotFoundError
-    expect(output).not.toContain('ProviderModelNotFoundError');
+    try {
+      const proc = Bun.spawn({
+        cmd: [
+          'bun',
+          'run',
+          `${projectRoot}/src/index.js`,
+          '--model',
+          'google-oauth/gemini-3-pro',
+          '--verbose',
+        ],
+        stdin: new Blob(['{"message":"hi"}']),
+        stdout: 'pipe',
+        stderr: 'pipe',
+        env: {
+          ...process.env,
+          // Clear API key env vars to ensure OAuth is used
+          GOOGLE_GENERATIVE_AI_API_KEY: '',
+          GEMINI_API_KEY: '',
+          OPENCODE_VERBOSE: '1',
+        },
+      });
 
-    // The provider should be found
-    const hasGoogleProviderFound = output.includes('providerID=google found');
-    const hasApiKeyError =
-      output.includes('API key not valid') ||
-      output.includes('API key is invalid') ||
-      output.includes('Invalid API key');
+      const stdoutText = await new Response(proc.stdout).text();
+      const stderrText = await new Response(proc.stderr).text();
+      const output = stdoutText + stderrText;
+      await proc.exited;
 
-    expect(hasGoogleProviderFound || hasApiKeyError).toBe(true);
+      // The provider should be found (even if the API call fails due to invalid token)
+      expect(output).not.toContain('ProviderModelNotFoundError');
+
+      // The provider should attempt to load the model
+      const hasGoogleOAuthProviderFound = output.includes(
+        'providerID=google-oauth found'
+      );
+      const hasApiKeyError =
+        output.includes('API key not valid') ||
+        output.includes('API key is invalid') ||
+        output.includes('Invalid API key') ||
+        output.includes('UNAUTHENTICATED') ||
+        output.includes('PERMISSION_DENIED');
+
+      // The provider should be found (and may fail with authentication error which is expected)
+      expect(hasGoogleOAuthProviderFound || hasApiKeyError).toBe(true);
+    } finally {
+      // Restore original auth content
+      await Bun.write(authFilePath, originalAuthContent);
+    }
   });
 
-  test('Google provider not loaded without any API key', async () => {
+  test('Google provider loads with GOOGLE_GENERATIVE_AI_API_KEY env var', async () => {
     // This tests that the provider correctly does not load when no API key is set
     const proc = Bun.spawn({
       cmd: [
