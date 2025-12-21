@@ -3,13 +3,3 @@ Your prepared branch: issue-66-4b5b645ed022
 Your prepared working directory: /tmp/gh-issue-solver-1765946512941
 
 Proceed.
-
----
-
-Issue to solve: https://github.com/link-assistant/agent/issues/89
-Your prepared branch: issue-89-9a1b6226b579
-Your prepared working directory: /tmp/gh-issue-solver-1766340106693
-
-Proceed.
-
-Run timestamp: 2025-12-21T18:01:47.833Z
