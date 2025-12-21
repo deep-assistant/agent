@@ -156,23 +156,6 @@ async function parseModelConfig(argv) {
   let providerID = modelParts[0] || 'opencode';
   let modelID = modelParts.slice(1).join('/') || 'grok-code';
 
-  // Handle --dry-run mode - use echo provider for simulated responses
-  // This allows testing round-trips and multi-turn conversations without API costs
-  // @see https://github.com/link-assistant/agent/issues/89
-  if (argv['dry-run']) {
-    // Only override if using default model (user didn't explicitly specify a model)
-    const isDefaultModel = providerID === 'opencode' && modelID === 'grok-code';
-    if (isDefaultModel) {
-      providerID = 'link-assistant';
-      modelID = 'echo';
-      if (Flag.OPENCODE_VERBOSE) {
-        console.error(
-          `[DRY RUN] Using echo provider (link-assistant/echo) for simulated responses`
-        );
-      }
-    }
-  }
-
   // Handle --use-existing-claude-oauth option
   // This reads OAuth credentials from ~/.claude/.credentials.json (Claude Code CLI)
   // For new authentication, use: agent auth login (select Anthropic > Claude Pro/Max)

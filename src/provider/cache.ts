@@ -3,15 +3,16 @@
  *
  * This provider caches API responses to enable deterministic testing.
  * When a response is not cached, it falls back to the echo provider behavior.
- * Cached responses are stored as JSON files.
+ * Cached responses are stored using Links Notation format (.lino files).
  *
  * Usage:
  *   agent --model link-assistant/cache/opencode -p "hello"  # Uses cached responses
  *
  * Cache location: ./data/api-cache/{provider}/{model}/
- * Format: JSON files with .json extension
+ * Format: Links Notation files with .lino extension
  *
  * @see https://github.com/link-assistant/agent/issues/89
+ * @see https://github.com/link-foundation/lino-objects-codec
  */
 
 import type { LanguageModelV2, LanguageModelV2CallOptions } from 'ai';
@@ -20,6 +21,8 @@ import { createEchoModel } from './echo';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+// @ts-ignore - lino-objects-codec is a JavaScript library
+import { encode, decode } from 'lino-objects-codec';
 
 const log = Log.create({ service: 'provider.cache' });
 
@@ -45,9 +48,10 @@ function generateCacheKey(
 
 /**
  * Get cache file path for a provider/model combination
+ * Uses .lino extension for Links Notation format
  */
 function getCachePath(provider: string, model: string, key: string): string {
-  return join(CACHE_ROOT, provider, model, `${key}.json`);
+  return join(CACHE_ROOT, provider, model, `${key}.lino`);
 }
 
 /**
@@ -58,7 +62,7 @@ function generatePartId(): string {
 }
 
 /**
- * Load cached response from file
+ * Load cached response from file using Links Notation format
  */
 function loadCachedResponse(filePath: string): any | null {
   try {
@@ -66,7 +70,8 @@ function loadCachedResponse(filePath: string): any | null {
       return null;
     }
     const content = readFileSync(filePath, 'utf8');
-    return JSON.parse(content);
+    // Decode from Links Notation format
+    return decode({ notation: content });
   } catch (error: any) {
     log.warn('Failed to load cached response', {
       filePath,
@@ -77,7 +82,7 @@ function loadCachedResponse(filePath: string): any | null {
 }
 
 /**
- * Save response to cache file
+ * Save response to cache file using Links Notation format
  */
 function saveCachedResponse(filePath: string, response: any): void {
   try {
@@ -85,7 +90,8 @@ function saveCachedResponse(filePath: string, response: any): void {
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
-    const encoded = JSON.stringify(response, null, 2);
+    // Encode to Links Notation format
+    const encoded = encode({ obj: response });
     writeFileSync(filePath, encoded, 'utf8');
     log.info('Saved cached response', { filePath });
   } catch (error: any) {

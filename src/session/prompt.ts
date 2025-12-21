@@ -507,10 +507,11 @@ export namespace SessionPrompt {
         processor,
       });
       const params = {
-        temperature: model.info?.temperature ?? false
-          ? (agent.temperature ??
-            ProviderTransform.temperature(model.providerID, model.modelID))
-          : undefined,
+        temperature:
+          (model.info?.temperature ?? false)
+            ? (agent.temperature ??
+              ProviderTransform.temperature(model.providerID, model.modelID))
+            : undefined,
         topP:
           agent.topP ?? ProviderTransform.topP(model.providerID, model.modelID),
         options: {
@@ -577,7 +578,9 @@ export namespace SessionPrompt {
         log.info(
           `Model context limit: ${model.info?.limit?.context || 'unknown'}`
         );
-        log.info(`Model output limit: ${model.info?.limit?.output || 'unknown'}`);
+        log.info(
+          `Model output limit: ${model.info?.limit?.output || 'unknown'}`
+        );
         log.info('=== END VERBOSE ===');
       }
 
@@ -1569,7 +1572,10 @@ export namespace SessionPrompt {
           });
       })
       .catch((error) => {
-        log.error('failed to generate title', { error, model: small.info?.id ?? small.modelID });
+        log.error('failed to generate title', {
+          error,
+          model: small.info?.id ?? small.modelID,
+        });
       });
   }
 }

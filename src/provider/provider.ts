@@ -906,11 +906,13 @@ export namespace Provider {
 
     // For synthetic providers (like link-assistant/echo and link-assistant/cache), skip SDK loading
     // These providers have a custom getModel function that creates the model directly
-    const isSyntheticProvider = providerID === 'link-assistant' || providerID === 'link-assistant/cache';
+    const isSyntheticProvider =
+      providerID === 'link-assistant' || providerID === 'link-assistant/cache';
 
     // For synthetic providers, we don't need model info from the database
     const info = isSyntheticProvider ? null : provider.info.models[modelID];
-    if (!isSyntheticProvider && !info) throw new ModelNotFoundError({ providerID, modelID });
+    if (!isSyntheticProvider && !info)
+      throw new ModelNotFoundError({ providerID, modelID });
 
     try {
       const keyReal = `${providerID}/${modelID}`;
@@ -933,7 +935,9 @@ export namespace Provider {
         modelID,
         info,
         language,
-        npm: isSyntheticProvider ? provider.info.npm : (info.provider?.npm ?? provider.info.npm),
+        npm: isSyntheticProvider
+          ? provider.info.npm
+          : (info.provider?.npm ?? provider.info.npm),
       });
       return {
         modelID,
