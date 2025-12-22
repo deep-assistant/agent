@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Test temporary files
 tmp/
+
+# API cache data
+data/api-cache/
