@@ -780,6 +780,12 @@ async function main() {
         handler: async (argv) => {
           const compactJson = argv['compact-json'] === true;
 
+          // Check if no positional arguments and no prompt - show help
+          if (argv._.length === 0 && !argv.prompt) {
+            yargs.showHelp();
+            process.exit(0);
+          }
+
           // Check if --prompt flag was provided
           if (argv.prompt) {
             // Direct prompt mode - bypass stdin entirely

@@ -49,7 +49,9 @@ on:
           - opencode/grok-code
           - opencode/kimi-k2
           - opencode/kimi-k2-thinking
-          - opencode/qwen3-coder
+           - opencode/qwen3-coder
+           # Test models (no API costs)
+           - link-assistant/echo
       custom_model:
         description: 'Custom model name in provider/model format (overrides dropdown if set)'
         required: false
