@@ -152,22 +152,9 @@ function outputStatus(status, compact = false) {
  */
 async function parseModelConfig(argv) {
   // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
-  let modelString = argv.model;
-  if (!modelString || Flag.OPENCODE_DRY_RUN) {
-    // No model specified, or dry-run mode, use the default model (which may be echo in dry-run mode)
-    const { Provider } = await import('./provider/provider.ts');
-    const defaultModel = await Provider.defaultModel();
-    modelString = `${defaultModel.providerID}/${defaultModel.modelID}`;
-  }
-  const modelParts = modelString.split('/');
-  let providerID = modelParts[0];
-  let modelID = modelParts.slice(1).join('/');
-
-  // In dry-run mode, override to use echo provider
-  if (Flag.OPENCODE_DRY_RUN) {
-    providerID = 'link-assistant';
-    modelID = 'echo';
-  }
+  const modelParts = argv.model.split('/');
+  let providerID = modelParts[0] || 'opencode';
+  let modelID = modelParts.slice(1).join('/') || 'grok-code';
 
   // Handle --use-existing-claude-oauth option
   // This reads OAuth credentials from ~/.claude/.credentials.json (Claude Code CLI)
@@ -260,7 +247,7 @@ async function readSystemMessages(argv) {
 
 async function runAgentMode(argv, request) {
   // Log version and command info in verbose mode using lazy logging
-  Log.Default.info(() => ({
+  Log.Default.lazy.info(() => ({
     message: 'Agent started',
     version: pkg.version,
     command: process.argv.join(' '),
@@ -268,7 +255,7 @@ async function runAgentMode(argv, request) {
     scriptPath: import.meta.path,
   }));
   if (Flag.OPENCODE_DRY_RUN) {
-    Log.Default.info(() => ({
+    Log.Default.lazy.info(() => ({
       message: 'Dry run mode enabled',
       mode: 'dry-run',
     }));
@@ -331,7 +318,7 @@ async function runAgentMode(argv, request) {
 async function runContinuousAgentMode(argv) {
   const compactJson = argv['compact-json'] === true;
   // Log version and command info in verbose mode using lazy logging
-  Log.Default.info(() => ({
+  Log.Default.lazy.info(() => ({
     message: 'Agent started (continuous mode)',
     version: pkg.version,
     command: process.argv.join(' '),
@@ -339,7 +326,7 @@ async function runContinuousAgentMode(argv) {
     scriptPath: import.meta.path,
   }));
   if (Flag.OPENCODE_DRY_RUN) {
-    Log.Default.info(() => ({
+    Log.Default.lazy.info(() => ({
       message: 'Dry run mode enabled',
       mode: 'dry-run',
     }));
@@ -690,6 +677,7 @@ async function main() {
             .option('model', {
               type: 'string',
               description: 'Model to use in format providerID/modelID',
+              default: 'opencode/grok-code',
             })
             .option('json-standard', {
               type: 'string',
@@ -939,8 +927,6 @@ async function main() {
         // Set dry-run flag if requested
         if (argv['dry-run']) {
           Flag.setDryRun(true);
-          // In dry-run mode, clear the model so defaultModel() will be used
-          argv.model = undefined;
         }
 
         // Initialize logging system

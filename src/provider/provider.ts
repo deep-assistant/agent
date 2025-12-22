@@ -473,7 +473,7 @@ export namespace Provider {
     'link-assistant': async () => {
       // Echo provider is always available - no external dependencies needed
       return {
-        autoload: true, // Always available for testing and explicit usage
+        autoload: Flag.OPENCODE_DRY_RUN, // Auto-load only in dry-run mode
         async getModel(_sdk: any, modelID: string) {
           // Return our custom echo model that implements LanguageModelV1
           return createEchoModel(modelID);
@@ -767,18 +767,6 @@ export namespace Provider {
       mergeProvider(providerID, provider.options ?? {}, 'config');
     }
 
-    // Merge synthetic providers that weren't merged from env/api/config
-    for (const [providerID, providerInfo] of Object.entries(database)) {
-      if (!providers[providerID] && providerID.startsWith('link-assistant')) {
-        providers[providerID] = {
-          source: 'synthetic',
-          info: providerInfo,
-          options: {},
-          getModel: providerInfo.getModel,
-        };
-      }
-    }
-
     for (const [providerID, provider] of Object.entries(providers)) {
       const filteredModels = Object.fromEntries(
         Object.entries(provider.info.models)
@@ -928,8 +916,9 @@ export namespace Provider {
     const isSyntheticProvider =
       providerID === 'link-assistant' || providerID === 'link-assistant/cache';
 
-    const info = provider.info.models[modelID];
-    if (!info)
+    // For synthetic providers, we don't need model info from the database
+    const info = isSyntheticProvider ? null : provider.info.models[modelID];
+    if (!isSyntheticProvider && !info)
       throw new ModelNotFoundError({ providerID, modelID });
 
     try {

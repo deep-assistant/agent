@@ -446,13 +446,7 @@ export namespace SessionPrompt {
         lastFinished.summary !== true &&
         SessionCompaction.isOverflow({
           tokens: lastFinished.tokens,
-          model: model.info ?? {
-            id: model.modelID,
-            limit: {
-              context: 1000000, // Large limit for synthetic providers
-              output: 100000,
-            },
-          },
+          model: model.info ?? { id: model.modelID },
         })
       ) {
         await SessionCompaction.create({
