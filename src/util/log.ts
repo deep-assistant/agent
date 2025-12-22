@@ -74,7 +74,6 @@ export namespace Log {
       stop(): void;
       [Symbol.dispose](): void;
     };
-    lazy?: Logger;
   };
 
   const loggers = new Map<string, Logger>();
@@ -333,13 +332,6 @@ export namespace Log {
         };
       },
     };
-
-    // Add lazy property for backward compatibility (non-enumerable)
-    Object.defineProperty(result, 'lazy', {
-      value: result,
-      enumerable: false,
-      configurable: true,
-    });
 
     if (service && typeof service === 'string') {
       loggers.set(service, result);

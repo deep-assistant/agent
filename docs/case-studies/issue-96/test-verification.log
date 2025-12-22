@@ -20,43 +20,43 @@
 }
 {
   "type": "step_start",
-  "timestamp": 1766433418829,
-  "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
+  "timestamp": 1766433466653,
+  "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
   "part": {
-    "id": "prt_b47a2ee4b001QPZFmwaoZ0RVPw",
-    "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
-    "messageID": "msg_b47a2ed05001iYk9BtUSX1i1Bo",
+    "id": "prt_b47a3a90e0015LBZhEjUd21NlQ",
+    "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
+    "messageID": "msg_b47a3a74a001i5NlTRgE50afwl",
     "type": "step-start",
-    "snapshot": "8d01ef95848baf57341016237aa435c1c8db2ed0"
+    "snapshot": "73f1f854d59b330edcf6ce7f798711916feb250c"
   }
 }
 {
   "type": "text",
-  "timestamp": 1766433418857,
-  "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
+  "timestamp": 1766433466677,
+  "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
   "part": {
-    "id": "prt_b47a2ee51001MhpVvFB7rRR7j0",
-    "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
-    "messageID": "msg_b47a2ed05001iYk9BtUSX1i1Bo",
+    "id": "prt_b47a3a91e001t9MQZCUrq4ySo2",
+    "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
+    "messageID": "msg_b47a3a74a001i5NlTRgE50afwl",
     "type": "text",
     "text": "hi",
     "time": {
-      "start": 1766433418850,
-      "end": 1766433418850
+      "start": 1766433466676,
+      "end": 1766433466676
     }
   }
 }
 {
   "type": "step_finish",
-  "timestamp": 1766433418920,
-  "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
+  "timestamp": 1766433466793,
+  "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
   "part": {
-    "id": "prt_b47a2ee77001Z43cQ4RiZT1Sdv",
-    "sessionID": "ses_4b85d146effeHWgWLQfcE3MqdJ",
-    "messageID": "msg_b47a2ed05001iYk9BtUSX1i1Bo",
+    "id": "prt_b47a3a9370011EZd0lTES6p4bu",
+    "sessionID": "ses_4b85c5b83ffelAR4IHxTjUzHrQ",
+    "messageID": "msg_b47a3a74a001i5NlTRgE50afwl",
     "type": "step-finish",
     "reason": "stop",
-    "snapshot": "",
+    "snapshot": "73f1f854d59b330edcf6ce7f798711916feb250c",
     "cost": 0,
     "tokens": {
       "input": 0,
@@ -91,43 +91,43 @@
 }
 {
   "type": "step_start",
-  "timestamp": 1766433421515,
-  "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
+  "timestamp": 1766433470295,
+  "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
   "part": {
-    "id": "prt_b47a2f8b200137uAjqSSHmeSwK",
-    "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
-    "messageID": "msg_b47a2f789001Zr5qP4Ob5UYVXq",
+    "id": "prt_b47a3b741001Zqanj3txBBwBgx",
+    "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
+    "messageID": "msg_b47a3b5b9001qgSsU33A6JO545",
     "type": "step-start",
-    "snapshot": "8d01ef95848baf57341016237aa435c1c8db2ed0"
+    "snapshot": "73f1f854d59b330edcf6ce7f798711916feb250c"
   }
 }
 {
   "type": "text",
-  "timestamp": 1766433421528,
-  "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
+  "timestamp": 1766433470297,
+  "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
   "part": {
-    "id": "prt_b47a2f8d2001oWn0cDiAaqFjXZ",
-    "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
-    "messageID": "msg_b47a2f789001Zr5qP4Ob5UYVXq",
+    "id": "prt_b47a3b757001tB3VUAa5UXu20w",
+    "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
+    "messageID": "msg_b47a3b5b9001qgSsU33A6JO545",
     "type": "text",
     "text": "test",
     "time": {
-      "start": 1766433421527,
-      "end": 1766433421527
+      "start": 1766433470296,
+      "end": 1766433470296
     }
   }
 }
 {
   "type": "step_finish",
-  "timestamp": 1766433421595,
-  "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
+  "timestamp": 1766433470411,
+  "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
   "part": {
-    "id": "prt_b47a2f8ef001b6tTjzpBJ3PZMI",
-    "sessionID": "ses_4b85d093dffe3Izl1ipUvaIeqs",
-    "messageID": "msg_b47a2f789001Zr5qP4Ob5UYVXq",
+    "id": "prt_b47a3b76e001Vq6QZrhy98cbSH",
+    "sessionID": "ses_4b85c4b75ffeRwVaj2NZSrrGQF",
+    "messageID": "msg_b47a3b5b9001qgSsU33A6JO545",
     "type": "step-finish",
     "reason": "stop",
-    "snapshot": "",
+    "snapshot": "73f1f854d59b330edcf6ce7f798711916feb250c",
     "cost": 0,
     "tokens": {
       "input": 0,
@@ -194,17 +194,16 @@
 
 
 
-
 {
   "type": "step_start",
-  "timestamp": 1766433426275,
-  "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
+  "timestamp": 1766433475760,
+  "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
   "part": {
-    "id": "prt_b47a30b52001uWBoxG9Hl4c7Bl",
-    "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
-    "messageID": "msg_b47a30980001MzEea74Mn4uBA3",
+    "id": "prt_b47a3cc8d001bw4IjPQnLH68l2",
+    "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
+    "messageID": "msg_b47a3c9da001jDSHwL43369eKE",
     "type": "step-start",
-    "snapshot": "8d01ef95848baf57341016237aa435c1c8db2ed0"
+    "snapshot": ""
   }
 }
 
@@ -212,17 +211,17 @@
 
 {
   "type": "text",
-  "timestamp": 1766433426298,
-  "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
+  "timestamp": 1766433475802,
+  "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
   "part": {
-    "id": "prt_b47a30b70001vG9cDJT5gj7Lju",
-    "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
-    "messageID": "msg_b47a30980001MzEea74Mn4uBA3",
+    "id": "prt_b47a3ccb0001TqRhp0N76CzeAU",
+    "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
+    "messageID": "msg_b47a3c9da001jDSHwL43369eKE",
     "type": "text",
     "text": "verbose test",
     "time": {
-      "start": 1766433426297,
-      "end": 1766433426297
+      "start": 1766433475802,
+      "end": 1766433475802
     }
   }
 }
@@ -230,17 +229,18 @@
 
 
 
+
 {
   "type": "step_finish",
-  "timestamp": 1766433426365,
-  "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
+  "timestamp": 1766433475969,
+  "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
   "part": {
-    "id": "prt_b47a30b8a001i1n3sXDjTWClvE",
-    "sessionID": "ses_4b85cf899ffeHZdKTdtDs1cedV",
-    "messageID": "msg_b47a30b8a001i1n3sXDjTWClvE",
+    "id": "prt_b47a3ccfa001PUpXviLOPNDs5S",
+    "sessionID": "ses_4b85c3879ffebhQc0wvkXGZp6B",
+    "messageID": "msg_b47a3c9da001jDSHwL43369eKE",
     "type": "step-finish",
     "reason": "stop",
-    "snapshot": "",
+    "snapshot": "09c248de3469c27c7387bc2601438d1b5b001907",
     "cost": 0,
     "tokens": {
       "input": 0,
