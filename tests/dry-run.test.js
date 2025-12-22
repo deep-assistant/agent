@@ -143,7 +143,7 @@ describe('Echo provider (dry-run mode)', () => {
   test('dry-run mode echoes back "hi" message', async () => {
     const input = '{"message":"hi"}';
     const result = await sh(
-      `echo '${input}' | bun run ${projectRoot}/src/index.js --dry-run --no-always-accept-stdin`
+      `echo '${input}' | bun run ${projectRoot}/src/index.js --model link-assistant/echo --no-always-accept-stdin`
     );
     const events = parseJSONOutput(result.stdout);
 

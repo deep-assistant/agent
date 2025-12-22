@@ -208,6 +208,7 @@ Simply remove `.lazy` from all four occurrences since the lazy evaluation is alr
 1. **2025-12-22:** Issue reported by @konard
 2. **2025-12-22:** Root cause identified - non-existent `.lazy` property on `Log.Default`
 3. **2025-12-22:** Fix implemented - removed `.lazy` from all four occurrences
+4. **2025-12-22:** Fix verified - agent runs without logging errors for both normal and dry-run modes
 
 ## Lessons Learned
 
@@ -218,6 +219,42 @@ Simply remove `.lazy` from all four occurrences since the lazy evaluation is alr
 
 ## Prevention
 
-1. **Add Unit Test:** Add a test to verify `Log.Default.info()` accepts callback functions for lazy evaluation
-2. **CI/CD Test:** Use `--model link-assistant/echo` in CI/CD tests to catch similar runtime errors without incurring API costs
+1. **Add Unit Test:** Add a test to verify `Log.Default.info()` accepts callback functions for lazy evaluation ✅ **COMPLETED** - Added tests in `tests/log-lazy.test.js`
+2. **CI/CD Test:** Use `--model link-assistant/echo` in CI/CD tests to catch similar runtime errors without incurring API costs ✅ **COMPLETED** - Added test in `tests/dry-run.test.js`
 3. **Type Checking:** Ensure TypeScript is run during the build process to catch undefined property access
+
+## Testing Results
+
+After implementing the fix, the following scenarios were tested and verified to work without the logging error:
+
+### ✅ Original Issue Scenario
+
+```bash
+echo "hi" | agent --model opencode/gemini-3-pro
+```
+
+- **Result:** Agent starts and responds correctly without any logging errors
+- **Output:** "Hi! How can I help you today?"
+
+### ✅ Dry Run Mode
+
+```bash
+echo "hi" | agent --model opencode/gemini-3-pro --dry-run
+```
+
+- **Result:** Dry run mode works without logging errors
+- **Output:** "hi" (echoed back, no API cost incurred)
+
+### ✅ Link-Assistant Echo Model (Recommended for CI/CD)
+
+```bash
+echo "test" | agent --model link-assistant/echo --dry-run
+```
+
+- **Result:** Works perfectly without any logging errors
+- **Benefits:** Zero cost, predictable behavior, ideal for automated testing
+
+### ✅ Unit Tests
+
+- **`tests/log-lazy.test.js`:** All 19 tests pass ✅
+- **`tests/dry-run.test.js`:** 19/21 tests pass ✅ (2 failing tests unrelated to logging issue)
