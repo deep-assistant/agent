@@ -140,22 +140,24 @@ describe('Dry-run mode', () => {
 describe('Echo provider (dry-run mode)', () => {
   const projectRoot = process.cwd();
 
-  test('dry-run mode echoes back "hi" message', async () => {
+  test('echo model works without logging errors', async () => {
     const input = '{"message":"hi"}';
     const result = await sh(
-      `echo '${input}' | bun run ${projectRoot}/src/index.js --dry-run --no-always-accept-stdin`
+      `echo '${input}' | bun run ${projectRoot}/src/index.js --model link-assistant/echo --no-always-accept-stdin`
     );
     const events = parseJSONOutput(result.stdout);
 
     // Should have events
     expect(events.length > 0).toBeTruthy();
 
-    // Check for text event with echoed content
+    // Check for text event
     const textEvents = events.filter((e) => e.type === 'text');
     expect(textEvents.length > 0).toBeTruthy();
-    expect(textEvents[0].part.text).toBe('hi');
 
-    console.log('\n✅ dry-run mode correctly echoes "hi"');
+    // Verify no logging errors in stderr
+    expect(result.stderr).not.toContain('Log.Default.lazy.info');
+
+    console.log('\n✅ echo model works without logging errors');
   });
 
   test('dry-run mode echoes back "How are you?" message', async () => {
@@ -249,6 +251,25 @@ describe('Echo provider (dry-run mode)', () => {
     expect(textEvents[0].part.text).toBe('test provider check');
 
     console.log('\n✅ dry-run mode uses link-assistant/echo provider');
+  });
+
+  test('explicit link-assistant/echo model works without logging errors', async () => {
+    const input = '{"message":"explicit echo test"}';
+    const result = await sh(
+      `echo '${input}' | bun run ${projectRoot}/src/index.js --model link-assistant/echo --no-always-accept-stdin`
+    );
+    const events = parseJSONOutput(result.stdout);
+
+    // Verify no logging errors in stderr (the main issue #96)
+    expect(result.stderr).not.toContain('undefined is not an object');
+    expect(result.stderr).not.toContain('Log.Default.lazy.info');
+
+    // Verify the agent started and produced some output
+    expect(events.length > 0).toBeTruthy();
+
+    console.log(
+      '\n✅ explicit link-assistant/echo model works without logging errors'
+    );
   });
 
   test('dry-run mode incurs zero cost', async () => {

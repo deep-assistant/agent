@@ -473,7 +473,7 @@ export namespace Provider {
     'link-assistant': async () => {
       // Echo provider is always available - no external dependencies needed
       return {
-        autoload: Flag.OPENCODE_DRY_RUN, // Auto-load only in dry-run mode
+        autoload: true, // Always available for testing and explicit usage
         async getModel(_sdk: any, modelID: string) {
           // Return our custom echo model that implements LanguageModelV1
           return createEchoModel(modelID);
@@ -765,6 +765,18 @@ export namespace Provider {
     // load config
     for (const [providerID, provider] of configProviders) {
       mergeProvider(providerID, provider.options ?? {}, 'config');
+    }
+
+    // Merge synthetic providers that weren't merged from env/api/config
+    for (const [providerID, providerInfo] of Object.entries(database)) {
+      if (!providers[providerID] && providerID.startsWith('link-assistant')) {
+        providers[providerID] = {
+          source: 'synthetic',
+          info: providerInfo,
+          options: {},
+          getModel: providerInfo.getModel,
+        };
+      }
     }
 
     for (const [providerID, provider] of Object.entries(providers)) {

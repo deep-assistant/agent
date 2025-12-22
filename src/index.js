@@ -15,6 +15,7 @@ import {
 } from './json-standard/index.ts';
 import { McpCommand } from './cli/cmd/mcp.ts';
 import { AuthCommand } from './cli/cmd/auth.ts';
+import { StatsCommand } from './cli/cmd/stats.ts';
 import { Flag } from './flag/flag.ts';
 import { FormatError } from './cli/error.ts';
 import { UI } from './cli/ui.ts';
@@ -151,6 +152,14 @@ function outputStatus(status, compact = false) {
  * @returns {object} - { providerID, modelID }
  */
 async function parseModelConfig(argv) {
+  // In dry-run mode, always use the echo provider
+  if (Flag.OPENCODE_DRY_RUN) {
+    return {
+      providerID: 'link-assistant',
+      modelID: 'echo',
+    };
+  }
+
   // Parse model argument (handle model IDs with slashes like groq/qwen/qwen3-32b)
   const modelParts = argv.model.split('/');
   let providerID = modelParts[0] || 'opencode';
@@ -247,7 +256,7 @@ async function readSystemMessages(argv) {
 
 async function runAgentMode(argv, request) {
   // Log version and command info in verbose mode using lazy logging
-  Log.Default.lazy.info(() => ({
+  Log.Default.info(() => ({
     message: 'Agent started',
     version: pkg.version,
     command: process.argv.join(' '),
@@ -255,7 +264,7 @@ async function runAgentMode(argv, request) {
     scriptPath: import.meta.path,
   }));
   if (Flag.OPENCODE_DRY_RUN) {
-    Log.Default.lazy.info(() => ({
+    Log.Default.info(() => ({
       message: 'Dry run mode enabled',
       mode: 'dry-run',
     }));
@@ -318,7 +327,7 @@ async function runAgentMode(argv, request) {
 async function runContinuousAgentMode(argv) {
   const compactJson = argv['compact-json'] === true;
   // Log version and command info in verbose mode using lazy logging
-  Log.Default.lazy.info(() => ({
+  Log.Default.info(() => ({
     message: 'Agent started (continuous mode)',
     version: pkg.version,
     command: process.argv.join(' '),
@@ -326,7 +335,7 @@ async function runContinuousAgentMode(argv) {
     scriptPath: import.meta.path,
   }));
   if (Flag.OPENCODE_DRY_RUN) {
-    Log.Default.lazy.info(() => ({
+    Log.Default.info(() => ({
       message: 'Dry run mode enabled',
       mode: 'dry-run',
     }));
@@ -668,6 +677,8 @@ async function main() {
       .command(McpCommand)
       // Auth subcommand
       .command(AuthCommand)
+      // Stats subcommand
+      .command(StatsCommand)
       // Default command for agent mode (when no subcommand specified)
       .command({
         command: '$0',
