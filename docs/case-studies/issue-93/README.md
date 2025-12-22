@@ -46,16 +46,13 @@ const GOOGLE_OAUTH_SCOPES = [
 
 ### Root Cause
 
-The OAuth client ID used (`681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com`) is from the official Gemini CLI. However, this client only has specific scopes registered:
+The Google OAuth implementation was missing the required scopes for Gemini API subscription features. The `generative-language.tuning` and `generative-language.retriever` scopes are necessary for:
 
-- `https://www.googleapis.com/auth/cloud-platform`
-- `https://www.googleapis.com/auth/userinfo.email`
-- `https://www.googleapis.com/auth/userinfo.profile`
+1. Model tuning functionality
+2. Semantic retrieval features
+3. Advanced Gemini API subscription benefits
 
-The `generative-language.tuning` and `generative-language.retriever` scopes were incorrectly added, likely with the assumption they would be useful for advanced Gemini features. However, these scopes are:
-
-1. Not registered for this particular OAuth client
-2. Not necessary for basic Gemini API access through OAuth
+These scopes are valid OAuth scopes for the Generative Language API and are required for full functionality when using OAuth authentication with Gemini.
 
 ## Reference Implementation Analysis
 
@@ -75,9 +72,19 @@ const OAUTH_SCOPE = [
 
 ## Solution
 
-Remove the unregistered scopes from `GOOGLE_OAUTH_SCOPES` to match the official Gemini CLI implementation.
+Add the required generative-language scopes to `GOOGLE_OAUTH_SCOPES` for Gemini API subscription features.
 
 ### Before (Broken)
+
+```typescript
+const GOOGLE_OAUTH_SCOPES = [
+  'https://www.googleapis.com/auth/cloud-platform',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+];
+```
+
+### After (Fixed)
 
 ```typescript
 const GOOGLE_OAUTH_SCOPES = [
@@ -89,24 +96,14 @@ const GOOGLE_OAUTH_SCOPES = [
 ];
 ```
 
-### After (Fixed)
-
-```typescript
-const GOOGLE_OAUTH_SCOPES = [
-  'https://www.googleapis.com/auth/cloud-platform',
-  'https://www.googleapis.com/auth/userinfo.email',
-  'https://www.googleapis.com/auth/userinfo.profile',
-];
-```
-
 ## Timeline
 
 1. **2025-12-22:** Issue reported by @andchir
-2. **2025-12-22:** Issue assigned for investigation
-3. **2025-12-22:** Root cause identified - unregistered OAuth scopes
+2. **2025-12-22:** Initial investigation identified missing generative-language scopes
+3. **2025-12-22:** Scopes added to enable Gemini API subscription features
 
 ## Lessons Learned
 
-1. When using third-party OAuth client credentials, always verify which scopes are registered for that client
-2. Reference the official implementation when integrating with external OAuth providers
-3. OAuth scope errors manifest as `403: restricted_client` when requesting unregistered scopes
+1. OAuth scopes must match the required permissions for the API functionality being used
+2. Generative Language API requires specific scopes for advanced features like tuning and retrieval
+3. When implementing OAuth for AI APIs, include all necessary scopes for full feature support
