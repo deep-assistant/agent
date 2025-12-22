@@ -1,0 +1,135 @@
+Test Verification Log - Issue #96 Fix
+
+Date: 2025-12-22
+Command: echo "hi" | bun run src/index.js --model link-assistant/echo --no-always-accept-stdin
+
+Expected: Agent should start without logging errors and process the input successfully
+Result: ✅ SUCCESS - No logging errors, proper JSON output with status, step_start, text, and step_finish events
+
+Output:
+{
+  "type": "status",
+  "mode": "stdin-stream",
+  "message": "Agent CLI in single-message mode. Accepts JSON and plain text input.",
+  "hint": "Press CTRL+C to exit. Use --help for options.",
+  "acceptedFormats": [
+    "JSON object with \"message\" field",
+    "Plain text"
+  ],
+  "options": {
+    "interactive": true,
+    "autoMergeQueuedMessages": true,
+    "alwaysAcceptStdin": false,
+    "compactJson": false
+  }
+}
+{
+  "type": "step_start",
+  "timestamp": 1766432376600,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930716001TZf6W1M5Dw9CH4",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b479300300014G944l9fk2c9O3",
+    "type": "step-start",
+    "snapshot": "174c7d72e16ac8b54b1bb6d4bc290d0114c86a16"
+  }
+}
+{
+  "type": "text",
+  "timestamp": 1766432377495,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930750001UmQEK2C7HAKvuF",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b479300300014G944l9fk2c9O3",
+    "type": "text",
+    "text": "\nHi! I'm here to help you solve the GitHub issue. Let me start by understanding what needs to be done.",
+    "time": {
+      "start": 1766432377495,
+      "end": 1766432377495
+    }
+  }
+}
+{
+  "type": "step_finish",
+  "timestamp": 1766432377508,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930a99001F1YAi8EjwsQJy3",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b479300300014G944l9fk2c9O3",
+    "type": "step-finish",
+    "reason": "tool-calls",
+    "snapshot": "174c7d72e16ac8b54b1bb6d4bc290d0114c86a16",
+    "cost": 0,
+    "tokens": {
+      "input": 1,
+      "output": 59,
+      "reasoning": 0,
+      "cache": {
+        "read": 12111,
+        "write": 0
+      }
+    }
+  }
+}
+{
+  "type": "step_start",
+  "timestamp": 1766432377570,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930ae2001XmLI3wus2gWPyT",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b47930abd0019eRnQrUMjxxdOG",
+    "type": "step-start",
+    "snapshot": "174c7d72e16ac8b54b1bb6d4bc290d0114c86a16"
+  }
+}
+{
+  "type": "text",
+  "timestamp": 1766432377571,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930ae30010oBVh2bwUaG1hK",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b47930abd0019eRnQrUMjxxdOG",
+    "type": "text",
+    "text": "hi",
+    "time": {
+      "start": 1766432377571,
+      "end": 1766432377571
+    }
+  }
+}
+{
+  "type": "step_finish",
+  "timestamp": 1766432377582,
+  "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+  "part": {
+    "id": "prt_b47930ae4001sPdbAos5ZtpVEj",
+    "sessionID": "ses_4b86d0078ffewxfNDqvFNONDDS",
+    "messageID": "msg_b47930abd0019eRnQrUMjxxdOG",
+    "type": "step-finish",
+    "reason": "stop",
+    "snapshot": "174c7d72e16ac8b54b1bb6d4bc290d0114c86a16",
+    "cost": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reasoning": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    }
+  }
+}
+
+Verification:
+- ✅ No "undefined is not an object (evaluating 'Log.Default.lazy.info')" error
+- ✅ Agent started successfully with status message
+- ✅ Input "hi" was processed and echoed back
+- ✅ Proper JSON event stream output
+- ✅ Zero cost (using echo model)
+- ✅ No stderr output (clean execution)
