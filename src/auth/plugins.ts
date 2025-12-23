@@ -1281,6 +1281,12 @@ const GooglePlugin: AuthPlugin = {
     const CLOUD_CODE_ENDPOINT = 'https://cloudcode-pa.googleapis.com';
     const CLOUD_CODE_API_VERSION = 'v1internal';
 
+    log.debug(() => ({
+      message: 'google oauth loader initialized',
+      cloudCodeEndpoint: CLOUD_CODE_ENDPOINT,
+      apiVersion: CLOUD_CODE_API_VERSION,
+    }));
+
     /**
      * Check if we have a fallback API key available.
      * This allows trying API key authentication if Cloud Code API fails.
@@ -1291,7 +1297,22 @@ const GooglePlugin: AuthPlugin = {
       const envKey =
         process.env['GOOGLE_GENERATIVE_AI_API_KEY'] ||
         process.env['GEMINI_API_KEY'];
-      if (envKey) return envKey;
+
+      if (envKey) {
+        log.debug(() => ({
+          message: 'fallback api key available',
+          source: process.env['GOOGLE_GENERATIVE_AI_API_KEY']
+            ? 'GOOGLE_GENERATIVE_AI_API_KEY'
+            : 'GEMINI_API_KEY',
+          keyLength: envKey.length,
+        }));
+        return envKey;
+      }
+
+      log.debug(() => ({
+        message: 'no fallback api key available',
+        hint: 'Set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY for fallback',
+      }));
 
       // Check for API key in auth storage (async, so we need to handle this differently)
       // For now, we only support env var fallback synchronously
@@ -1305,10 +1326,19 @@ const GooglePlugin: AuthPlugin = {
     const isScopeError = (response: Response): boolean => {
       if (response.status !== 403) return false;
       const wwwAuth = response.headers.get('www-authenticate') || '';
-      return (
+      const isScope =
         wwwAuth.includes('insufficient_scope') ||
-        wwwAuth.includes('ACCESS_TOKEN_SCOPE_INSUFFICIENT')
-      );
+        wwwAuth.includes('ACCESS_TOKEN_SCOPE_INSUFFICIENT');
+
+      if (isScope) {
+        log.debug(() => ({
+          message: 'detected oauth scope error',
+          status: response.status,
+          wwwAuthenticate: wwwAuth.substring(0, 200),
+        }));
+      }
+
+      return isScope;
     };
 
     /**
@@ -1325,6 +1355,11 @@ const GooglePlugin: AuthPlugin = {
       try {
         const parsed = new URL(url);
         if (!parsed.hostname.includes('generativelanguage.googleapis.com')) {
+          log.debug(() => ({
+            message:
+              'url is not generativelanguage api, skipping cloud code transform',
+            hostname: parsed.hostname,
+          }));
           return null; // Not a Generative Language API URL
         }
 
@@ -1332,12 +1367,30 @@ const GooglePlugin: AuthPlugin = {
         // Path format: /v1beta/models/gemini-2.0-flash:generateContent
         const pathMatch = parsed.pathname.match(/:(\w+)$/);
         if (!pathMatch) {
+          log.debug(() => ({
+            message: 'could not extract method from url path',
+            pathname: parsed.pathname,
+          }));
           return null; // Can't determine method
         }
 
         const method = pathMatch[1];
-        return `${CLOUD_CODE_ENDPOINT}/${CLOUD_CODE_API_VERSION}:${method}`;
-      } catch {
+        const cloudCodeUrl = `${CLOUD_CODE_ENDPOINT}/${CLOUD_CODE_API_VERSION}:${method}`;
+
+        log.debug(() => ({
+          message: 'transformed url to cloud code api',
+          originalUrl: url.substring(0, 100),
+          method,
+          cloudCodeUrl,
+        }));
+
+        return cloudCodeUrl;
+      } catch (error) {
+        log.debug(() => ({
+          message: 'failed to parse url for cloud code transform',
+          url: url.substring(0, 100),
+          error: String(error),
+        }));
         return null;
       }
     };
@@ -1353,8 +1406,21 @@ const GooglePlugin: AuthPlugin = {
         const parsed = new URL(url);
         // Path format: /v1beta/models/gemini-2.0-flash:generateContent
         const pathMatch = parsed.pathname.match(/\/models\/([^:]+):/);
-        return pathMatch ? pathMatch[1] : null;
-      } catch {
+        const model = pathMatch ? pathMatch[1] : null;
+
+        log.debug(() => ({
+          message: 'extracted model from url',
+          pathname: parsed.pathname,
+          model,
+        }));
+
+        return model;
+      } catch (error) {
+        log.debug(() => ({
+          message: 'failed to extract model from url',
+          url: url.substring(0, 100),
+          error: String(error),
+        }));
         return null;
       }
     };
@@ -1389,8 +1455,20 @@ const GooglePlugin: AuthPlugin = {
           request: parsed,
         };
 
+        log.debug(() => ({
+          message: 'transformed request body for cloud code api',
+          model,
+          hasProjectId: !!projectId,
+          originalBodyLength: body.length,
+          transformedBodyLength: JSON.stringify(cloudCodeRequest).length,
+        }));
+
         return JSON.stringify(cloudCodeRequest);
-      } catch {
+      } catch (error) {
+        log.debug(() => ({
+          message: 'failed to transform request body, using original',
+          error: String(error),
+        }));
         return body; // Return original if parsing fails
       }
     };
@@ -1407,15 +1485,31 @@ const GooglePlugin: AuthPlugin = {
     const transformResponseBody = async (
       response: Response
     ): Promise<Response> => {
+      const contentType = response.headers.get('content-type');
+      const isStreaming = contentType?.includes('text/event-stream');
+
+      log.debug(() => ({
+        message: 'transforming cloud code response',
+        status: response.status,
+        contentType,
+        isStreaming,
+      }));
+
       // For streaming responses, we need to transform each chunk
-      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+      if (isStreaming) {
         // The Cloud Code API returns SSE with data: { response: {...} } format
         // We need to transform each chunk to unwrap the response
         const reader = response.body?.getReader();
-        if (!reader) return response;
+        if (!reader) {
+          log.debug(() => ({
+            message: 'no response body reader available for streaming',
+          }));
+          return response;
+        }
 
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
+        let chunkCount = 0;
 
         const transformedStream = new ReadableStream({
           async start(controller) {
@@ -1423,11 +1517,16 @@ const GooglePlugin: AuthPlugin = {
               while (true) {
                 const { done, value } = await reader.read();
                 if (done) {
+                  log.debug(() => ({
+                    message: 'streaming response complete',
+                    totalChunks: chunkCount,
+                  }));
                   controller.close();
                   break;
                 }
 
                 const text = decoder.decode(value, { stream: true });
+                chunkCount++;
 
                 // Split by SSE event boundaries
                 const events = text.split('\n\n');
@@ -1463,6 +1562,10 @@ const GooglePlugin: AuthPlugin = {
                 }
               }
             } catch (error) {
+              log.debug(() => ({
+                message: 'error during streaming response transformation',
+                error: String(error),
+              }));
               controller.error(error);
             }
           },
@@ -1479,12 +1582,23 @@ const GooglePlugin: AuthPlugin = {
       try {
         const json = await response.json();
         const unwrapped = json.response || json;
+
+        log.debug(() => ({
+          message: 'unwrapped non-streaming cloud code response',
+          hasResponseWrapper: !!json.response,
+          hasTraceId: !!json.traceId,
+        }));
+
         return new Response(JSON.stringify(unwrapped), {
           status: response.status,
           statusText: response.statusText,
           headers: response.headers,
         });
-      } catch {
+      } catch (error) {
+        log.debug(() => ({
+          message: 'failed to parse non-streaming response, returning original',
+          error: String(error),
+        }));
         return response;
       }
     };
@@ -1493,8 +1607,20 @@ const GooglePlugin: AuthPlugin = {
       apiKey: 'oauth-token-used-via-custom-fetch',
       async fetch(input: RequestInfo | URL, init?: RequestInit) {
         let currentAuth = await getAuth();
-        if (!currentAuth || currentAuth.type !== 'oauth')
+        if (!currentAuth || currentAuth.type !== 'oauth') {
+          log.debug(() => ({
+            message: 'no google oauth credentials, using standard fetch',
+          }));
           return fetch(input, init);
+        }
+
+        log.debug(() => ({
+          message: 'google oauth fetch initiated',
+          hasAccessToken: !!currentAuth?.access,
+          tokenExpiresIn: currentAuth
+            ? Math.round((currentAuth.expires - Date.now()) / 1000)
+            : 0,
+        }));
 
         // Refresh token if expired (with 5 minute buffer)
         const FIVE_MIN_MS = 5 * 60 * 1000;
@@ -1502,7 +1628,12 @@ const GooglePlugin: AuthPlugin = {
           !currentAuth.access ||
           currentAuth.expires < Date.now() + FIVE_MIN_MS
         ) {
-          log.info(() => ({ message: 'refreshing google oauth token' }));
+          log.info(() => ({
+            message: 'refreshing google oauth token',
+            reason: !currentAuth.access
+              ? 'no access token'
+              : 'token expiring soon',
+          }));
           const response = await fetch(GOOGLE_TOKEN_URL, {
             method: 'POST',
             headers: {
@@ -1517,10 +1648,21 @@ const GooglePlugin: AuthPlugin = {
           });
 
           if (!response.ok) {
+            const errorText = await response.text().catch(() => 'unknown');
+            log.error(() => ({
+              message: 'google oauth token refresh failed',
+              status: response.status,
+              error: errorText.substring(0, 200),
+            }));
             throw new Error(`Token refresh failed: ${response.status}`);
           }
 
           const json = await response.json();
+          log.debug(() => ({
+            message: 'google oauth token refreshed successfully',
+            expiresIn: json.expires_in,
+          }));
+
           await Auth.set('google', {
             type: 'oauth',
             // Google doesn't return a new refresh token on refresh
@@ -1543,6 +1685,12 @@ const GooglePlugin: AuthPlugin = {
             : input instanceof URL
               ? input.toString()
               : (input as Request).url;
+
+        log.debug(() => ({
+          message: 'processing google api request',
+          originalUrl: originalUrl.substring(0, 100),
+          method: init?.method || 'GET',
+        }));
 
         // Try to transform to Cloud Code API URL
         const cloudCodeUrl = transformToCloudCodeUrl(originalUrl);
@@ -1572,20 +1720,46 @@ const GooglePlugin: AuthPlugin = {
           // Remove any API key header if present since we're using OAuth
           delete headers['x-goog-api-key'];
 
+          log.debug(() => ({
+            message: 'sending request to cloud code api',
+            url: cloudCodeUrl,
+            hasBody: !!body,
+          }));
+
           const cloudCodeResponse = await fetch(cloudCodeUrl, {
             ...init,
             body,
             headers,
           });
 
+          log.debug(() => ({
+            message: 'cloud code api response received',
+            status: cloudCodeResponse.status,
+            statusText: cloudCodeResponse.statusText,
+            contentType: cloudCodeResponse.headers.get('content-type'),
+          }));
+
           // Check for errors and handle fallback
           if (!cloudCodeResponse.ok) {
+            // Try to get error details for logging
+            const errorBody = await cloudCodeResponse
+              .clone()
+              .text()
+              .catch(() => 'unknown');
+            log.warn(() => ({
+              message: 'cloud code api returned error',
+              status: cloudCodeResponse.status,
+              statusText: cloudCodeResponse.statusText,
+              errorBody: errorBody.substring(0, 500),
+            }));
+
             const fallbackApiKey = getFallbackApiKey();
             if (fallbackApiKey) {
               log.warn(() => ({
                 message:
                   'cloud code api error, falling back to api key with standard api',
                 status: cloudCodeResponse.status,
+                fallbackTarget: originalUrl.substring(0, 100),
               }));
 
               // Fall back to standard API with API key
@@ -1595,21 +1769,42 @@ const GooglePlugin: AuthPlugin = {
               };
               delete apiKeyHeaders['Authorization'];
 
+              log.debug(() => ({
+                message: 'sending fallback request with api key',
+                url: originalUrl.substring(0, 100),
+              }));
+
               return fetch(originalUrl, {
                 ...init,
                 headers: apiKeyHeaders,
               });
             }
 
+            log.error(() => ({
+              message: 'cloud code api error and no api key fallback available',
+              status: cloudCodeResponse.status,
+              hint: 'Set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable for fallback',
+            }));
+
             // No fallback available, return the error response
             return cloudCodeResponse;
           }
+
+          log.debug(() => ({
+            message: 'cloud code api request successful, transforming response',
+          }));
 
           // Transform response back to standard format
           return transformResponseBody(cloudCodeResponse);
         }
 
         // Not a Generative Language API request, use standard OAuth flow
+        log.debug(() => ({
+          message:
+            'not a generative language api request, using standard oauth',
+          url: originalUrl.substring(0, 100),
+        }));
+
         const headers: Record<string, string> = {
           ...(init?.headers as Record<string, string>),
           Authorization: `Bearer ${currentAuth.access}`,
@@ -1621,6 +1816,11 @@ const GooglePlugin: AuthPlugin = {
           headers,
         });
 
+        log.debug(() => ({
+          message: 'standard oauth response received',
+          status: oauthResponse.status,
+        }));
+
         // Check if OAuth failed due to insufficient scopes
         if (isScopeError(oauthResponse)) {
           const fallbackApiKey = getFallbackApiKey();
@@ -1629,6 +1829,7 @@ const GooglePlugin: AuthPlugin = {
               message:
                 'oauth scope error, falling back to api key authentication',
               hint: 'This should not happen with Cloud Code API routing',
+              url: originalUrl.substring(0, 100),
             }));
 
             const apiKeyHeaders: Record<string, string> = {
@@ -1645,6 +1846,7 @@ const GooglePlugin: AuthPlugin = {
             log.error(() => ({
               message: 'oauth scope error and no api key fallback available',
               hint: 'Set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable',
+              url: originalUrl.substring(0, 100),
             }));
           }
         }
