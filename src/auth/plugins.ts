@@ -858,6 +858,14 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/cloud-platform',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
+  // Add generative-language scopes for Gemini API access
+  // These are required by generativelanguage.googleapis.com for StreamGenerateContent
+  // See: https://github.com/link-assistant/agent/issues/100
+  'https://www.googleapis.com/auth/generative-language',
+  'https://www.googleapis.com/auth/generative-language.tuning',
+  'https://www.googleapis.com/auth/generative-language.tuning.readonly',
+  'https://www.googleapis.com/auth/generative-language.retriever',
+  'https://www.googleapis.com/auth/generative-language.retriever.readonly',
 ];
 
 // Google OAuth endpoints
@@ -1260,6 +1268,36 @@ const GooglePlugin: AuthPlugin = {
       }
     }
 
+    /**
+     * Check if we have a fallback API key available.
+     * This allows trying API key authentication if OAuth fails with scope errors.
+     * See: https://github.com/link-assistant/agent/issues/100
+     */
+    const getFallbackApiKey = (): string | undefined => {
+      // Check for API key in environment variables
+      const envKey =
+        process.env['GOOGLE_GENERATIVE_AI_API_KEY'] ||
+        process.env['GEMINI_API_KEY'];
+      if (envKey) return envKey;
+
+      // Check for API key in auth storage (async, so we need to handle this differently)
+      // For now, we only support env var fallback synchronously
+      return undefined;
+    };
+
+    /**
+     * Detect if an error is a scope-related authentication error.
+     * This is triggered when OAuth token doesn't have the required scopes.
+     */
+    const isScopeError = (response: Response): boolean => {
+      if (response.status !== 403) return false;
+      const wwwAuth = response.headers.get('www-authenticate') || '';
+      return (
+        wwwAuth.includes('insufficient_scope') ||
+        wwwAuth.includes('ACCESS_TOKEN_SCOPE_INSUFFICIENT')
+      );
+    };
+
     return {
       apiKey: 'oauth-token-used-via-custom-fetch',
       async fetch(input: RequestInfo | URL, init?: RequestInit) {
@@ -1315,10 +1353,45 @@ const GooglePlugin: AuthPlugin = {
         // Remove any API key header if present since we're using OAuth
         delete headers['x-goog-api-key'];
 
-        return fetch(input, {
+        // Make the OAuth request
+        const oauthResponse = await fetch(input, {
           ...init,
           headers,
         });
+
+        // Check if OAuth failed due to insufficient scopes
+        // If so, try fallback to API key authentication
+        // See: https://github.com/link-assistant/agent/issues/100
+        if (isScopeError(oauthResponse)) {
+          const fallbackApiKey = getFallbackApiKey();
+          if (fallbackApiKey) {
+            log.warn(() => ({
+              message:
+                'oauth scope error, falling back to api key authentication',
+              hint: 'Re-run "agent auth login" and select Google to get updated OAuth scopes',
+            }));
+
+            // Build headers for API key authentication
+            const apiKeyHeaders: Record<string, string> = {
+              ...(init?.headers as Record<string, string>),
+              'x-goog-api-key': fallbackApiKey,
+            };
+            // Remove OAuth Authorization header
+            delete apiKeyHeaders['Authorization'];
+
+            return fetch(input, {
+              ...init,
+              headers: apiKeyHeaders,
+            });
+          } else {
+            log.error(() => ({
+              message: 'oauth scope error and no api key fallback available',
+              hint: 'Either re-run "agent auth login" to get updated OAuth scopes, or set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable',
+            }));
+          }
+        }
+
+        return oauthResponse;
       },
     };
   },
