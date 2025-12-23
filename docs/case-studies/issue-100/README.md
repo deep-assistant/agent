@@ -76,11 +76,13 @@ We make API calls to `generativelanguage.googleapis.com` which requires specific
 ### The Real Difference: API Endpoint
 
 **Our Implementation**:
+
 - Uses `generativelanguage.googleapis.com` (standard Generative Language API)
 - This API requires `generative-language.*` scopes
 - OAuth client doesn't have these scopes registered → **SCOPE MISMATCH**
 
 **Gemini CLI Implementation**:
+
 - Uses `https://cloudcode-pa.googleapis.com/v1internal` (Cloud Code API)
 - This is a **different API endpoint** that wraps the Generative Language API
 - The Cloud Code API accepts `cloud-platform` scope!
@@ -97,6 +99,7 @@ Cloud Code Server → Generative Language API (internal)
 ```
 
 The Gemini CLI doesn't call `generativelanguage.googleapis.com` directly. It calls Google's **Cloud Code API** which:
+
 1. Accepts `cloud-platform` OAuth tokens
 2. Handles subscription validation (FREE tier, STANDARD tier)
 3. Proxies requests to the Generative Language API internally
@@ -174,18 +177,22 @@ Auth credentials are stored by provider ID, meaning:
 **The proper fix**: Use the same API endpoint as Gemini CLI.
 
 When Google OAuth is active, route API calls through:
+
 - `https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent`
 
 Instead of:
+
 - `https://generativelanguage.googleapis.com/v1beta/models/...:streamGenerateContent`
 
 **Pros**:
+
 - Exact same approach as official Gemini CLI
 - Works with existing `cloud-platform` scope
 - Supports subscription tiers (FREE, STANDARD, etc.)
 - No need for users to set API keys
 
 **Cons**:
+
 - Requires implementing Cloud Code API request/response translation
 - More complex implementation
 
@@ -204,6 +211,7 @@ const GOOGLE_OAUTH_SCOPES = [
 
 **Pros**: Simple fix
 **Cons**:
+
 - Won't work - scopes aren't registered for the OAuth client (causes `403: restricted_client`)
 - See issue #93
 
@@ -217,6 +225,7 @@ Implement a fallback strategy in `src/auth/plugins.ts`:
 
 **Pros**: Works as workaround
 **Cons**:
+
 - Requires users to have an API key set
 - Doesn't leverage subscription benefits properly
 - Not the same experience as Gemini CLI
@@ -226,11 +235,13 @@ Implement a fallback strategy in `src/auth/plugins.ts`:
 **Proper Fix**: Solution 1 - Use Cloud Code API
 
 This requires implementing a `CodeAssistServer`-like client that:
+
 1. Calls `https://cloudcode-pa.googleapis.com/v1internal` endpoints
 2. Translates between our request format and Cloud Code API format
 3. Uses the `google-auth-library` OAuth client for Bearer token authentication
 
 The Gemini CLI has already implemented this in:
+
 - `/packages/core/src/code_assist/server.ts` - API client
 - `/packages/core/src/code_assist/converter.ts` - Request/response translation
 

@@ -1265,8 +1265,25 @@ const GooglePlugin: AuthPlugin = {
     }
 
     /**
+     * Cloud Code API Configuration
+     *
+     * The official Gemini CLI uses Google's Cloud Code API (cloudcode-pa.googleapis.com)
+     * instead of the standard Generative Language API (generativelanguage.googleapis.com).
+     *
+     * The Cloud Code API:
+     * 1. Accepts `cloud-platform` OAuth scope (unlike generativelanguage.googleapis.com)
+     * 2. Handles subscription tier validation (FREE, STANDARD, etc.)
+     * 3. Proxies requests to the Generative Language API internally
+     *
+     * @see https://github.com/google-gemini/gemini-cli/blob/main/packages/core/src/code_assist/server.ts
+     * @see https://github.com/link-assistant/agent/issues/100
+     */
+    const CLOUD_CODE_ENDPOINT = 'https://cloudcode-pa.googleapis.com';
+    const CLOUD_CODE_API_VERSION = 'v1internal';
+
+    /**
      * Check if we have a fallback API key available.
-     * This allows trying API key authentication if OAuth fails with scope errors.
+     * This allows trying API key authentication if Cloud Code API fails.
      * See: https://github.com/link-assistant/agent/issues/100
      */
     const getFallbackApiKey = (): string | undefined => {
@@ -1292,6 +1309,184 @@ const GooglePlugin: AuthPlugin = {
         wwwAuth.includes('insufficient_scope') ||
         wwwAuth.includes('ACCESS_TOKEN_SCOPE_INSUFFICIENT')
       );
+    };
+
+    /**
+     * Transform a Generative Language API URL to Cloud Code API URL
+     *
+     * Input:  https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+     * Output: https://cloudcode-pa.googleapis.com/v1internal:generateContent
+     *
+     * The Cloud Code API uses a different URL structure:
+     * - Model is passed in request body, not URL path
+     * - Method is directly after version: /v1internal:methodName
+     */
+    const transformToCloudCodeUrl = (url: string): string | null => {
+      try {
+        const parsed = new URL(url);
+        if (!parsed.hostname.includes('generativelanguage.googleapis.com')) {
+          return null; // Not a Generative Language API URL
+        }
+
+        // Extract the method from the path
+        // Path format: /v1beta/models/gemini-2.0-flash:generateContent
+        const pathMatch = parsed.pathname.match(/:(\w+)$/);
+        if (!pathMatch) {
+          return null; // Can't determine method
+        }
+
+        const method = pathMatch[1];
+        return `${CLOUD_CODE_ENDPOINT}/${CLOUD_CODE_API_VERSION}:${method}`;
+      } catch {
+        return null;
+      }
+    };
+
+    /**
+     * Extract model name from Generative Language API URL
+     *
+     * Input:  https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+     * Output: gemini-2.0-flash
+     */
+    const extractModelFromUrl = (url: string): string | null => {
+      try {
+        const parsed = new URL(url);
+        // Path format: /v1beta/models/gemini-2.0-flash:generateContent
+        const pathMatch = parsed.pathname.match(/\/models\/([^:]+):/);
+        return pathMatch ? pathMatch[1] : null;
+      } catch {
+        return null;
+      }
+    };
+
+    /**
+     * Transform request body for Cloud Code API
+     *
+     * The Cloud Code API expects requests in this format:
+     * {
+     *   model: "gemini-2.0-flash",
+     *   project: "optional-project-id",
+     *   user_prompt_id: "optional-prompt-id",
+     *   request: { contents: [...], generationConfig: {...}, ... }
+     * }
+     *
+     * The standard AI SDK sends:
+     * { contents: [...], generationConfig: {...}, ... }
+     */
+    const transformRequestBody = (body: string, model: string): string => {
+      try {
+        const parsed = JSON.parse(body);
+
+        // Get project ID from environment if available
+        const projectId =
+          process.env['GOOGLE_CLOUD_PROJECT'] ||
+          process.env['GOOGLE_CLOUD_PROJECT_ID'];
+
+        // Wrap in Cloud Code API format
+        const cloudCodeRequest = {
+          model,
+          ...(projectId && { project: projectId }),
+          request: parsed,
+        };
+
+        return JSON.stringify(cloudCodeRequest);
+      } catch {
+        return body; // Return original if parsing fails
+      }
+    };
+
+    /**
+     * Transform Cloud Code API response to standard format
+     *
+     * Cloud Code API returns:
+     * { response: { candidates: [...], ... }, traceId: "..." }
+     *
+     * Standard API returns:
+     * { candidates: [...], ... }
+     */
+    const transformResponseBody = async (
+      response: Response
+    ): Promise<Response> => {
+      // For streaming responses, we need to transform each chunk
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        // The Cloud Code API returns SSE with data: { response: {...} } format
+        // We need to transform each chunk to unwrap the response
+        const reader = response.body?.getReader();
+        if (!reader) return response;
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+
+        const transformedStream = new ReadableStream({
+          async start(controller) {
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                  controller.close();
+                  break;
+                }
+
+                const text = decoder.decode(value, { stream: true });
+
+                // Split by SSE event boundaries
+                const events = text.split('\n\n');
+                for (const event of events) {
+                  if (!event.trim()) continue;
+
+                  // Check if this is a data line
+                  if (event.startsWith('data: ')) {
+                    try {
+                      const jsonStr = event.slice(6).trim();
+                      if (jsonStr === '[DONE]') {
+                        controller.enqueue(encoder.encode(event + '\n\n'));
+                        continue;
+                      }
+
+                      const parsed = JSON.parse(jsonStr);
+
+                      // Unwrap Cloud Code response format if present
+                      const unwrapped = parsed.response || parsed;
+                      controller.enqueue(
+                        encoder.encode(
+                          'data: ' + JSON.stringify(unwrapped) + '\n\n'
+                        )
+                      );
+                    } catch {
+                      // If parsing fails, pass through as-is
+                      controller.enqueue(encoder.encode(event + '\n\n'));
+                    }
+                  } else {
+                    // Non-data lines (like event type), pass through
+                    controller.enqueue(encoder.encode(event + '\n\n'));
+                  }
+                }
+              }
+            } catch (error) {
+              controller.error(error);
+            }
+          },
+        });
+
+        return new Response(transformedStream, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      }
+
+      // For non-streaming responses, parse and unwrap
+      try {
+        const json = await response.json();
+        const unwrapped = json.response || json;
+        return new Response(JSON.stringify(unwrapped), {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      } catch {
+        return response;
+      }
     };
 
     return {
@@ -1341,38 +1536,105 @@ const GooglePlugin: AuthPlugin = {
           };
         }
 
-        // Google API uses Bearer token authentication
+        // Get the original URL
+        const originalUrl =
+          typeof input === 'string'
+            ? input
+            : input instanceof URL
+              ? input.toString()
+              : (input as Request).url;
+
+        // Try to transform to Cloud Code API URL
+        const cloudCodeUrl = transformToCloudCodeUrl(originalUrl);
+        const model = extractModelFromUrl(originalUrl);
+
+        // If this is a Generative Language API request, route through Cloud Code API
+        if (cloudCodeUrl && model) {
+          log.info(() => ({
+            message: 'routing google oauth request through cloud code api',
+            originalUrl: originalUrl.substring(0, 100) + '...',
+            cloudCodeUrl,
+            model,
+          }));
+
+          // Transform request body to Cloud Code format
+          let body = init?.body;
+          if (typeof body === 'string') {
+            body = transformRequestBody(body, model);
+          }
+
+          // Make request to Cloud Code API with Bearer token
+          const headers: Record<string, string> = {
+            ...(init?.headers as Record<string, string>),
+            Authorization: `Bearer ${currentAuth.access}`,
+            'x-goog-api-client': 'agent/0.6.3',
+          };
+          // Remove any API key header if present since we're using OAuth
+          delete headers['x-goog-api-key'];
+
+          const cloudCodeResponse = await fetch(cloudCodeUrl, {
+            ...init,
+            body,
+            headers,
+          });
+
+          // Check for errors and handle fallback
+          if (!cloudCodeResponse.ok) {
+            const fallbackApiKey = getFallbackApiKey();
+            if (fallbackApiKey) {
+              log.warn(() => ({
+                message:
+                  'cloud code api error, falling back to api key with standard api',
+                status: cloudCodeResponse.status,
+              }));
+
+              // Fall back to standard API with API key
+              const apiKeyHeaders: Record<string, string> = {
+                ...(init?.headers as Record<string, string>),
+                'x-goog-api-key': fallbackApiKey,
+              };
+              delete apiKeyHeaders['Authorization'];
+
+              return fetch(originalUrl, {
+                ...init,
+                headers: apiKeyHeaders,
+              });
+            }
+
+            // No fallback available, return the error response
+            return cloudCodeResponse;
+          }
+
+          // Transform response back to standard format
+          return transformResponseBody(cloudCodeResponse);
+        }
+
+        // Not a Generative Language API request, use standard OAuth flow
         const headers: Record<string, string> = {
           ...(init?.headers as Record<string, string>),
           Authorization: `Bearer ${currentAuth.access}`,
         };
-        // Remove any API key header if present since we're using OAuth
         delete headers['x-goog-api-key'];
 
-        // Make the OAuth request
         const oauthResponse = await fetch(input, {
           ...init,
           headers,
         });
 
         // Check if OAuth failed due to insufficient scopes
-        // If so, try fallback to API key authentication
-        // See: https://github.com/link-assistant/agent/issues/100
         if (isScopeError(oauthResponse)) {
           const fallbackApiKey = getFallbackApiKey();
           if (fallbackApiKey) {
             log.warn(() => ({
               message:
                 'oauth scope error, falling back to api key authentication',
-              hint: 'Re-run "agent auth login" and select Google to get updated OAuth scopes',
+              hint: 'This should not happen with Cloud Code API routing',
             }));
 
-            // Build headers for API key authentication
             const apiKeyHeaders: Record<string, string> = {
               ...(init?.headers as Record<string, string>),
               'x-goog-api-key': fallbackApiKey,
             };
-            // Remove OAuth Authorization header
             delete apiKeyHeaders['Authorization'];
 
             return fetch(input, {
@@ -1382,7 +1644,7 @@ const GooglePlugin: AuthPlugin = {
           } else {
             log.error(() => ({
               message: 'oauth scope error and no api key fallback available',
-              hint: 'Either re-run "agent auth login" to get updated OAuth scopes, or set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable',
+              hint: 'Set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable',
             }));
           }
         }
