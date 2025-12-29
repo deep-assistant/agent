@@ -52,6 +52,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: js
 
       - name: Check for changesets
         run: |
@@ -80,15 +81,19 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: js
 
       - name: Run ESLint
         run: npm run lint
+        working-directory: js
 
       - name: Check formatting
         run: npm run format:check
+        working-directory: js
 
       - name: Check file size limit
         run: npm run check:file-size
+        working-directory: js
 
   # Test with Bun (this project is Bun-only)
   # Only runs unit tests (no external dependencies/API calls)
@@ -119,9 +124,11 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+        working-directory: js
 
       - name: Run unit tests
-        run: bun test js/tests/json-standard-unit.test.js
+        run: bun test tests/json-standard-unit.test.js
+        working-directory: js
 
       - name: Commit cached API responses
         # Only commit on the primary OS to avoid conflicts
@@ -170,6 +177,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: js
 
       - name: Update npm for OIDC trusted publishing
         run: node scripts/setup-npm.mjs
@@ -178,7 +186,7 @@ jobs:
         id: check_changesets
         run: |
           # Count changeset files (excluding README.md and config.json)
-          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+          CHANGESET_COUNT=$(find js/.changeset -name "*.md" ! -name "README.md" | wc -l)
           echo "Found $CHANGESET_COUNT changeset file(s)"
           echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
@@ -230,6 +238,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: js
 
       - name: Update npm for OIDC trusted publishing
         run: node scripts/setup-npm.mjs
@@ -276,6 +285,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+        working-directory: js
 
       - name: Create changeset file
         run: node scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
@@ -283,7 +293,7 @@ jobs:
       - name: Format changeset with Prettier
         run: |
           # Run Prettier on the changeset file to ensure it matches project style
-          npx prettier --write ".changeset/*.md" || true
+          cd js && npx prettier --write ".changeset/*.md" || true
 
           echo "Formatted changeset files"
 

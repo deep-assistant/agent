@@ -79,7 +79,7 @@ export default [
   },
   {
     // Test files have different requirements
-    files: ['js/tests/**/*.js', '**/*.test.js'],
+    files: ['tests/**/*.js', '**/*.test.js'],
     rules: {
       'require-await': 'off', // Async functions without await are common in tests
     },
@@ -91,11 +91,6 @@ export default [
       'dist/**',
       '*.min.js',
       '.eslintcache',
-      // Ignore git submodules (reference implementations)
-      'original-opencode/**',
-      'reference-gemini-cli/**',
-      'reference-gemini-cookbook/**',
-      'reference-qwen3-coder/**',
     ],
   },
 ];

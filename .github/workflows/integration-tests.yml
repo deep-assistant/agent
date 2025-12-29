@@ -41,6 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+        working-directory: js
 
       - name: Run integration tests
         run: |
@@ -49,20 +50,22 @@ jobs:
           else
             bun test
           fi
+        working-directory: js
 
       - name: Test MCP CLI commands
         run: |
           # Test help command
-          bun run js/src/index.js mcp --help
+          bun run src/index.js mcp --help
 
           # Test mcp add command for Playwright
-          bun run js/src/index.js mcp add playwright npx @playwright/mcp@latest
+          bun run src/index.js mcp add playwright npx @playwright/mcp@latest
 
           # Verify configuration was created
           cat ~/.config/opencode/opencode.json || echo "Config not found"
 
           # Test mcp list command
-          bun run js/src/index.js mcp list
+          bun run src/index.js mcp list
+        working-directory: js
 
   test-all:
     name: Integration Tests (${{ matrix.os }})
@@ -88,6 +91,7 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+        working-directory: js
 
       - name: Run integration tests
         run: |
@@ -96,17 +100,19 @@ jobs:
           else
             bun test
           fi
+        working-directory: js
 
       - name: Test MCP CLI commands
         run: |
           # Test help command
-          bun run js/src/index.js mcp --help
+          bun run src/index.js mcp --help
 
           # Test mcp add command for Playwright
-          bun run js/src/index.js mcp add playwright npx @playwright/mcp@latest
+          bun run src/index.js mcp add playwright npx @playwright/mcp@latest
 
           # Verify configuration was created
           cat ~/.config/opencode/opencode.json || echo "Config not found"
 
           # Test mcp list command
-          bun run js/src/index.js mcp list
+          bun run src/index.js mcp list
+        working-directory: js
