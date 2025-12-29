@@ -7,6 +7,7 @@ This case study documents the lessons learned from translating the `@link-assist
 ## Project Context
 
 The agent CLI tool provides:
+
 - File operations (read, write, edit)
 - Directory operations (list, glob)
 - Search operations (grep)
@@ -18,6 +19,7 @@ The agent CLI tool provides:
 ### 1. Reorganization First
 
 Before translation, the JavaScript codebase was reorganized:
+
 - Moved `src/` to `js/src/`
 - Moved `tests/` to `js/tests/`
 - Updated all configuration files (package.json, tsconfig.json, eslint.config.js)
@@ -27,6 +29,7 @@ This separation allows both implementations to coexist and be maintained indepen
 ### 2. Incremental Translation
 
 Tools were translated incrementally, with tests added for each:
+
 1. Core utilities (error handling, filesystem, binary detection)
 2. Simple tools (read, write, list)
 3. Complex tools (edit, grep, glob, bash)
@@ -141,6 +144,7 @@ let cwd = args.working_directory.clone().unwrap_or_else(|| {
 ### Async Runtime
 
 Chose `tokio` for the async runtime due to:
+
 - Wide ecosystem support
 - Required for async command execution
 - Good integration with other async crates
@@ -148,6 +152,7 @@ Chose `tokio` for the async runtime due to:
 ### Error Handling
 
 Created a custom `AgentError` enum with:
+
 - Clear error variants (ToolExecution, InvalidArguments, FileNotFound, etc.)
 - JSON serialization for API compatibility
 - Helpful context in error messages
@@ -177,6 +182,7 @@ This mirrors the JavaScript implementation's interface while being idiomatic Rus
 ## Dependencies
 
 Key crates used:
+
 - `clap` - CLI argument parsing
 - `tokio` - Async runtime
 - `serde` / `serde_json` - JSON serialization
