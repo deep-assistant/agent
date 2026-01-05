@@ -5,10 +5,7 @@ import { MCP } from '../src/mcp';
 describe('MCP Tool Call Timeout', () => {
   describe('withTimeout utility', () => {
     test('resolves when promise completes within timeout', async () => {
-      const result = await withTimeout(
-        Promise.resolve('success'),
-        1000
-      );
+      const result = await withTimeout(Promise.resolve('success'), 1000);
       expect(result).toBe('success');
     });
 
@@ -24,10 +21,7 @@ describe('MCP Tool Call Timeout', () => {
 
     test('clears timeout when promise resolves', async () => {
       // This test ensures the timeout is cleared and doesn't cause issues
-      const result = await withTimeout(
-        Promise.resolve('quick'),
-        1000
-      );
+      const result = await withTimeout(Promise.resolve('quick'), 1000);
       expect(result).toBe('quick');
       // Wait a bit to ensure no lingering timeout errors
       await new Promise((r) => setTimeout(r, 50));
