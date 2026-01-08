@@ -3,7 +3,7 @@
 import { Server } from './server/server.ts';
 import { Instance } from './project/instance.ts';
 import { Log } from './util/log.ts';
-import { Bus } from './bus/index.ts';
+// Bus is used via createBusEventSubscription in event-handler.js
 import { Session } from './session/index.ts';
 import { SessionPrompt } from './session/prompt.ts';
 // EOL is reserved for future use
@@ -23,6 +23,7 @@ import {
   runContinuousDirectMode,
   resolveResumeSession,
 } from './cli/continuous-mode.js';
+import { createBusEventSubscription } from './cli/event-handler.js';
 import { createRequire } from 'module';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -430,77 +431,15 @@ async function runServerMode(
     const eventHandler = createEventHandler(jsonStandard, sessionID);
 
     // Subscribe to all bus events and output in selected format
-    const eventPromise = new Promise((resolve) => {
-      unsub = Bus.subscribeAll((event) => {
-        // Output events in selected JSON format
-        if (event.type === 'message.part.updated') {
-          const part = event.properties.part;
-          if (part.sessionID !== sessionID) {
-            return;
-          }
-
-          // Output different event types
-          if (part.type === 'step-start') {
-            eventHandler.output({
-              type: 'step_start',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'step-finish') {
-            eventHandler.output({
-              type: 'step_finish',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'text' && part.time?.end) {
-            eventHandler.output({
-              type: 'text',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'tool' && part.state.status === 'completed') {
-            eventHandler.output({
-              type: 'tool_use',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-        }
-
-        // Handle session idle to know when to stop
-        if (
-          event.type === 'session.idle' &&
-          event.properties.sessionID === sessionID
-        ) {
-          resolve();
-        }
-
-        // Handle errors
-        if (event.type === 'session.error') {
-          const props = event.properties;
-          if (props.sessionID !== sessionID || !props.error) {
-            return;
-          }
+    const { unsub: eventUnsub, idlePromise: eventPromise } =
+      createBusEventSubscription({
+        sessionID,
+        eventHandler,
+        onError: () => {
           hasError = true;
-          eventHandler.output({
-            type: 'error',
-            timestamp: Date.now(),
-            sessionID,
-            error: props.error,
-          });
-        }
+        },
       });
-    });
+    unsub = eventUnsub;
 
     // Send message to session with specified model (default: opencode/grok-code)
     const message = request.message || 'hi';
@@ -579,77 +518,15 @@ async function runDirectMode(
     const eventHandler = createEventHandler(jsonStandard, sessionID);
 
     // Subscribe to all bus events and output in selected format
-    const eventPromise = new Promise((resolve) => {
-      unsub = Bus.subscribeAll((event) => {
-        // Output events in selected JSON format
-        if (event.type === 'message.part.updated') {
-          const part = event.properties.part;
-          if (part.sessionID !== sessionID) {
-            return;
-          }
-
-          // Output different event types
-          if (part.type === 'step-start') {
-            eventHandler.output({
-              type: 'step_start',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'step-finish') {
-            eventHandler.output({
-              type: 'step_finish',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'text' && part.time?.end) {
-            eventHandler.output({
-              type: 'text',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-
-          if (part.type === 'tool' && part.state.status === 'completed') {
-            eventHandler.output({
-              type: 'tool_use',
-              timestamp: Date.now(),
-              sessionID,
-              part,
-            });
-          }
-        }
-
-        // Handle session idle to know when to stop
-        if (
-          event.type === 'session.idle' &&
-          event.properties.sessionID === sessionID
-        ) {
-          resolve();
-        }
-
-        // Handle errors
-        if (event.type === 'session.error') {
-          const props = event.properties;
-          if (props.sessionID !== sessionID || !props.error) {
-            return;
-          }
+    const { unsub: eventUnsub, idlePromise: eventPromise } =
+      createBusEventSubscription({
+        sessionID,
+        eventHandler,
+        onError: () => {
           hasError = true;
-          eventHandler.output({
-            type: 'error',
-            timestamp: Date.now(),
-            sessionID,
-            error: props.error,
-          });
-        }
+        },
       });
-    });
+    unsub = eventUnsub;
 
     // Send message to session directly
     const message = request.message || 'hi';
