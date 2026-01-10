@@ -105,5 +105,6 @@ After the fix is applied:
 ## References
 
 - [GitHub Actions Run #20803315337](https://github.com/link-assistant/agent/actions/runs/20803315337/job/59752415630)
+- [CI Run Log (local copy)](./ci-run-20803315337.txt)
 - [npm ERESOLVE Documentation](https://docs.npmjs.com/cli/v8/commands/npm-install#strict-peer-deps)
 - [Issue #111](https://github.com/link-assistant/agent/issues/111)
