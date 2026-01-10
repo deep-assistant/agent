@@ -15,6 +15,13 @@
 
 import { readFileSync, appendFileSync } from 'fs';
 
+import {
+  getJsRoot,
+  getPackageJsonPath,
+  needsCd,
+  parseJsRootConfig,
+} from './js-paths.mjs';
+
 // Package name from package.json
 const PACKAGE_NAME = '@link-assistant/agent';
 
@@ -30,14 +37,24 @@ const { makeConfig } = await use('lino-arguments');
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
-    yargs.option('should-pull', {
-      type: 'boolean',
-      default: getenv('SHOULD_PULL', false),
-      describe: 'Pull latest changes before publishing',
-    }),
+    yargs
+      .option('should-pull', {
+        type: 'boolean',
+        default: getenv('SHOULD_PULL', false),
+        describe: 'Pull latest changes before publishing',
+      })
+      .option('js-root', {
+        type: 'string',
+        default: getenv('JS_ROOT', ''),
+        describe: 'JavaScript package root directory (auto-detected if not specified)',
+      }),
 });
 
-const { shouldPull } = config;
+const { shouldPull, jsRoot: jsRootArg } = config;
+
+// Get JavaScript package root (auto-detect or use explicit config)
+const jsRootConfig = jsRootArg || parseJsRootConfig();
+const jsRoot = getJsRoot({ jsRoot: jsRootConfig, verbose: true });
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
 
@@ -73,7 +90,8 @@ async function main() {
     }
 
     // Get current version
-    const packageJson = JSON.parse(readFileSync('./js/package.json', 'utf8'));
+    const packageJsonPath = getPackageJsonPath({ jsRoot });
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
     console.log(`Current version to publish: ${currentVersion}`);
 
@@ -107,8 +125,12 @@ async function main() {
       try {
         // Run changeset:publish from the js directory where package.json with this script exists
         // IMPORTANT: cd is a virtual command that calls process.chdir(), so we restore after
-        await $`cd js && npm run changeset:publish`;
-        process.chdir(originalCwd);
+        if (needsCd({ jsRoot })) {
+          await $`cd ${jsRoot} && npm run changeset:publish`;
+          process.chdir(originalCwd);
+        } else {
+          await $`npm run changeset:publish`;
+        }
         setOutput('published', 'true');
         setOutput('published_version', currentVersion);
         console.log(
@@ -117,7 +139,9 @@ async function main() {
         return;
       } catch (_error) {
         // Restore cwd on error before retry
-        process.chdir(originalCwd);
+        if (needsCd({ jsRoot })) {
+          process.chdir(originalCwd);
+        }
         if (i < MAX_RETRIES) {
           console.log(
             `Publish failed, waiting ${RETRY_DELAY / 1000}s before retry...`
