@@ -11,6 +11,18 @@ import { Decimal } from 'decimal.js';
 
 console.log('=== Issue #119: DecimalError Reproduction ===\n');
 
+// First, demonstrate the actual crash with Decimal.js directly
+console.log('=== Demonstrating actual DecimalError crash ===\n');
+try {
+  const badValue = { count: 100 };
+  console.log(`Attempting: new Decimal(${JSON.stringify(badValue)})`);
+  const result = new Decimal(badValue as unknown as number);
+  console.log('Result:', result.toString());
+} catch (error) {
+  console.log(`CRASHED with: ${(error as Error).message}`);
+  console.log('This is the exact error from issue #119!\n');
+}
+
 // Simulate the original getUsage implementation (without safe wrapper)
 function getUsageOriginal(usage: {
   inputTokens?: number;
