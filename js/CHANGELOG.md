@@ -1,5 +1,13 @@
 # @link-assistant/agent
 
+## 0.8.1
+
+### Patch Changes
+
+- 4f4e6e7: Add publish verification and failure detection to prevent false positives
+
+  The npm publish script now detects failures even when changeset publish exits with code 0. This prevents the CI from falsely reporting success when packages fail to publish.
+
 ## 0.8.0
 
 ### Minor Changes
