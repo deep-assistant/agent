@@ -149,6 +149,32 @@ echo "hi" | agent --disable-tools bash,write,edit
 
 Can also be set with `LINK_ASSISTANT_AGENT_DISABLE_TOOLS=bash,write,edit`.
 
+### Fine-grained permission system (`--permission-mode` / `--permission`)
+
+`--read-only` / `--disable-tools` remove tools entirely (the hard layer). For
+finer control — read-only **planning** that still allows safe shell commands, or
+**per-command approval** — the agent ships a native, JSON-driven permission
+system ported from OpenCode, with **no TUI**:
+
+```bash
+# Deny edits, allow read-only shell, ask before anything else (planning):
+agent --permission-mode plan --input-format stream-json
+
+# Hard read-only that still allows read-only shell commands, never asks:
+agent --permission-mode readonly -p "summarize the repo layout"
+
+# Approve every mutating tool over JSON (stdin/stdout):
+agent --permission-mode ask --input-format stream-json
+
+# OpenCode-compatible fine-grained override, merged on top of the mode:
+agent --permission '{"edit":"ask","bash":{"git push*":"ask","*":"allow"}}'
+```
+
+The default mode is `auto` (full autonomy, never asks — unchanged behavior).
+Approvals are exchanged as `permission_request` / `permission_response` JSON
+frames. See [docs/permissions.md](docs/permissions.md) for the full protocol,
+every mode, the JSON shapes, environment variables, and worked examples.
+
 ## Testing
 
 ### Run All Tool Tests

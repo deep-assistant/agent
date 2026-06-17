@@ -19,6 +19,12 @@
 > with `--read-only` (or `--disable-tools bash,write,edit`), a native,
 > enforceable mode that disables all filesystem-mutating and shell tools. See
 > [TOOLS.md → Read-Only / Planning Mode](TOOLS.md#read-only--planning-mode).
+>
+> 🔐 **Opt-in permission system:** For finer-grained control there is a native,
+> JSON-driven permission system (`--permission-mode auto|plan|readonly|ask` and
+> an OpenCode-compatible `--permission '<json>'` override) with per-command
+> approval over stdin/stdout and **no TUI**. Default stays full auto. See
+> [docs/permissions.md](docs/permissions.md).
 
 ## Implementations
 

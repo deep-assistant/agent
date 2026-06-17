@@ -176,6 +176,20 @@ pub struct Args {
     /// Working directory
     #[arg(long)]
     pub working_directory: Option<PathBuf>,
+
+    /// Permission mode: "auto" (default, full autonomy, never asks), "plan"
+    /// (deny edits, allow read-only shell, ask otherwise), "readonly" (deny all
+    /// mutations, never asks), or "ask" (approve every mutating tool over JSON).
+    /// Env: LINK_ASSISTANT_AGENT_PERMISSION_MODE. See docs/permissions.md.
+    #[arg(long, default_value_t = crate::permission::default_permission_mode(), value_parser = ["auto", "plan", "readonly", "ask"])]
+    pub permission_mode: String,
+
+    /// OpenCode-compatible permission override JSON, merged on top of the mode
+    /// (override wins; bash maps merge key-by-key). Example:
+    /// '{"edit":"ask","bash":{"git push*":"ask","*":"allow"}}'.
+    /// Env: LINK_ASSISTANT_AGENT_PERMISSION. See docs/permissions.md.
+    #[arg(long, default_value_t = crate::permission::default_permission())]
+    pub permission: String,
 }
 
 impl Args {
@@ -221,6 +235,19 @@ impl Args {
     /// Effective summarize-session: defaults to true, --no-summarize-session sets to false
     pub fn summarize_session(&self) -> bool {
         !self.no_summarize_session
+    }
+
+    /// Resolve the active permission policy from --permission-mode and
+    /// --permission. Returns a clear error if the mode or override is invalid,
+    /// so the CLI fails fast when the requested mode cannot be honored (#271 R6).
+    pub fn resolve_policy(&self) -> std::result::Result<crate::permission::Policy, String> {
+        let mode = crate::permission::Mode::parse(&self.permission_mode)?;
+        let override_raw = if self.permission.trim().is_empty() {
+            None
+        } else {
+            Some(self.permission.as_str())
+        };
+        crate::permission::policy(mode, override_raw)
     }
 }
 
@@ -348,6 +375,12 @@ pub async fn run(args: Args) -> Result<()> {
 
     // Resolve system messages from file args if needed
     let (system_message, append_system_message) = resolve_system_messages(&args)?;
+
+    // Validate the permission policy up front so an invalid --permission-mode or
+    // --permission override fails clearly instead of silently being ignored (#271 R6).
+    if let Err(e) = args.resolve_policy() {
+        return Err(AgentError::invalid_arguments("permission", e));
+    }
 
     // Handle --disable-stdin: requires --prompt or shows help
     if args.disable_stdin && args.prompt.is_none() {
@@ -564,6 +597,26 @@ async fn run_with_input(
                     timestamp: timestamp_ms(),
                     session_id: session_id.clone(),
                     text: format!("Append system message: {}", append_msg),
+                },
+                args.compact_json,
+            );
+        }
+
+        output_event(
+            &OutputEvent::Text {
+                timestamp: timestamp_ms(),
+                session_id: session_id.clone(),
+                text: format!("Permission mode: {}", args.permission_mode),
+            },
+            args.compact_json,
+        );
+
+        if !args.permission.trim().is_empty() {
+            output_event(
+                &OutputEvent::Text {
+                    timestamp: timestamp_ms(),
+                    session_id: session_id.clone(),
+                    text: format!("Permission override: {}", args.permission),
                 },
                 args.compact_json,
             );
