@@ -105,6 +105,50 @@ Fetches content from a specified URL and processes it using an AI model.
 **Status:** ✅ Fully supported and tested
 **Test:** [tests/webfetch.tools.test.js](tests/webfetch.tools.test.js)
 
+## Read-Only / Planning Mode
+
+By default all tools are enabled and the agent runs with full, unrestricted
+access. For planning-only tasks (or to enforce a per-command approval UX in a
+parent process such as
+[`agent-commander`](https://github.com/link-assistant/agent-commander)), the
+agent supports a **native, enforceable read-only mode**.
+
+### `--read-only`
+
+Disables every filesystem-mutating and shell tool so the agent can only read,
+search and plan:
+
+| Tool        | read-only |
+| ----------- | --------- |
+| `bash`      | ❌ disabled |
+| `edit`      | ❌ disabled |
+| `write`     | ❌ disabled |
+| `multiedit` | ❌ disabled |
+| `patch`     | ❌ disabled |
+| everything else (`read`, `list`, `glob`, `grep`, `websearch`, `codesearch`, `webfetch`, `todo`, `batch`, `task`) | ✅ enabled |
+
+```bash
+echo "Summarize this project" | agent --read-only
+```
+
+Can also be enabled with the `LINK_ASSISTANT_AGENT_READ_ONLY=true` environment
+variable.
+
+The restriction is enforced where tools are exposed to the model **and** when a
+tool is invoked indirectly through the `batch` tool, so it cannot be bypassed by
+the model.
+
+### `--disable-tools <list>`
+
+Disable an explicit, comma-separated set of tools (in addition to or instead of
+`--read-only`):
+
+```bash
+echo "hi" | agent --disable-tools bash,write,edit
+```
+
+Can also be set with `LINK_ASSISTANT_AGENT_DISABLE_TOOLS=bash,write,edit`.
+
 ## Testing
 
 ### Run All Tool Tests

@@ -52,6 +52,8 @@ export interface AgentConfig {
   mcpDefaultToolCallTimeout: number;
   mcpMaxToolCallTimeout: number;
   verifyImagesAtReadTool: boolean;
+  readOnly: boolean;
+  disableTools: string;
 }
 
 // Fallback helpers for when config is not yet initialized (early imports/tests)
@@ -132,6 +134,8 @@ function defaultConfig(): AgentConfig {
     })(),
     verifyImagesAtReadTool:
       getEnvStr('LINK_ASSISTANT_AGENT_VERIFY_IMAGES_AT_READ_TOOL') !== 'false',
+    readOnly: truthyEnv('LINK_ASSISTANT_AGENT_READ_ONLY'),
+    disableTools: getEnvStr('LINK_ASSISTANT_AGENT_DISABLE_TOOLS') ?? '',
   };
 }
 
@@ -240,6 +244,18 @@ function buildAgentConfigOptions({
       type: 'boolean',
       description: 'Verify images when using the read tool',
       default: getenv('LINK_ASSISTANT_AGENT_VERIFY_IMAGES_AT_READ_TOOL', true),
+    })
+    .option('read-only', {
+      type: 'boolean',
+      description:
+        'Enforceable read-only / planning mode. Disables all filesystem-mutating and shell tools (bash, edit, write, multiedit, patch).',
+      default: getenv('LINK_ASSISTANT_AGENT_READ_ONLY', false),
+    })
+    .option('disable-tools', {
+      type: 'string',
+      description:
+        'Comma-separated list of tool ids to disable (e.g. "bash,write,edit"). Disabled tools are never exposed to the model and are rejected if invoked via batch.',
+      default: getenv('LINK_ASSISTANT_AGENT_DISABLE_TOOLS', ''),
     });
 }
 
@@ -292,6 +308,8 @@ export function initConfig(argv?: string[]): AgentConfig {
     mcpDefaultToolCallTimeout: parsed.mcpDefaultToolCallTimeout ?? 120000,
     mcpMaxToolCallTimeout: parsed.mcpMaxToolCallTimeout ?? 600000,
     verifyImagesAtReadTool: parsed.verifyImagesAtReadTool ?? true,
+    readOnly: parsed.readOnly ?? false,
+    disableTools: parsed.disableTools ?? '',
   });
 
   // Propagate verbose to env var for subprocess resilience (issue #227).

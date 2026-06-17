@@ -293,6 +293,18 @@ Options:
   --append-system-message        Append to the default system message
   --append-system-message-file   Append to the default system message from file
 
+Permission Options:
+  --read-only                    Enforceable read-only / planning mode.
+                                 Disables all filesystem-mutating and shell
+                                 tools (bash, edit, write, multiedit, patch)
+                                 so the agent can only read, search and plan.
+                                 Env: LINK_ASSISTANT_AGENT_READ_ONLY=true
+  --disable-tools <list>         Comma-separated list of tool ids to disable
+                                 (e.g. "bash,write,edit"). Disabled tools are
+                                 never exposed to the model and are rejected if
+                                 invoked via batch.
+                                 Env: LINK_ASSISTANT_AGENT_DISABLE_TOOLS
+
 Stdin Mode Options:
   -p, --prompt                   Direct prompt (bypasses stdin reading)
   --disable-stdin                Disable stdin streaming (requires --prompt)

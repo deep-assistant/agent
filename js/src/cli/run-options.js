@@ -211,5 +211,16 @@ export function buildRunOptions(yargs, defaultOptions = {}) {
       type: 'number',
       description:
         'Override the temperature for model completions. When not set, the default per-model temperature is used.',
+    })
+    .option('read-only', {
+      type: 'boolean',
+      description:
+        'Enforceable read-only / planning mode. Disables all filesystem-mutating and shell tools (bash, edit, write, multiedit, patch) so the agent can only read, search and plan. Maps to agent-commander --read-only.',
+      default: false,
+    })
+    .option('disable-tools', {
+      type: 'string',
+      description:
+        'Comma-separated list of tool ids to disable (e.g. "bash,write,edit"). Disabled tools are never exposed to the model and are rejected if invoked via batch.',
     });
 }

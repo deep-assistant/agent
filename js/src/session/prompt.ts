@@ -1128,6 +1128,12 @@ export namespace SessionPrompt {
       ),
       mergeDeep(input.tools ?? {})
     );
+    // Enforce read-only / planning mode and explicit --disable-tools. These
+    // denials are applied last so they always win over agent and per-message
+    // tool overrides (issue #271).
+    for (const id of ToolRegistry.deniedTools()) {
+      enabledTools[id] = false;
+    }
     for (const item of await ToolRegistry.tools(
       input.model.providerID,
       input.model.modelID

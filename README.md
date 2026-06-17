@@ -14,6 +14,11 @@
 > - ⚠️ **Autonomous Execution** - Makes decisions and executes actions independently
 >
 > **ONLY use in isolated environments** (VMs, Docker containers) where AI agents can have unrestricted access. **NOT SAFE** for personal computers, production servers, or systems with sensitive data.
+>
+> 🛡️ **Opt-in read-only mode:** For planning-only tasks you can run the agent
+> with `--read-only` (or `--disable-tools bash,write,edit`), a native,
+> enforceable mode that disables all filesystem-mutating and shell tools. See
+> [TOOLS.md → Read-Only / Planning Mode](TOOLS.md#read-only--planning-mode).
 
 ## Implementations
 

@@ -2,6 +2,7 @@ import { Ripgrep } from '../file/ripgrep';
 import { Global } from '../global';
 import { Filesystem } from '../util/filesystem';
 import { Config } from '../config/file-config';
+import { config as runtimeConfig } from '../config/config';
 
 import { Instance } from '../project/instance';
 import path from 'path';
@@ -42,6 +43,18 @@ export namespace SystemPrompt {
 
   export async function environment() {
     const project = Instance.project;
+    const readOnlyNote = runtimeConfig.readOnly
+      ? [
+          ``,
+          `<read_only_mode>`,
+          `  You are running in read-only / planning mode. Tools that modify the`,
+          `  filesystem or execute shell commands (bash, edit, write, multiedit,`,
+          `  patch) are disabled and will be rejected if attempted. You may only`,
+          `  read, search, and plan. Describe the changes you would make instead`,
+          `  of attempting to apply them.`,
+          `</read_only_mode>`,
+        ].join('\n')
+      : '';
     return [
       [
         `Here is some useful information about the environment you are running in:`,
@@ -51,6 +64,7 @@ export namespace SystemPrompt {
         `  Platform: ${process.platform}`,
         `  Today's date: ${new Date().toDateString()}`,
         `</env>`,
+        readOnlyNote,
         `<files>`,
         `  ${
           project.vcs === 'git'
