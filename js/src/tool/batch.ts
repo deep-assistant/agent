@@ -54,6 +54,14 @@ export const BatchTool = Tool.define('batch', async () => {
             );
           }
 
+          // Enforce read-only / planning mode and --disable-tools even when a
+          // tool is invoked indirectly through batch (issue #271).
+          if (ToolRegistry.deniedTools().has(call.tool)) {
+            throw new Error(
+              `Tool '${call.tool}' is disabled in read-only / planning mode and cannot be executed.`
+            );
+          }
+
           const tool = toolMap.get(call.tool);
           if (!tool) {
             const availableToolsList = Array.from(toolMap.keys()).filter(

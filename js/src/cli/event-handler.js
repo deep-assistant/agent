@@ -81,6 +81,27 @@ export function createBusEventSubscription({
       }
     }
 
+    // Emit a JSON permission request when a tool needs approval (issue #271).
+    // The consumer replies with a `permission_response` frame over stdin which
+    // is routed to Permission.respond. No TUI is involved.
+    if (event.type === 'permission.updated') {
+      const permission = event.properties;
+      if (permission.sessionID !== sessionID) {
+        return;
+      }
+      eventHandler.output({
+        type: 'permission_request',
+        timestamp: Date.now(),
+        sessionID,
+        permissionID: permission.id,
+        callID: permission.callID,
+        tool: permission.type,
+        pattern: permission.pattern,
+        title: permission.title,
+        metadata: permission.metadata,
+      });
+    }
+
     // Handle session idle to know when to stop
     if (
       event.type === 'session.idle' &&

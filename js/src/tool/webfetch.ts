@@ -3,6 +3,7 @@ import { Tool } from './tool';
 import TurndownService from 'turndown';
 import DESCRIPTION from './webfetch.txt';
 import { createVerboseFetch } from '../util/verbose-fetch';
+import { Permission } from '../permission';
 
 const verboseFetch = createVerboseFetch(fetch, { caller: 'webfetch' });
 
@@ -33,7 +34,17 @@ export const WebFetchTool = Tool.define('webfetch', {
       throw new Error('URL must start with http:// or https://');
     }
 
-    // No restrictions - unrestricted web fetch
+    // Permission enforcement (issue #271). `auto` allows; plan/readonly allow
+    // (webfetch is read-only); `ask` emits a JSON permission request.
+    await Permission.check({
+      type: 'webfetch',
+      title: params.url,
+      sessionID: ctx.sessionID,
+      messageID: ctx.messageID,
+      callID: ctx.callID,
+      metadata: { url: params.url },
+    });
+
     const timeout = Math.min(
       (params.timeout ?? DEFAULT_TIMEOUT / 1000) * 1000,
       MAX_TIMEOUT

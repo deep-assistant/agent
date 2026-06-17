@@ -8,6 +8,7 @@ import { lazy } from '../util/lazy';
 import { Language } from 'web-tree-sitter';
 import { $ } from 'bun';
 import { Filesystem } from '../util/filesystem';
+import { Permission } from '../permission';
 import { fileURLToPath } from 'url';
 
 const MAX_OUTPUT_LENGTH = 30_000;
@@ -71,7 +72,46 @@ export const BashTool = Tool.define('bash', {
     }
     const timeout = Math.min(params.timeout ?? DEFAULT_TIMEOUT, MAX_TIMEOUT);
 
-    // No restrictions - unrestricted command execution
+    // Permission enforcement (issue #271). In the default `auto` mode every
+    // bash pattern resolves to `allow`, so we skip the tree-sitter parse
+    // entirely and keep zero overhead. In plan/readonly/ask modes (or with a
+    // `--permission` override) we parse the shell line into its individual
+    // command nodes and evaluate each against the bash policy: a `deny` match
+    // throws, `ask` matches are batched into a single JSON permission request.
+    if (Permission.bashEnforced()) {
+      const tree = await parser().then((p) => p.parse(params.command));
+      if (!tree) {
+        throw new Error('Failed to parse command');
+      }
+      const commands: string[][] = [];
+      for (const node of tree.rootNode.descendantsOfType('command')) {
+        if (!node) continue;
+        const command: string[] = [];
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (!child) continue;
+          if (
+            child.type !== 'command_name' &&
+            child.type !== 'word' &&
+            child.type !== 'string' &&
+            child.type !== 'raw_string' &&
+            child.type !== 'concatenation'
+          ) {
+            continue;
+          }
+          command.push(child.text);
+        }
+        commands.push(command);
+      }
+      await Permission.checkBashTokens({
+        commands,
+        command: params.command,
+        sessionID: ctx.sessionID,
+        messageID: ctx.messageID,
+        callID: ctx.callID,
+      });
+    }
+
     const proc = spawn(params.command, {
       shell: true,
       cwd: Instance.directory,

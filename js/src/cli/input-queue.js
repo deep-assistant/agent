@@ -30,18 +30,47 @@ export class InputQueue {
       return parseStreamJsonInput(trimmed);
     }
 
+    let parsed;
     try {
-      const parsed = JSON.parse(trimmed);
-      // If it has a message field, use it directly
-      if (typeof parsed === 'object' && parsed !== null) {
-        return parsed;
-      }
-      // Otherwise wrap it
-      return { message: JSON.stringify(parsed) };
+      parsed = JSON.parse(trimmed);
     } catch (_e) {
       // Not JSON, treat as plain text message
       return { message: trimmed };
     }
+
+    // If it has a message field, use it directly
+    if (typeof parsed === 'object' && parsed !== null) {
+      // Permission approval reply (issue #271) — normalize to a `kind` frame
+      // so it is routed to Permission.respond, mirroring stream-json mode.
+      if (parsed.type === 'permission_response') {
+        const permissionID = parsed.permissionID ?? parsed.permission_id;
+        const response = parsed.response;
+        if (typeof permissionID !== 'string' || !permissionID) {
+          throw new Error(
+            'Invalid permission_response: expected string "permissionID"'
+          );
+        }
+        if (
+          response !== 'once' &&
+          response !== 'always' &&
+          response !== 'reject'
+        ) {
+          throw new Error(
+            'Invalid permission_response: "response" must be "once", "always" or "reject"'
+          );
+        }
+        return {
+          kind: 'permission_response',
+          permissionID,
+          response,
+          raw: trimmed,
+          parsed,
+        };
+      }
+      return parsed;
+    }
+    // Otherwise wrap it
+    return { message: JSON.stringify(parsed) };
   }
 
   /**
@@ -276,6 +305,33 @@ export function parseStreamJsonInput(input) {
     return {
       kind: 'system',
       system,
+      raw: input,
+      parsed: frame,
+      format: 'stream-json',
+      inputType: type,
+    };
+  }
+
+  // Permission approval reply (issue #271). Resolves a pending
+  // `permission_request` emitted by the agent. `response` is one of
+  // `once` | `always` | `reject`.
+  if (type === 'permission_response') {
+    const permissionID = frame.permissionID ?? frame.permission_id;
+    const response = frame.response;
+    if (typeof permissionID !== 'string' || !permissionID) {
+      throw new Error(
+        'Invalid permission_response frame: expected string "permissionID"'
+      );
+    }
+    if (response !== 'once' && response !== 'always' && response !== 'reject') {
+      throw new Error(
+        'Invalid permission_response frame: "response" must be "once", "always" or "reject"'
+      );
+    }
+    return {
+      kind: 'permission_response',
+      permissionID,
+      response,
       raw: input,
       parsed: frame,
       format: 'stream-json',

@@ -3,6 +3,7 @@ import * as path from 'path';
 import { Tool } from './tool';
 import DESCRIPTION from './write.txt';
 import { Instance } from '../project/instance';
+import { Permission } from '../permission';
 
 export const WriteTool = Tool.define('write', {
   description: DESCRIPTION,
@@ -15,10 +16,21 @@ export const WriteTool = Tool.define('write', {
       ),
   }),
   async execute(params, ctx) {
-    // No restrictions - unrestricted file system access
     const filepath = path.isAbsolute(params.filePath)
       ? params.filePath
       : path.join(Instance.directory, params.filePath);
+
+    // Permission enforcement (issue #271). Writing is governed by the same
+    // `edit` policy as the edit tool: `auto` allows, plan/readonly deny,
+    // `ask` emits a JSON permission request.
+    await Permission.check({
+      type: 'edit',
+      title: filepath,
+      sessionID: ctx.sessionID,
+      messageID: ctx.messageID,
+      callID: ctx.callID,
+      metadata: { filePath: filepath },
+    });
 
     const file = Bun.file(filepath);
     const exists = await file.exists();

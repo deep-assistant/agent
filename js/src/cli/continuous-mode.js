@@ -10,6 +10,7 @@ import { Session } from '../session/index.ts';
 import { SessionPrompt } from '../session/prompt.ts';
 import { createEventHandler, serializeOutput } from '../json-standard/index.ts';
 import { createContinuousStdinReader } from './input-queue.js';
+import { Permission } from '../permission/index.ts';
 import { Log } from '../util/log.ts';
 import { config } from '../config/config.ts';
 import { createVerboseFetch } from '../util/verbose-fetch.ts';
@@ -323,6 +324,19 @@ export async function runContinuousServerMode(
         return;
       }
 
+      // Permission approval reply (issue #271). Resolve a pending tool
+      // permission request without interrupting the in-flight turn — this must
+      // bypass the `isProcessing` queue, since the turn is blocked waiting for it.
+      if (message.kind === 'permission_response') {
+        Permission.respond({
+          sessionID,
+          permissionID: message.permissionID,
+          response: message.response,
+        });
+        outputConsumedInput({ message, jsonStandard, sessionID, compactJson });
+        return;
+      }
+
       if (isProcessing) {
         pendingMessages.push(message);
         return;
@@ -573,6 +587,19 @@ export async function runContinuousDirectMode(
 
       if (message.kind === 'system') {
         currentSystemMessage = message.system;
+        outputConsumedInput({ message, jsonStandard, sessionID, compactJson });
+        return;
+      }
+
+      // Permission approval reply (issue #271). Resolve a pending tool
+      // permission request without interrupting the in-flight turn — this must
+      // bypass the `isProcessing` queue, since the turn is blocked waiting for it.
+      if (message.kind === 'permission_response') {
+        Permission.respond({
+          sessionID,
+          permissionID: message.permissionID,
+          response: message.response,
+        });
         outputConsumedInput({ message, jsonStandard, sessionID, compactJson });
         return;
       }

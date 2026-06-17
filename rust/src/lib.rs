@@ -7,5 +7,6 @@ pub mod cli;
 pub mod defaults;
 pub mod error;
 pub mod id;
+pub mod permission;
 pub mod tool;
 pub mod util;

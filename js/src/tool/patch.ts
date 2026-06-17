@@ -8,6 +8,7 @@ import { FileWatcher } from '../file/watcher';
 import { Instance } from '../project/instance';
 import { Patch } from '../patch';
 import { Filesystem } from '../util/filesystem';
+import { Permission } from '../permission';
 import { createTwoFilesPatch } from 'diff';
 
 const PatchParams = z.object({
@@ -141,7 +142,24 @@ export const PatchTool = Tool.define('patch', {
       }
     }
 
-    // No restrictions - apply changes directly
+    // Permission enforcement (issue #271). Patching mutates the filesystem and
+    // is governed by the `edit` policy. `auto` allows; plan/readonly deny;
+    // `ask` emits a JSON permission request per affected file.
+    for (const change of fileChanges) {
+      await Permission.check({
+        type: 'edit',
+        title: change.movePath ?? change.filePath,
+        sessionID: ctx.sessionID,
+        messageID: ctx.messageID,
+        callID: ctx.callID,
+        metadata: {
+          filePath: change.filePath,
+          movePath: change.movePath,
+          changeType: change.type,
+        },
+      });
+    }
+
     // Apply the changes
     const changedFiles: string[] = [];
 

@@ -105,6 +105,76 @@ Fetches content from a specified URL and processes it using an AI model.
 **Status:** ✅ Fully supported and tested
 **Test:** [tests/webfetch.tools.test.js](tests/webfetch.tools.test.js)
 
+## Read-Only / Planning Mode
+
+By default all tools are enabled and the agent runs with full, unrestricted
+access. For planning-only tasks (or to enforce a per-command approval UX in a
+parent process such as
+[`agent-commander`](https://github.com/link-assistant/agent-commander)), the
+agent supports a **native, enforceable read-only mode**.
+
+### `--read-only`
+
+Disables every filesystem-mutating and shell tool so the agent can only read,
+search and plan:
+
+| Tool        | read-only |
+| ----------- | --------- |
+| `bash`      | ❌ disabled |
+| `edit`      | ❌ disabled |
+| `write`     | ❌ disabled |
+| `multiedit` | ❌ disabled |
+| `patch`     | ❌ disabled |
+| everything else (`read`, `list`, `glob`, `grep`, `websearch`, `codesearch`, `webfetch`, `todo`, `batch`, `task`) | ✅ enabled |
+
+```bash
+echo "Summarize this project" | agent --read-only
+```
+
+Can also be enabled with the `LINK_ASSISTANT_AGENT_READ_ONLY=true` environment
+variable.
+
+The restriction is enforced where tools are exposed to the model **and** when a
+tool is invoked indirectly through the `batch` tool, so it cannot be bypassed by
+the model.
+
+### `--disable-tools <list>`
+
+Disable an explicit, comma-separated set of tools (in addition to or instead of
+`--read-only`):
+
+```bash
+echo "hi" | agent --disable-tools bash,write,edit
+```
+
+Can also be set with `LINK_ASSISTANT_AGENT_DISABLE_TOOLS=bash,write,edit`.
+
+### Fine-grained permission system (`--permission-mode` / `--permission`)
+
+`--read-only` / `--disable-tools` remove tools entirely (the hard layer). For
+finer control — read-only **planning** that still allows safe shell commands, or
+**per-command approval** — the agent ships a native, JSON-driven permission
+system ported from OpenCode, with **no TUI**:
+
+```bash
+# Deny edits, allow read-only shell, ask before anything else (planning):
+agent --permission-mode plan --input-format stream-json
+
+# Hard read-only that still allows read-only shell commands, never asks:
+agent --permission-mode readonly -p "summarize the repo layout"
+
+# Approve every mutating tool over JSON (stdin/stdout):
+agent --permission-mode ask --input-format stream-json
+
+# OpenCode-compatible fine-grained override, merged on top of the mode:
+agent --permission '{"edit":"ask","bash":{"git push*":"ask","*":"allow"}}'
+```
+
+The default mode is `auto` (full autonomy, never asks — unchanged behavior).
+Approvals are exchanged as `permission_request` / `permission_response` JSON
+frames. See [docs/permissions.md](docs/permissions.md) for the full protocol,
+every mode, the JSON shapes, environment variables, and worked examples.
+
 ## Testing
 
 ### Run All Tool Tests

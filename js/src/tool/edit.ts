@@ -13,6 +13,7 @@ import { Bus } from '../bus';
 import { FileTime } from '../file/time';
 import { Instance } from '../project/instance';
 import { Snapshot } from '../snapshot';
+import { Permission } from '../permission';
 
 function normalizeLineEndings(text: string): string {
   return text.replaceAll('\r\n', '\n');
@@ -42,10 +43,20 @@ export const EditTool = Tool.define('edit', {
       throw new Error('oldString and newString must be different');
     }
 
-    // No restrictions - unrestricted file editing
     const filePath = path.isAbsolute(params.filePath)
       ? params.filePath
       : path.join(Instance.directory, params.filePath);
+
+    // Permission enforcement (issue #271). `auto` mode allows immediately;
+    // plan/readonly modes deny; `ask` mode emits a JSON permission request.
+    await Permission.check({
+      type: 'edit',
+      title: filePath,
+      sessionID: ctx.sessionID,
+      messageID: ctx.messageID,
+      callID: ctx.callID,
+      metadata: { filePath },
+    });
 
     let diff = '';
     let contentOld = '';
