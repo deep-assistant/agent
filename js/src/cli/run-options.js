@@ -222,5 +222,17 @@ export function buildRunOptions(yargs, defaultOptions = {}) {
       type: 'string',
       description:
         'Comma-separated list of tool ids to disable (e.g. "bash,write,edit"). Disabled tools are never exposed to the model and are rejected if invoked via batch.',
+    })
+    .option('permission-mode', {
+      type: 'string',
+      choices: ['auto', 'plan', 'readonly', 'ask'],
+      description:
+        'Permission policy for mutating tools. "auto" (default) allows everything; "plan" allows read-only shell and asks before mutations; "readonly" denies all mutations; "ask" asks before every mutating tool. Approvals are driven over JSON (permission_request / permission_response).',
+      default: 'auto',
+    })
+    .option('permission', {
+      type: 'string',
+      description:
+        'OpenCode-compatible permission override as JSON, merged on top of --permission-mode. Example: \'{"edit":"ask","bash":{"git push*":"ask","*":"allow"},"webfetch":"allow"}\'.',
     });
 }

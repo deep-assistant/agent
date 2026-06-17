@@ -54,6 +54,8 @@ export interface AgentConfig {
   verifyImagesAtReadTool: boolean;
   readOnly: boolean;
   disableTools: string;
+  permissionMode: string;
+  permission: string;
 }
 
 // Fallback helpers for when config is not yet initialized (early imports/tests)
@@ -136,6 +138,8 @@ function defaultConfig(): AgentConfig {
       getEnvStr('LINK_ASSISTANT_AGENT_VERIFY_IMAGES_AT_READ_TOOL') !== 'false',
     readOnly: truthyEnv('LINK_ASSISTANT_AGENT_READ_ONLY'),
     disableTools: getEnvStr('LINK_ASSISTANT_AGENT_DISABLE_TOOLS') ?? '',
+    permissionMode: getEnvStr('LINK_ASSISTANT_AGENT_PERMISSION_MODE') ?? 'auto',
+    permission: getEnvStr('LINK_ASSISTANT_AGENT_PERMISSION') ?? '',
   };
 }
 
@@ -256,6 +260,19 @@ function buildAgentConfigOptions({
       description:
         'Comma-separated list of tool ids to disable (e.g. "bash,write,edit"). Disabled tools are never exposed to the model and are rejected if invoked via batch.',
       default: getenv('LINK_ASSISTANT_AGENT_DISABLE_TOOLS', ''),
+    })
+    .option('permission-mode', {
+      type: 'string',
+      choices: ['auto', 'plan', 'readonly', 'ask'],
+      description:
+        'Permission policy for mutating tools. "auto" (default) allows everything; "plan" allows read-only shell and asks before mutations; "readonly" denies all mutations; "ask" asks before every mutating tool. Approvals are driven over JSON (permission_request / permission_response).',
+      default: getenv('LINK_ASSISTANT_AGENT_PERMISSION_MODE', 'auto'),
+    })
+    .option('permission', {
+      type: 'string',
+      description:
+        'OpenCode-compatible permission override as JSON, merged on top of --permission-mode. Example: \'{"edit":"ask","bash":{"git push*":"ask","*":"allow"},"webfetch":"allow"}\'.',
+      default: getenv('LINK_ASSISTANT_AGENT_PERMISSION', ''),
     });
 }
 
@@ -310,6 +327,8 @@ export function initConfig(argv?: string[]): AgentConfig {
     verifyImagesAtReadTool: parsed.verifyImagesAtReadTool ?? true,
     readOnly: parsed.readOnly ?? false,
     disableTools: parsed.disableTools ?? '',
+    permissionMode: parsed.permissionMode ?? 'auto',
+    permission: parsed.permission ?? '',
   });
 
   // Propagate verbose to env var for subprocess resilience (issue #227).

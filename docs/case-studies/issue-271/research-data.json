@@ -1,0 +1,91 @@
+{
+  "issue": {
+    "number": 271,
+    "title": "Add a native read-only / planning permission mode (enforceable via agent-commander --read-only)",
+    "url": "https://github.com/link-assistant/agent/issues/271",
+    "createdAt": "2026-06-17T12:46:31Z",
+    "authoritativeComment": "https://github.com/link-assistant/agent/issues/271#issuecomment-4730457589"
+  },
+  "pr": {
+    "number": 272,
+    "branch": "issue-271-3f282f6e5862"
+  },
+  "checkedAt": "2026-06-17",
+  "sources": [
+    "https://opencode.ai/docs/permissions",
+    "https://opencode.ai/docs/agents/",
+    "https://github.com/sst/opencode",
+    "https://docs.claude.com/en/docs/claude-code/sdk",
+    "https://docs.claude.com/en/docs/claude-code/iam",
+    "https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation",
+    "https://developers.openai.com/codex/local-config",
+    "https://google-gemini.github.io/gemini-cli/",
+    "https://qwenlm.github.io/qwen-code-docs/",
+    "https://vercel.com/blog/ai-sdk-6"
+  ],
+  "requirements": [
+    { "id": "R1", "text": "Re-add OpenCode's permission system in the most similar way possible", "status": "done" },
+    { "id": "R2", "text": "Default behavior remains full auto-mode (no behavior change)", "status": "done" },
+    { "id": "R3", "text": "Plan, readonly, and approve-each-command via CLI options", "status": "done" },
+    { "id": "R4", "text": "Fully controllable from JSON (input and output), no TUI", "status": "done" },
+    { "id": "R5", "text": "Detailed docs on how to send approval JSON", "status": "done" },
+    { "id": "R6", "text": "Fail clearly if the mode cannot be honored", "status": "done" },
+    { "id": "R7", "text": "Expressible through OpenCode-compatible permission/deny rules", "status": "done" },
+    { "id": "R8", "text": "Implement in both JavaScript and Rust", "status": "done" },
+    { "id": "R9", "text": "Case study folder with deep analysis, research, requirements, solution plans", "status": "done" },
+    { "id": "R10", "text": "No TUI integration", "status": "done" }
+  ],
+  "design": {
+    "modes": ["auto", "plan", "readonly", "ask"],
+    "actions": ["allow", "ask", "deny"],
+    "responses": ["once", "always", "reject"],
+    "policyShape": { "edit": "Action", "bash": "Record<glob, Action>", "webfetch": "Action" },
+    "defaultMode": "auto",
+    "envVars": {
+      "LINK_ASSISTANT_AGENT_PERMISSION_MODE": "auto",
+      "LINK_ASSISTANT_AGENT_PERMISSION": ""
+    },
+    "cliFlags": ["--permission-mode", "--permission"],
+    "jsonRequest": {
+      "type": "permission_request",
+      "fields": ["timestamp", "sessionID", "permissionID", "callID", "tool", "pattern", "title", "metadata"]
+    },
+    "jsonResponse": {
+      "type": "permission_response",
+      "fields": ["permissionID", "response"],
+      "responseEnum": ["once", "always", "reject"]
+    }
+  },
+  "priorArt": [
+    {
+      "name": "OpenCode",
+      "reuse": "ported",
+      "facts": "Three actions allow/ask/deny; per-tool bash/edit/webfetch; bash string or {pattern:action}; last-matching-rule-wins; HTTP POST /session/:id/permissions/:permissionID with {response: once|always|reject, remember?}; permission.updated SSE event."
+    },
+    {
+      "name": "Claude Code",
+      "reuse": "referenced",
+      "facts": "--permission-mode plan; canUseTool / --permission-prompt-tool MCP returns {behavior: 'allow'|'deny', updatedInput?, message?}; permissions.{allow,ask,deny,defaultMode}; Bash(git log:*) rule syntax."
+    },
+    {
+      "name": "MCP elicitation",
+      "reuse": "referenced",
+      "facts": "elicitation/create with requestedSchema; response action accept|decline|cancel (three-action model)."
+    },
+    {
+      "name": "OpenAI Codex",
+      "reuse": "referenced",
+      "facts": "sandbox read-only|workspace-write|danger-full-access; approval untrusted|on-failure|on-request|never; --dangerously-bypass-approvals-and-sandbox (--yolo)."
+    },
+    {
+      "name": "Gemini CLI / Qwen Code",
+      "reuse": "referenced",
+      "facts": "--approval-mode plan|default|auto_edit|yolo; tool allowlist in plan mode."
+    },
+    {
+      "name": "Vercel AI SDK 6",
+      "reuse": "not-adopted",
+      "facts": "needsApproval per-tool flag; in-process JS-only, not a JSON transport, not cross-language."
+    }
+  ]
+}
