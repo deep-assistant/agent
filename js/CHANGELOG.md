@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.24.2
+
+### Patch Changes
+
+- 0b8bc3b: Fix compaction cascade logging so default fallback model misses no longer emit provider error logs for single-provider configurations.
+
 ## 0.24.1
 
 ### Patch Changes
