@@ -75,7 +75,79 @@ export namespace Provider {
 
   type Source = 'env' | 'config' | 'custom' | 'api';
 
+  const FORMAL_AI_DEFAULT_BASE_URL = 'http://127.0.0.1:8080/api/openai/v1';
+  const FORMAL_AI_API_KEY_ENV = 'FORMAL_AI_API_KEY';
+  const FORMAL_AI_BASE_URL_ENV = 'FORMAL_AI_BASE_URL';
+  const FORMAL_AI_DEFAULT_API_KEY = 'formal-ai';
+
+  function getFormalAiBaseURL(provider?: ModelsDev.Provider) {
+    return (
+      process.env[FORMAL_AI_BASE_URL_ENV] ??
+      provider?.api ??
+      FORMAL_AI_DEFAULT_BASE_URL
+    );
+  }
+
+  function createFormalAiLoader(input?: ModelsDev.Provider) {
+    return {
+      autoload: true,
+      options: {
+        apiKey: process.env[FORMAL_AI_API_KEY_ENV] ?? FORMAL_AI_DEFAULT_API_KEY,
+        baseURL: getFormalAiBaseURL(input),
+      },
+    };
+  }
+
+  function createFormalAiModel(name = 'Formal AI'): ModelsDev.Model {
+    return {
+      id: 'formal-ai',
+      name,
+      release_date: '2026-07-03',
+      attachment: false,
+      reasoning: true,
+      temperature: true,
+      tool_call: true,
+      cost: {
+        input: 0,
+        output: 0,
+        cache_read: 0,
+        cache_write: 0,
+      },
+      limit: {
+        context: 60000,
+        output: 8192,
+      },
+      modalities: {
+        input: ['text'],
+        output: ['text'],
+      },
+      options: {},
+      provider: {
+        npm: '@ai-sdk/openai-compatible',
+      },
+    };
+  }
+
+  function createFormalAiProvider(
+    id: string,
+    name: string
+  ): ModelsDev.Provider {
+    return {
+      id,
+      name,
+      npm: '@ai-sdk/openai-compatible',
+      api: getFormalAiBaseURL(),
+      env: [FORMAL_AI_API_KEY_ENV],
+      models: {
+        'formal-ai': createFormalAiModel('formal-ai'),
+      },
+    };
+  }
+
   const CUSTOM_LOADERS: Record<string, CustomLoader> = {
+    'formal-ai': async (input) => createFormalAiLoader(input),
+    formalai: async (input) => createFormalAiLoader(input),
+    '@link-assistant': async (input) => createFormalAiLoader(input),
     async anthropic(input) {
       // Check if OAuth credentials are available via the auth plugin
       const auth = await Auth.get('anthropic');
@@ -790,6 +862,22 @@ export namespace Provider {
       };
       realIdByKey.set('google/gemini-3-pro', 'gemini-3-pro-preview');
     }
+
+    // Add Formal AI local OpenAI-compatible provider and selectors.
+    // Formal AI serves the canonical model ID "formal-ai"; Agent also accepts
+    // the scoped selector "@link-assistant/formal-ai" as a provider alias.
+    database['formal-ai'] = createFormalAiProvider(
+      'formal-ai',
+      'Formal AI Local Server'
+    );
+    database['formalai'] = createFormalAiProvider(
+      'formalai',
+      'Formal AI Local Server'
+    );
+    database['@link-assistant'] = createFormalAiProvider(
+      '@link-assistant',
+      'Formal AI Local Server (@link-assistant alias)'
+    );
 
     // Add link-assistant echo provider for dry-run testing
     // This synthetic provider echoes back user input without API calls
@@ -1991,6 +2079,17 @@ export namespace Provider {
           modelID,
         }));
         return { providerID: 'kilo', modelID };
+      }
+    }
+
+    if (modelID === 'formal-ai') {
+      const formalAiProvider = s.providers['formal-ai'];
+      if (formalAiProvider && formalAiProvider.info.models[modelID]) {
+        log.info(() => ({
+          message: 'resolved short model name to formal-ai (canonical)',
+          modelID,
+        }));
+        return { providerID: 'formal-ai', modelID };
       }
     }
 

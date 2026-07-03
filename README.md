@@ -116,7 +116,7 @@ While maintaining 100% compatibility with OpenCode's JSON interface, Agent offer
 - **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
 - **Unrestricted Access**: Full file system and command execution access (no sandbox, no restrictions)
 - **Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
-- **Flexible Model Selection**: Supports [OpenCode Zen](https://opencode.ai/docs/zen/), [Claude OAuth](docs/claude-oauth.md), [Groq](docs/groq.md), [OpenRouter](docs/openrouter.md), and more - see [MODELS.md](MODELS.md)
+- **Flexible Model Selection**: Supports [OpenCode Zen](https://opencode.ai/docs/zen/), [Formal AI](docs/formal-ai.md), [Claude OAuth](docs/claude-oauth.md), [Groq](docs/groq.md), [OpenRouter](docs/openrouter.md), and more - see [MODELS.md](MODELS.md)
 - **Public Domain**: Unlicense - use it however you want
 
 ## Quick Start
@@ -206,14 +206,15 @@ See [js/README.md](js/README.md#mcp-model-context-protocol-support) for full MCP
 
 ## Documentation
 
-| Document                         | Description                               |
-| -------------------------------- | ----------------------------------------- |
-| [MODELS.md](MODELS.md)           | Available models, providers, and pricing  |
-| [TOOLS.md](TOOLS.md)             | Complete tool documentation               |
-| [EXAMPLES.md](EXAMPLES.md)       | Usage examples for each tool              |
-| [TESTING.md](TESTING.md)         | Testing guide                             |
-| [js/README.md](js/README.md)     | JavaScript/Bun implementation (full docs) |
-| [rust/README.md](rust/README.md) | Rust implementation                       |
+| Document                               | Description                               |
+| -------------------------------------- | ----------------------------------------- |
+| [MODELS.md](MODELS.md)                 | Available models, providers, and pricing  |
+| [docs/formal-ai.md](docs/formal-ai.md) | Formal AI local server setup              |
+| [TOOLS.md](TOOLS.md)                   | Complete tool documentation               |
+| [EXAMPLES.md](EXAMPLES.md)             | Usage examples for each tool              |
+| [TESTING.md](TESTING.md)               | Testing guide                             |
+| [js/README.md](js/README.md)           | JavaScript/Bun implementation (full docs) |
+| [rust/README.md](rust/README.md)       | Rust implementation                       |
 
 ## Files
 
