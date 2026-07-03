@@ -16,6 +16,8 @@ use crate::error::{AgentError, Result};
 use crate::id::{ascending, Prefix};
 use crate::util::binary::{is_binary_file, is_image_extension, validate_image_format};
 
+use super::text_window::{format_balanced_line_window, format_column_window};
+
 /// Default number of lines to read
 const DEFAULT_READ_LIMIT: usize = 2000;
 
@@ -27,8 +29,10 @@ const DESCRIPTION: &str = r#"Reads a file from the local filesystem.
 
 Usage:
 - The filePath parameter must be an absolute path
-- By default, reads up to 2000 lines from the beginning
-- Optionally specify offset and limit for pagination
+- By default, reads the whole file when it fits the limit; longer files return first and last line ranges with an omitted-lines marker
+- Optionally specify offset and limit for line pagination
+- Optionally specify columnOffset and columnLimit to read a column window from each selected line
+- Long lines are summarized with omitted-column ranges instead of being silently truncated
 - Returns content with line numbers
 - Can read image files (returns base64 encoded data)
 - Detects and rejects binary files"#;
@@ -45,6 +49,12 @@ pub struct ReadParams {
     /// Number of lines to read
     #[serde(default)]
     pub limit: Option<usize>,
+    /// Column number to start reading from (0-based)
+    #[serde(default)]
+    pub column_offset: Option<usize>,
+    /// Number of columns to read from each selected line
+    #[serde(default)]
+    pub column_limit: Option<usize>,
 }
 
 /// Read tool implementation
@@ -75,6 +85,14 @@ impl Tool for ReadTool {
                 "limit": {
                     "type": "number",
                     "description": "The number of lines to read (defaults to 2000)"
+                },
+                "columnOffset": {
+                    "type": "number",
+                    "description": "The column number to start reading from (0-based)"
+                },
+                "columnLimit": {
+                    "type": "number",
+                    "description": "The number of columns to read from each selected line"
                 }
             },
             "required": ["filePath"]
@@ -118,23 +136,40 @@ impl Tool for ReadTool {
 
         let offset = params.offset.unwrap_or(0);
         let limit = params.limit.unwrap_or(DEFAULT_READ_LIMIT);
+        let has_explicit_line_range = params.offset.is_some() || params.limit.is_some();
+        let has_explicit_column_range =
+            params.column_offset.is_some() || params.column_limit.is_some();
+        let column_offset = params.column_offset.unwrap_or(0);
+        let column_limit = params.column_limit.unwrap_or(MAX_LINE_LENGTH);
 
-        // Get the requested range of lines
-        let end = (offset + limit).min(lines.len());
-        let selected_lines = &lines[offset.min(lines.len())..end];
-
-        // Format lines with line numbers and truncation
-        let formatted: Vec<String> = selected_lines
+        let selected = select_lines(&lines, offset, limit, !has_explicit_line_range);
+        let formatted: Vec<String> = selected
+            .parts
             .iter()
-            .enumerate()
-            .map(|(i, line)| {
-                let line_num = i + offset + 1;
-                let truncated = if line.len() > MAX_LINE_LENGTH {
-                    format!("{}...", &line[..MAX_LINE_LENGTH])
-                } else {
-                    line.to_string()
-                };
-                format!("{:05}| {}", line_num, truncated)
+            .flat_map(|part| match part {
+                SelectedLinePart::Lines(items) => items
+                    .iter()
+                    .map(|item| {
+                        let line = if has_explicit_column_range {
+                            format_column_window(
+                                item.line,
+                                item.line_number,
+                                column_offset,
+                                column_limit,
+                            )
+                        } else {
+                            format_balanced_line_window(
+                                item.line,
+                                item.line_number,
+                                MAX_LINE_LENGTH,
+                            )
+                        };
+                        format!("{:05}| {}", item.line_number, line)
+                    })
+                    .collect::<Vec<_>>(),
+                SelectedLinePart::Omitted { start, end } => {
+                    vec![format!("... [omitted lines {}..{}] ...", start, end)]
+                }
             })
             .collect();
 
@@ -143,8 +178,8 @@ impl Tool for ReadTool {
         output.push_str(&formatted.join("\n"));
 
         let total_lines = lines.len();
-        let last_read_line = offset + formatted.len();
-        let has_more = total_lines > last_read_line;
+        let last_read_line = selected.last_line;
+        let has_more = has_explicit_line_range && total_lines > last_read_line;
 
         if has_more {
             output.push_str(&format!(
@@ -157,7 +192,7 @@ impl Tool for ReadTool {
         output.push_str("\n</file>");
 
         // Create preview from first 20 lines
-        let preview: String = selected_lines
+        let preview: String = formatted
             .iter()
             .take(20)
             .cloned()
@@ -173,6 +208,65 @@ impl Tool for ReadTool {
             attachments: None,
         })
     }
+}
+
+struct SelectedLine<'a> {
+    line: &'a str,
+    line_number: usize,
+}
+
+enum SelectedLinePart<'a> {
+    Lines(Vec<SelectedLine<'a>>),
+    Omitted { start: usize, end: usize },
+}
+
+struct SelectedLines<'a> {
+    parts: Vec<SelectedLinePart<'a>>,
+    last_line: usize,
+}
+
+fn select_lines<'a>(
+    lines: &'a [&'a str],
+    offset: usize,
+    limit: usize,
+    summarize_middle: bool,
+) -> SelectedLines<'a> {
+    let total_lines = lines.len();
+
+    if !summarize_middle || total_lines <= limit {
+        let end = offset.saturating_add(limit).min(total_lines);
+        return SelectedLines {
+            parts: vec![SelectedLinePart::Lines(line_range(lines, offset, end))],
+            last_line: end,
+        };
+    }
+
+    let head_count = limit.div_ceil(2);
+    let tail_count = limit - head_count;
+    let tail_start = total_lines - tail_count;
+
+    SelectedLines {
+        parts: vec![
+            SelectedLinePart::Lines(line_range(lines, 0, head_count)),
+            SelectedLinePart::Omitted {
+                start: head_count + 1,
+                end: tail_start,
+            },
+            SelectedLinePart::Lines(line_range(lines, tail_start, total_lines)),
+        ],
+        last_line: total_lines,
+    }
+}
+
+fn line_range<'a>(lines: &'a [&'a str], start: usize, end: usize) -> Vec<SelectedLine<'a>> {
+    lines[start.min(lines.len())..end.min(lines.len())]
+        .iter()
+        .enumerate()
+        .map(|(index, line)| SelectedLine {
+            line,
+            line_number: start + index + 1,
+        })
+        .collect()
 }
 
 /// Find file suggestions when a file is not found

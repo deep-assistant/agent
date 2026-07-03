@@ -8,7 +8,9 @@ This document lists all tools supported by `@link-assistant/agent`. All tools ar
 
 ### read
 
-Reads file contents from the filesystem.
+Reads file contents from the filesystem. Long files are summarized with first
+and last line ranges by default, and long lines can be inspected with explicit
+column windows.
 
 **Status:** ✅ Fully supported and tested
 **Test:** [tests/read.tools.test.js](tests/read.tools.test.js)
@@ -45,7 +47,8 @@ Fast file pattern matching tool that works with any codebase size. Supports glob
 
 ### grep
 
-Powerful search tool built on ripgrep. Supports full regex syntax and can filter by file type or glob pattern.
+Powerful search tool built on ripgrep. Supports full regex syntax, can filter by
+file type or glob pattern, and summarizes long matching lines around the match.
 
 **Status:** ✅ Fully supported and tested
 **Test:** [tests/grep.tools.test.js](tests/grep.tools.test.js)
@@ -118,14 +121,14 @@ agent supports a **native, enforceable read-only mode**.
 Disables every filesystem-mutating and shell tool so the agent can only read,
 search and plan:
 
-| Tool        | read-only |
-| ----------- | --------- |
-| `bash`      | ❌ disabled |
-| `edit`      | ❌ disabled |
-| `write`     | ❌ disabled |
-| `multiedit` | ❌ disabled |
-| `patch`     | ❌ disabled |
-| everything else (`read`, `list`, `glob`, `grep`, `websearch`, `codesearch`, `webfetch`, `todo`, `batch`, `task`) | ✅ enabled |
+| Tool                                                                                                             | read-only   |
+| ---------------------------------------------------------------------------------------------------------------- | ----------- |
+| `bash`                                                                                                           | ❌ disabled |
+| `edit`                                                                                                           | ❌ disabled |
+| `write`                                                                                                          | ❌ disabled |
+| `multiedit`                                                                                                      | ❌ disabled |
+| `patch`                                                                                                          | ❌ disabled |
+| everything else (`read`, `list`, `glob`, `grep`, `websearch`, `codesearch`, `webfetch`, `todo`, `batch`, `task`) | ✅ enabled  |
 
 ```bash
 echo "Summarize this project" | agent --read-only

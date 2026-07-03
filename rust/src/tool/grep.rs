@@ -10,8 +10,14 @@ use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
 
+use super::text_window::{
+    byte_offset_to_char_index, format_balanced_line_window, format_focused_line_window,
+};
 use super::{context::ToolContext, Tool, ToolResult};
 use crate::error::{AgentError, Result};
+
+/// Maximum matching line length before omitting columns
+const MAX_MATCHING_LINE_LENGTH: usize = 2000;
 
 /// Tool description
 const DESCRIPTION: &str = r#"A powerful search tool for finding text patterns in files.
@@ -20,6 +26,7 @@ Usage:
 - Supports full regex syntax (e.g., "log.*Error", "function\s+\w+")
 - Filter files with glob parameter (e.g., "*.js", "**/*.tsx")
 - Output modes: "content" shows matching lines, "files_with_matches" shows only file paths
+- Long matching lines are summarized around the match with omitted-column ranges
 - Use -C/-A/-B for context lines around matches"#;
 
 /// Parameters for the grep tool
@@ -274,29 +281,46 @@ fn search_file(
                     // Add context before
                     let start = i.saturating_sub(context_before);
                     for (j, ctx_line) in lines.iter().enumerate().skip(start).take(i - start) {
+                        let line_text =
+                            format_balanced_line_window(ctx_line, j + 1, MAX_MATCHING_LINE_LENGTH);
                         let line_output = if show_line_numbers {
-                            format!("{}:{}: {}", rel_path, j + 1, ctx_line)
+                            format!("{}:{}: {}", rel_path, j + 1, line_text)
                         } else {
-                            format!("{}: {}", rel_path, ctx_line)
+                            format!("{}: {}", rel_path, line_text)
                         };
                         results.push(line_output);
                     }
 
                     // Add matching line
-                    let line_output = if show_line_numbers {
-                        format!("{}:{}: {}", rel_path, i + 1, line)
+                    let matching_line = if let Some(found) = regex.find(line) {
+                        let focus_start = byte_offset_to_char_index(line, found.start());
+                        let focus_end = byte_offset_to_char_index(line, found.end());
+                        format_focused_line_window(
+                            line,
+                            i + 1,
+                            focus_start,
+                            focus_end,
+                            MAX_MATCHING_LINE_LENGTH,
+                        )
                     } else {
-                        format!("{}: {}", rel_path, line)
+                        format_balanced_line_window(line, i + 1, MAX_MATCHING_LINE_LENGTH)
+                    };
+                    let line_output = if show_line_numbers {
+                        format!("{}:{}: {}", rel_path, i + 1, matching_line)
+                    } else {
+                        format!("{}: {}", rel_path, matching_line)
                     };
                     results.push(line_output);
 
                     // Add context after
                     let end = (i + context_after + 1).min(lines.len());
                     for (j, ctx_line) in lines.iter().enumerate().skip(i + 1).take(end - (i + 1)) {
+                        let line_text =
+                            format_balanced_line_window(ctx_line, j + 1, MAX_MATCHING_LINE_LENGTH);
                         let line_output = if show_line_numbers {
-                            format!("{}:{}: {}", rel_path, j + 1, ctx_line)
+                            format!("{}:{}: {}", rel_path, j + 1, line_text)
                         } else {
-                            format!("{}: {}", rel_path, ctx_line)
+                            format!("{}: {}", rel_path, line_text)
                         };
                         results.push(line_output);
                     }
