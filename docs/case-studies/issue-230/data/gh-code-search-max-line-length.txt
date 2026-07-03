@@ -1,0 +1,6 @@
+link-assistant/agent:rust/src/tool/read.rs: const MAX_LINE_LENGTH: usize = 2000;
+link-assistant/agent:rust/src/tool/read.rs: let truncated = if line.len() > MAX_LINE_LENGTH {
+link-assistant/agent:rust/src/tool/read.rs: format!("{}...", &line[..MAX_LINE_LENGTH])
+link-assistant/agent:js/src/tool/read.ts: const MAX_LINE_LENGTH = 2000;
+link-assistant/agent:js/src/tool/read.ts: return line.length > MAX_LINE_LENGTH
+link-assistant/agent:js/src/tool/read.ts: ? line.substring(0, MAX_LINE_LENGTH) + '...'
