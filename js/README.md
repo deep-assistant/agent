@@ -24,7 +24,7 @@ This is an MVP implementation of an OpenCode-compatible CLI agent, focused on ma
 
 - ✅ **JSON Input/Output**: Compatible with `opencode run --format json --model opencode/minimax-m2.5-free`
 - ✅ **Plain Text Input**: Also accepts plain text messages (auto-converted to JSON format)
-- ✅ **Flexible Model Selection**: Defaults to free OpenCode Zen MiniMax M2.5 Free, supports [OpenCode Zen](https://opencode.ai/docs/zen/), [Claude OAuth](../docs/claude-oauth.md), [Groq](../docs/groq.md), and [OpenRouter](../docs/openrouter.md) providers
+- ✅ **Flexible Model Selection**: Defaults to free OpenCode Zen MiniMax M2.5 Free, supports [OpenCode Zen](https://opencode.ai/docs/zen/), [Formal AI](../docs/formal-ai.md), [Claude OAuth](../docs/claude-oauth.md), [Groq](../docs/groq.md), and [OpenRouter](../docs/openrouter.md) providers
 - ✅ **No Restrictions**: Fully unrestricted file system and command execution access (no sandbox)
 - ✅ **Minimal Footprint**: Built with Bun.sh for maximum efficiency
 - ✅ **Full Tool Support**: 13 tools including websearch, codesearch, batch - all enabled by default
@@ -201,6 +201,10 @@ echo "hi" | agent --model opencode/nemotron-3-super-free
 echo "hi" | agent --model opencode/gpt-5-nano
 echo "hi" | agent --model opencode/big-pickle
 
+# Formal AI local server
+echo "hi" | agent --model formal-ai
+echo "hi" | agent --model @link-assistant/formal-ai
+
 # Premium models (OpenCode Zen subscription)
 echo "hi" | agent --model opencode/sonnet        # Claude Sonnet 4.5
 echo "hi" | agent --model opencode/haiku         # Claude Haiku 4.5
@@ -237,6 +241,7 @@ echo "hi" | agent --model github-copilot/gpt-4o        # Uses Copilot
 ```
 
 See [MODELS.md](../MODELS.md) for complete list of available models and pricing.
+See [docs/formal-ai.md](../docs/formal-ai.md) for Formal AI local server setup.
 See [docs/groq.md](../docs/groq.md) for Groq provider documentation.
 See [docs/openrouter.md](../docs/openrouter.md) for OpenRouter provider documentation.
 See [docs/claude-oauth.md](../docs/claude-oauth.md) for Claude OAuth provider documentation.

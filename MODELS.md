@@ -8,6 +8,7 @@ This agent supports multiple model providers. By default, it uses models from th
 | ------------ | ------------------------------- | ---------------------------- | -------------------------------------------------- |
 | OpenCode Zen | `opencode/<model-id>`           | N/A (public for free models) | [OpenCode Zen](https://opencode.ai/docs/zen/)      |
 | Kilo Gateway | `kilo/<model-id>`               | N/A (public for free models) | [Kilo Gateway Documentation](docs/kilo.md)         |
+| Formal AI    | `formal-ai`                     | `FORMAL_AI_API_KEY`          | [Formal AI Documentation](docs/formal-ai.md)       |
 | Anthropic    | `anthropic/<model-id>`          | `ANTHROPIC_API_KEY`          | [Anthropic Docs](https://docs.anthropic.com/)      |
 | Claude OAuth | `claude-oauth/<model-id>`       | `CLAUDE_CODE_OAUTH_TOKEN`    | [Claude OAuth Documentation](docs/claude-oauth.md) |
 | Groq         | `groq/<model-id>`               | `GROQ_API_KEY`               | [Groq Documentation](docs/groq.md)                 |
@@ -114,6 +115,10 @@ echo "hello" | agent --model opencode/gpt-5-nano
 
 # Big Pickle
 echo "hello" | agent --model opencode/big-pickle
+
+# Formal AI local server
+echo "hello" | agent --model formal-ai
+echo "hello" | agent --model @link-assistant/formal-ai
 ```
 
 ### Using Paid Models
@@ -148,6 +153,22 @@ For complete details about OpenCode Zen subscription and pricing, visit the [Ope
 - Cache pricing applies when using prompt caching features
 - Token context limits vary by model
 - Free models have no token costs but may have rate limits
+
+---
+
+## Formal AI Provider
+
+[Formal AI](https://github.com/link-assistant/formal-ai) provides a local symbolic assistant through OpenAI-compatible API routes. Start the local server, export a client key, then use the built-in selector:
+
+```bash
+formal-ai serve --agent-mode --host 127.0.0.1 --port 8080
+export FORMAL_AI_API_KEY="local-test-token"
+agent --model formal-ai --permission-mode plan -p "hi"
+```
+
+Agent also accepts `formal-ai/formal-ai`, `@link-assistant/formal-ai`, and `formalai/formal-ai`. For remote hosts or non-default ports, set `FORMAL_AI_BASE_URL` to the full OpenAI-compatible base URL ending in `/api/openai/v1`.
+
+For setup, server checks, and troubleshooting, see the [Formal AI Documentation](docs/formal-ai.md).
 
 ---
 
