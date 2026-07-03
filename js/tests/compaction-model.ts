@@ -371,3 +371,118 @@ describe('CompactionModelConfig with cascade', () => {
     expect(config.compactionModels).toBeUndefined();
   });
 });
+
+describe('compaction model cascade logging', () => {
+  test('does not emit provider error logs for unresolvable default cascade entries', async () => {
+    const configContent = JSON.stringify({
+      $schema: 'https://opencode.ai/config.json',
+      disabled_providers: [
+        'amazon-bedrock',
+        'anthropic',
+        'azure',
+        'claude-oauth',
+        'github-copilot',
+        'github-copilot-enterprise',
+        'google',
+        'google-vertex',
+        'google-vertex-anthropic',
+        'groq',
+        'kilo',
+        'link-assistant',
+        'link-assistant/cache',
+        'mistral',
+        'opencode',
+        'openai',
+        'openrouter',
+        'xai',
+      ],
+      provider: {
+        formalai: {
+          name: 'local',
+          npm: '@ai-sdk/openai-compatible',
+          options: {
+            baseURL: 'http://127.0.0.1:8080/api/openai/v1',
+            apiKey: '{env:FORMAL_AI_API_KEY}',
+          },
+          models: {
+            'formal-ai': {
+              name: 'formal-ai',
+            },
+          },
+        },
+      },
+      model: 'formalai/formal-ai',
+    });
+
+    const script = `
+      import { parseModelConfig } from './src/cli/model-config.js';
+      import { initConfig, resetConfig } from './src/config/config.ts';
+      import { Log } from './src/util/log.ts';
+      import { Instance } from './src/project/instance.ts';
+
+      process.argv = ['bun', 'agent', '--model', 'formalai/formal-ai', '--verbose'];
+      resetConfig();
+      initConfig(process.argv);
+      await Log.init({ print: true, level: 'DEBUG', compactJson: true });
+      await Instance.provide({
+        directory: process.cwd(),
+        fn: async () => {
+          await parseModelConfig(
+            { model: 'formalai/formal-ai' },
+            () => {},
+            () => {}
+          );
+        },
+      });
+      await Instance.disposeAll();
+    `;
+
+    const proc = Bun.spawn({
+      cmd: ['bun', '--eval', script],
+      cwd: process.cwd(),
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        ...process.env,
+        FORMAL_AI_API_KEY: 'formal-ai',
+        LINK_ASSISTANT_AGENT_CONFIG_CONTENT: configContent,
+      },
+    });
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ]);
+
+    if (exitCode !== 0) {
+      throw new Error(`parseModelConfig child process failed: ${stderr}`);
+    }
+
+    const logs = stdout
+      .split('\n')
+      .filter(Boolean)
+      .flatMap((line) => {
+        try {
+          return [JSON.parse(line)];
+        } catch {
+          return [];
+        }
+      });
+    const skippedCascadeModels = logs.filter(
+      (log) =>
+        log.message === 'skipping unresolvable compaction model in cascade'
+    );
+
+    expect(skippedCascadeModels.length).toBeGreaterThan(0);
+    expect(skippedCascadeModels.every((log) => log.level === 'debug')).toBe(
+      true
+    );
+    expect(
+      logs.some(
+        (log) =>
+          log.level === 'error' &&
+          log.message === 'model not found - refusing to silently fallback'
+      )
+    ).toBe(false);
+  });
+});
