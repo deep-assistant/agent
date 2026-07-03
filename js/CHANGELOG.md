@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.24.3
+
+### Patch Changes
+
+- f01c632: Add built-in Formal AI provider aliases and setup documentation.
+
 ## 0.24.2
 
 ### Patch Changes
