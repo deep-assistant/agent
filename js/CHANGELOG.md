@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.24.1
+
+### Patch Changes
+
+- f5c3a3c: Add explicit live stream-json idle events and document resume, replay, and interrupt semantics.
+
 ## 0.24.0
 
 ### Minor Changes
