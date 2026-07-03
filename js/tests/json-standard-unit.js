@@ -156,6 +156,21 @@ describe('JSON Standard Module - Unit Tests', () => {
       expect(claudeEvent.duration_ms).toBe(1000);
     });
 
+    test('converts session_idle to idle', () => {
+      const opencodeEvent = {
+        type: 'session_idle',
+        timestamp: startTime + 1100,
+        sessionID: 'ses_test123',
+      };
+
+      const claudeEvent = convertOpenCodeToClaude(opencodeEvent, startTime);
+
+      expect(claudeEvent).not.toBeNull();
+      expect(claudeEvent.type).toBe('idle');
+      expect(claudeEvent.session_id).toBe('ses_test123');
+      expect(claudeEvent.timestamp).toBeDefined();
+    });
+
     test('converts error to result with error status', () => {
       const opencodeEvent = {
         type: 'error',

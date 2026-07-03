@@ -10,6 +10,7 @@ import { Session } from '../session/index.ts';
 import { SessionPrompt } from '../session/prompt.ts';
 import { createEventHandler, serializeOutput } from '../json-standard/index.ts';
 import { createContinuousStdinReader } from './input-queue.js';
+import { outputBusEvent } from './event-handler.js';
 import { Permission } from '../permission/index.ts';
 import { Log } from '../util/log.ts';
 import { config } from '../config/config.ts';
@@ -400,62 +401,14 @@ export async function runContinuousServerMode(
 
     // Subscribe to all bus events and output in selected format
     unsub = Bus.subscribeAll((event) => {
-      if (event.type === 'message.part.updated') {
-        const part = event.properties.part;
-        if (part.sessionID !== sessionID) {
-          return;
-        }
-
-        if (part.type === 'step-start') {
-          eventHandler.output({
-            type: 'step_start',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'step-finish') {
-          eventHandler.output({
-            type: 'step_finish',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'text' && part.time?.end) {
-          eventHandler.output({
-            type: 'text',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'tool') {
-          eventHandler.output({
-            type: 'tool_use',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-      }
-
-      if (event.type === 'session.error') {
-        const props = event.properties;
-        if (props.sessionID !== sessionID || !props.error) {
-          return;
-        }
-        hasError = true;
-        eventHandler.output({
-          type: 'error',
-          timestamp: Date.now(),
-          sessionID,
-          error: props.error,
-        });
-      }
+      outputBusEvent({
+        event,
+        sessionID,
+        eventHandler,
+        onError: () => {
+          hasError = true;
+        },
+      });
     });
 
     // Create continuous stdin reader
@@ -661,62 +614,14 @@ export async function runContinuousDirectMode(
 
     // Subscribe to all bus events and output in selected format
     unsub = Bus.subscribeAll((event) => {
-      if (event.type === 'message.part.updated') {
-        const part = event.properties.part;
-        if (part.sessionID !== sessionID) {
-          return;
-        }
-
-        if (part.type === 'step-start') {
-          eventHandler.output({
-            type: 'step_start',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'step-finish') {
-          eventHandler.output({
-            type: 'step_finish',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'text' && part.time?.end) {
-          eventHandler.output({
-            type: 'text',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-
-        if (part.type === 'tool') {
-          eventHandler.output({
-            type: 'tool_use',
-            timestamp: Date.now(),
-            sessionID,
-            part,
-          });
-        }
-      }
-
-      if (event.type === 'session.error') {
-        const props = event.properties;
-        if (props.sessionID !== sessionID || !props.error) {
-          return;
-        }
-        hasError = true;
-        eventHandler.output({
-          type: 'error',
-          timestamp: Date.now(),
-          sessionID,
-          error: props.error,
-        });
-      }
+      outputBusEvent({
+        event,
+        sessionID,
+        eventHandler,
+        onError: () => {
+          hasError = true;
+        },
+      });
     });
 
     // Create continuous stdin reader
