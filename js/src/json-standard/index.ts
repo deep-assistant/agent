@@ -18,7 +18,13 @@ export type JsonStandard = 'opencode' | 'claude';
  * OpenCode JSON event types
  */
 export interface OpenCodeEvent {
-  type: 'step_start' | 'step_finish' | 'text' | 'tool_use' | 'error';
+  type:
+    | 'step_start'
+    | 'step_finish'
+    | 'text'
+    | 'tool_use'
+    | 'error'
+    | 'session_idle';
   timestamp: number;
   sessionID: string;
   part?: Record<string, unknown>;
@@ -29,7 +35,7 @@ export interface OpenCodeEvent {
  * Claude JSON event types (stream-json format)
  */
 export interface ClaudeEvent {
-  type: 'init' | 'message' | 'tool_use' | 'tool_result' | 'result';
+  type: 'init' | 'message' | 'tool_use' | 'tool_result' | 'result' | 'idle';
   timestamp?: string;
   session_id?: string;
   role?: 'assistant' | 'user';
@@ -124,6 +130,13 @@ export function convertOpenCodeToClaude(
         session_id,
         status: 'success',
         duration_ms: event.timestamp - startTime,
+      };
+
+    case 'session_idle':
+      return {
+        type: 'idle',
+        timestamp,
+        session_id,
       };
 
     case 'error':

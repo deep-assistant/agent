@@ -286,6 +286,10 @@ Options:
                                  Default: opencode/minimax-m2.5-free
   --json-standard                JSON output format standard
                                  Choices: "opencode" (default), "claude" (experimental)
+  --output-format                Alias for JSON output format
+                                 Choices: "json" (OpenCode), "stream-json" (Claude NDJSON)
+  --input-format                 Input format
+                                 Choices: "text" (default), "stream-json" (Claude JSONL)
   --use-existing-claude-oauth    Use existing Claude OAuth credentials
                                  from ~/.claude/.credentials.json
   --system-message               Full override of the system message
@@ -389,6 +393,21 @@ echo "your message here" | agent
   ]
 }
 ```
+
+**Live `stream-json`:**
+
+For bidirectional drivers, use:
+
+```bash
+agent --input-format stream-json --output-format stream-json
+```
+
+The live contract supports `user_prompt`, `system`, `interrupt`, and
+`permission_response` frames on stdin. It emits replay acknowledgements for
+consumed user frames and an explicit idle/turn-boundary event
+(`session_idle` in OpenCode output, `idle` in Claude output). See
+[docs/stdin-mode.md](../docs/stdin-mode.md#live-stream-json-contract) for the
+session resume and steering semantics.
 
 ## Supported Tools
 

@@ -352,6 +352,94 @@ printf 'First line\nSecond line\nThird line' | agent
 
 Becomes a single message: "First line\nSecond line\nThird line"
 
+## Live `stream-json` Contract
+
+For bidirectional drivers such as hive-mind, use continuous stdin with
+Claude-compatible JSONL input and output:
+
+```bash
+agent --input-format stream-json --output-format stream-json
+```
+
+Each stdin line must be one complete JSON object. Supported frame types:
+
+| Frame                                    | Direction       | Behavior                                                                                                                    |
+| ---------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `{"type":"user_prompt","content":"..."}` | driver -> agent | Queues a user turn. `{"type":"user", ...}` frames with text content are accepted too.                                       |
+| `{"type":"system","content":"..."}`      | driver -> agent | Replaces the system message used for subsequent turns.                                                                      |
+| `{"type":"interrupt"}`                   | driver -> agent | Requests cancellation of the active prompt and moves the session back to idle. It does not start a new user turn by itself. |
+| `{"type":"permission_response", ...}`    | driver -> agent | Resolves a pending `permission_request` without waiting for the turn to finish. See [permissions](permissions.md).          |
+
+### Session Resume
+
+`--resume <sessionID>` is the stable resume entry point. By default it forks
+the requested session to preserve the original history and continues in the
+forked session. Add `--no-fork` to continue in the exact same session:
+
+```bash
+agent --resume ses_abc123 --no-fork --input-format stream-json --output-format stream-json
+```
+
+Output events identify the active session. OpenCode output uses `sessionID`;
+Claude `stream-json` output uses `session_id`. When `--resume` forks, the first
+`init`, `message`, `result`, or `idle` event contains the forked session id.
+When `--resume --no-fork` is used, those events contain the requested session id.
+
+### User-Frame Replay
+
+When a `user_prompt` or `user` frame is actually consumed, the agent replays it
+on stdout as an acknowledgement. In Claude `stream-json` output this is a user
+message:
+
+```json
+{
+  "type": "message",
+  "timestamp": "2026-07-03T00:00:00.000Z",
+  "session_id": "ses_abc123",
+  "role": "user",
+  "content": [{ "type": "text", "text": "new issue comment" }]
+}
+```
+
+If the agent is busy, user frames are queued and replayed only when they become
+the active turn. This lets a driver distinguish "accepted on stdin" from
+"delivered to the conversation".
+
+### Interrupt And Queuing Semantics
+
+`{"type":"interrupt"}` requests an immediate abort of the active prompt. The
+agent then emits the idle signal below when the session is safe for another
+turn. User frames that arrive while the active prompt is stopping remain queued
+and are processed after that idle boundary.
+
+### Idle / Turn Boundary Signal
+
+At the end of each turn, and after an interrupt cancellation settles, the agent
+emits an explicit idle event.
+
+OpenCode output:
+
+```json
+{
+  "type": "session_idle",
+  "timestamp": 1718630400000,
+  "sessionID": "ses_abc123"
+}
+```
+
+Claude `stream-json` output:
+
+```json
+{
+  "type": "idle",
+  "timestamp": "2026-07-03T00:00:00.000Z",
+  "session_id": "ses_abc123"
+}
+```
+
+Drivers can flush queued `user_prompt` frames after this event instead of
+interrupting an in-progress turn.
+
 ## Status Messages
 
 When entering listening mode, the CLI outputs a JSON status message (pretty-printed by default).
