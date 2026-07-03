@@ -302,7 +302,10 @@ async function resolveCompactionModelEntry(
 
   // Short name resolution
   const { Provider } = await import('../provider/provider.ts');
-  const resolved = await Provider.parseModelWithResolution(modelArg);
+  const resolved = await Provider.resolveShortModelName(modelArg);
+  if (!resolved) {
+    throw new Error('ProviderModelNotFoundError');
+  }
   return {
     providerID: resolved.providerID,
     modelID: resolved.modelID,
@@ -336,10 +339,17 @@ async function parseCompactionModelConfig(
 
   // Check for --compaction-models (cascade) first — it overrides --compaction-model
   const cliCompactionModelsArg = getCompactionModelsFromProcessArgv();
+  const defaultCompactionModels = getDefaultCompactionModels(defaultOptions);
+  const compactionModelsSource =
+    cliCompactionModelsArg ||
+    (argv['compaction-models'] &&
+      argv['compaction-models'] !== defaultCompactionModels)
+      ? 'cli'
+      : 'default';
   const compactionModelsArg =
     cliCompactionModelsArg ??
     argv['compaction-models'] ??
-    getDefaultCompactionModels(defaultOptions);
+    defaultCompactionModels;
 
   // Parse the links notation sequence into an array of model names
   const modelNames = parseLinksNotationSequence(compactionModelsArg);
@@ -360,8 +370,11 @@ async function parseCompactionModelConfig(
           useSameModel: resolved.useSameModel,
         });
       } catch (err) {
-        // If a model can't be resolved, log and skip it
-        Log.Default.warn(() => ({
+        const logSkip =
+          compactionModelsSource === 'default'
+            ? Log.Default.debug
+            : Log.Default.warn;
+        logSkip(() => ({
           message: 'skipping unresolvable compaction model in cascade',
           model: name,
           error: err?.message,
@@ -374,7 +387,7 @@ async function parseCompactionModelConfig(
       models: compactionModels.map((m) =>
         m.useSameModel ? 'same' : `${m.providerID}/${m.modelID}`
       ),
-      source: cliCompactionModelsArg ? 'cli' : 'default',
+      source: compactionModelsSource,
     }));
 
     // Use the first model as the primary compaction model (for backward compatibility)
