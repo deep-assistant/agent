@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.25.0
+
+### Minor Changes
+
+- 5ad3929: Improve read and grep output for long files and long single-line matches.
+
 ## 0.24.3
 
 ### Patch Changes
