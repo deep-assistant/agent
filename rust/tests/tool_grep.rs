@@ -142,6 +142,38 @@ async fn test_grep_regex_pattern() {
     assert!(!result.output.contains("baz"));
 }
 
+#[tokio::test]
+async fn test_grep_long_matching_line_is_summarized_around_match() {
+    let temp = TempDir::new().unwrap();
+    fs::write(
+        temp.path().join("long-match.txt"),
+        format!(
+            "{}ivu-modal-header{{cursor:move}}{}",
+            "x".repeat(1500),
+            "y".repeat(1500)
+        ),
+    )
+    .unwrap();
+
+    let tool = GrepTool;
+    let ctx = create_context(temp.path());
+    let params = json!({
+        "pattern": "ivu-modal-header",
+        "path": temp.path().to_string_lossy(),
+        "glob": "*.txt",
+        "output_mode": "content"
+    });
+
+    let result = tool.execute(params, &ctx).await.unwrap();
+
+    assert!(result.output.contains("ivu-modal-header{cursor:move}"));
+    assert!(result.output.contains("[omitted columns 1..508 of line 1]"));
+    assert!(result
+        .output
+        .contains("[omitted columns 2509..3029 of line 1]"));
+    assert!(result.output.len() < 2300);
+}
+
 #[test]
 fn test_grep_tool_id() {
     let tool = GrepTool;

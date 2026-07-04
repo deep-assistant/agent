@@ -5,11 +5,10 @@ import { Tool } from './tool';
 import { FileTime } from '../file/time';
 import DESCRIPTION from './read.txt';
 import { config } from '../config/config';
-import { Filesystem } from '../util/filesystem';
 import { Instance } from '../project/instance';
 import { Provider } from '../provider/provider';
 import { Identifier } from '../id/id';
-import { iife } from '../util/iife';
+import { formatBalancedLineWindow, formatColumnWindow } from './text-window';
 
 const DEFAULT_READ_LIMIT = 2000;
 const MAX_LINE_LENGTH = 2000;
@@ -25,6 +24,14 @@ export const ReadTool = Tool.define('read', {
     limit: z.coerce
       .number()
       .describe('The number of lines to read (defaults to 2000)')
+      .optional(),
+    columnOffset: z.coerce
+      .number()
+      .describe('The column number to start reading from (0-based)')
+      .optional(),
+    columnLimit: z.coerce
+      .number()
+      .describe('The number of columns to read from each selected line')
       .optional(),
   }),
   async execute(params, ctx) {
@@ -120,25 +127,53 @@ export const ReadTool = Tool.define('read', {
     const isBinary = await isBinaryFile(filepath, file);
     if (isBinary) throw new Error(`Cannot read binary file: ${filepath}`);
 
-    const limit = params.limit ?? DEFAULT_READ_LIMIT;
-    const offset = params.offset || 0;
+    const limit = normalizeNonNegativeInteger(params.limit, DEFAULT_READ_LIMIT);
+    const offset = normalizeNonNegativeInteger(params.offset, 0);
+    const hasExplicitLineRange =
+      params.offset !== undefined || params.limit !== undefined;
+    const hasExplicitColumnRange =
+      params.columnOffset !== undefined || params.columnLimit !== undefined;
+    const columnOffset = normalizeNonNegativeInteger(params.columnOffset, 0);
+    const columnLimit = normalizeNonNegativeInteger(
+      params.columnLimit,
+      MAX_LINE_LENGTH
+    );
     const lines = await file.text().then((text) => text.split('\n'));
-    const raw = lines.slice(offset, offset + limit).map((line) => {
-      return line.length > MAX_LINE_LENGTH
-        ? line.substring(0, MAX_LINE_LENGTH) + '...'
-        : line;
+    const selected = selectLines({
+      lines,
+      offset,
+      limit,
+      summarizeMiddle: !hasExplicitLineRange,
     });
-    const content = raw.map((line, index) => {
-      return `${(index + offset + 1).toString().padStart(5, '0')}| ${line}`;
+    const content = selected.parts.flatMap((part) => {
+      if (part.type === 'omitted') {
+        return [`... [omitted lines ${part.start}..${part.end}] ...`];
+      }
+
+      return part.lines.map(({ line, lineNumber }) => {
+        const formattedLine = hasExplicitColumnRange
+          ? formatColumnWindow({
+              line,
+              lineNumber,
+              offset: columnOffset,
+              limit: columnLimit,
+            })
+          : formatBalancedLineWindow({
+              line,
+              lineNumber,
+              limit: MAX_LINE_LENGTH,
+            });
+        return `${lineNumber.toString().padStart(5, '0')}| ${formattedLine}`;
+      });
     });
-    const preview = raw.slice(0, 20).join('\n');
+    const preview = content.slice(0, 20).join('\n');
 
     let output = '<file>\n';
     output += content.join('\n');
 
     const totalLines = lines.length;
-    const lastReadLine = offset + content.length;
-    const hasMoreLines = totalLines > lastReadLine;
+    const lastReadLine = selected.lastLine;
+    const hasMoreLines = hasExplicitLineRange && totalLines > lastReadLine;
 
     if (hasMoreLines) {
       output += `\n\n(File has more lines. Use 'offset' parameter to read beyond line ${lastReadLine})`;
@@ -159,6 +194,79 @@ export const ReadTool = Tool.define('read', {
     };
   },
 });
+
+function normalizeNonNegativeInteger(
+  value: number | undefined,
+  fallback: number
+) {
+  if (value === undefined || !Number.isFinite(value)) return fallback;
+  return Math.max(0, Math.floor(value));
+}
+
+type SelectedLinePart =
+  | {
+      type: 'lines';
+      lines: Array<{ line: string; lineNumber: number }>;
+    }
+  | {
+      type: 'omitted';
+      start: number;
+      end: number;
+    };
+
+function selectLines(input: {
+  lines: string[];
+  offset: number;
+  limit: number;
+  summarizeMiddle: boolean;
+}): { parts: SelectedLinePart[]; lastLine: number } {
+  const totalLines = input.lines.length;
+
+  if (!input.summarizeMiddle || totalLines <= input.limit) {
+    const end = Math.min(input.offset + input.limit, totalLines);
+    return {
+      parts: [
+        {
+          type: 'lines',
+          lines: lineRange(input.lines, input.offset, end),
+        },
+      ],
+      lastLine: end,
+    };
+  }
+
+  const headCount = Math.ceil(input.limit / 2);
+  const tailCount = input.limit - headCount;
+  const tailStart = totalLines - tailCount;
+  const omittedStart = headCount + 1;
+  const omittedEnd = tailStart;
+
+  return {
+    parts: [
+      {
+        type: 'lines',
+        lines: lineRange(input.lines, 0, headCount),
+      },
+      {
+        type: 'omitted',
+        start: omittedStart,
+        end: omittedEnd,
+      },
+      {
+        type: 'lines',
+        lines: lineRange(input.lines, tailStart, totalLines),
+      },
+    ],
+    lastLine: totalLines,
+  };
+}
+
+function lineRange(lines: string[], start: number, end: number) {
+  return lines.slice(start, end).map((line, index) => ({
+    line,
+    lineNumber: start + index + 1,
+  }));
+}
 
 function isImageFile(filePath: string): string | false {
   const ext = path.extname(filePath).toLowerCase();

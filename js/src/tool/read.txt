@@ -3,9 +3,10 @@ Assume this tool is able to read all files on the machine. If the User provides 
 
 Usage:
 - The filePath parameter must be an absolute path, not a relative path
-- By default, it reads up to 2000 lines starting from the beginning of the file
-- You can optionally specify a line offset and limit (especially handy for long files), but it's recommended to read the whole file by not providing these parameters
-- Any lines longer than 2000 characters will be truncated
+- By default, it reads the whole file when it fits the read limit. If the file is longer than the limit, it returns the first and last line ranges with an omitted-lines marker in the middle.
+- You can optionally specify a line offset and limit (especially handy for long files), but it's recommended to read the default first/last summary first and then request omitted ranges if needed.
+- You can optionally specify columnOffset and columnLimit to read a window from each selected line, especially for long single-line files.
+- Long lines are summarized with first and last columns plus omitted-column ranges instead of being silently truncated.
 - Results are returned using cat -n format, with line numbers starting at 1
 - You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful.
 - If you read a file that exists but has empty contents you will receive a system reminder warning in place of file contents.

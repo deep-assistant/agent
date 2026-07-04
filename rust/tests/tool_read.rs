@@ -134,6 +134,74 @@ async fn test_read_with_line_numbers() {
     assert!(result.output.contains("00003|"));
 }
 
+#[tokio::test]
+async fn test_read_long_file_default_includes_first_and_last_ranges() {
+    let temp = TempDir::new().unwrap();
+    let file_path = temp.path().join("long-file.txt");
+    let content = (1..=2105)
+        .map(|line| format!("line {}", line))
+        .collect::<Vec<_>>()
+        .join("\n");
+    fs::write(&file_path, content).unwrap();
+
+    let tool = ReadTool;
+    let ctx = create_context(temp.path());
+    let params = json!({ "filePath": file_path.to_string_lossy() });
+
+    let result = tool.execute(params, &ctx).await.unwrap();
+
+    assert!(result.output.contains("00001| line 1"));
+    assert!(result.output.contains("02105| line 2105"));
+    assert!(result.output.contains("... [omitted lines 1001..1105] ..."));
+    assert!(!result.output.contains("01050| line 1050"));
+}
+
+#[tokio::test]
+async fn test_read_long_single_line_includes_omitted_column_range() {
+    let temp = TempDir::new().unwrap();
+    let file_path = temp.path().join("long-line.txt");
+    fs::write(&file_path, format!("START{}END", "m".repeat(3000))).unwrap();
+
+    let tool = ReadTool;
+    let ctx = create_context(temp.path());
+    let params = json!({ "filePath": file_path.to_string_lossy() });
+
+    let result = tool.execute(params, &ctx).await.unwrap();
+
+    assert!(result.output.contains("00001| START"));
+    assert!(result.output.contains("END"));
+    assert!(result
+        .output
+        .contains("[omitted columns 1001..2008 of line 1]"));
+}
+
+#[tokio::test]
+async fn test_read_explicit_column_window() {
+    let temp = TempDir::new().unwrap();
+    let file_path = temp.path().join("columns.txt");
+    fs::write(
+        &file_path,
+        format!("{}TARGET{}", "A".repeat(10), "B".repeat(10)),
+    )
+    .unwrap();
+
+    let tool = ReadTool;
+    let ctx = create_context(temp.path());
+    let params = json!({
+        "filePath": file_path.to_string_lossy(),
+        "columnOffset": 10,
+        "columnLimit": 6
+    });
+
+    let result = tool.execute(params, &ctx).await.unwrap();
+
+    assert!(result.output.contains(
+        "00001| [omitted columns 1..10 of line 1] ... TARGET ... [omitted columns 17..26 of line 1]"
+    ));
+    assert!(!result.output.contains("AAAAATARGET"));
+    assert!(!result.output.contains("TARGETBBBBB"));
+}
+
 #[test]
 fn test_read_tool_id() {
     let tool = ReadTool;

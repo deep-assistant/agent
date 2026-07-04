@@ -4,6 +4,12 @@ import { Ripgrep } from '../file/ripgrep';
 
 import DESCRIPTION from './grep.txt';
 import { Instance } from '../project/instance';
+import {
+  byteOffsetToColumnIndex,
+  formatFocusedLineWindow,
+} from './text-window';
+
+const MAX_MATCHING_LINE_LENGTH = 2000;
 
 export const GrepTool = Tool.define('grep', {
   description: DESCRIPTION,
@@ -32,12 +38,7 @@ export const GrepTool = Tool.define('grep', {
     const searchPath = params.path || Instance.directory;
 
     const rgPath = await Ripgrep.filepath();
-    const args = [
-      '-nH',
-      '--field-match-separator=|',
-      '--regexp',
-      params.pattern,
-    ];
+    const args = ['--json', '--regexp', params.pattern];
     if (params.include) {
       args.push('--glob', params.include);
     }
@@ -64,17 +65,29 @@ export const GrepTool = Tool.define('grep', {
       throw new Error(`ripgrep failed: ${errorOutput}`);
     }
 
-    const lines = output.trim().split('\n');
     const matches = [];
 
-    for (const line of lines) {
+    for (const line of output.trim().split('\n')) {
       if (!line) continue;
 
-      const [filePath, lineNumStr, ...lineTextParts] = line.split('|');
-      if (!filePath || !lineNumStr || lineTextParts.length === 0) continue;
+      const event = JSON.parse(line);
+      if (event.type !== 'match') continue;
 
-      const lineNum = parseInt(lineNumStr, 10);
-      const lineText = lineTextParts.join('|');
+      const filePath = event.data?.path?.text;
+      const lineNum = event.data?.line_number;
+      const rawLineText = event.data?.lines?.text;
+      const submatch = event.data?.submatches?.[0];
+      if (!filePath || !lineNum || typeof rawLineText !== 'string') continue;
+
+      const lineText = stripTrailingLineEnding(rawLineText);
+      const matchStart = byteOffsetToColumnIndex(
+        lineText,
+        submatch?.start ?? 0
+      );
+      const matchEnd = byteOffsetToColumnIndex(
+        lineText,
+        submatch?.end ?? submatch?.start ?? 0
+      );
 
       const file = Bun.file(filePath);
       const stats = await file.stat().catch(() => null);
@@ -85,6 +98,8 @@ export const GrepTool = Tool.define('grep', {
         modTime: stats.mtime.getTime(),
         lineNum,
         lineText,
+        matchStart,
+        matchEnd,
       });
     }
 
@@ -113,7 +128,15 @@ export const GrepTool = Tool.define('grep', {
         currentFile = match.path;
         outputLines.push(`${match.path}:`);
       }
-      outputLines.push(`  Line ${match.lineNum}: ${match.lineText}`);
+      outputLines.push(
+        `  Line ${match.lineNum}: ${formatFocusedLineWindow({
+          line: match.lineText,
+          lineNumber: match.lineNum,
+          focusStart: match.matchStart,
+          focusEnd: match.matchEnd,
+          limit: MAX_MATCHING_LINE_LENGTH,
+        })}`
+      );
     }
 
     if (truncated) {
@@ -133,3 +156,7 @@ export const GrepTool = Tool.define('grep', {
     };
   },
 });
+
+function stripTrailingLineEnding(line: string) {
+  return line.replace(/\r?\n$/, '');
+}
