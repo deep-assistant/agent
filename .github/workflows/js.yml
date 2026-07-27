@@ -187,13 +187,47 @@ jobs:
         working-directory: js
         timeout-minutes: 5
 
+  # Verify the published dependency graph installs without peer warnings.
+  package-install:
+    name: Clean Package Install
+    runs-on: ubuntu-latest
+    needs: [changeset-check]
+    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success')
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Pack package
+        id: pack
+        working-directory: js
+        run: |
+          TARBALL=$(bun pm pack --quiet | tail -1)
+          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
+
+      - name: Install package in a clean project
+        env:
+          TARBALL: ${{ github.workspace }}/js/${{ steps.pack.outputs.tarball }}
+        run: |
+          CONSUMER_DIR=$(mktemp -d)
+          cd "$CONSUMER_DIR"
+          bun init -y
+          bun add "$TARBALL" 2>&1 | tee install.log
+          if grep -q 'warn: incorrect peer dependency' install.log; then
+            echo "::error::Packed package installation emitted an incorrect peer dependency warning"
+            exit 1
+          fi
+
   # Release - only runs on main after tests pass (for push events)
   release:
     name: Release
-    needs: [lint, test, verbose-integration]
+    needs: [lint, test, verbose-integration, package-install]
     # Use always() to ensure this job runs even if changeset-check was skipped
     # This is needed because lint/test jobs have a transitive dependency on changeset-check
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.verbose-integration.result == 'success'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.verbose-integration.result == 'success' && needs.package-install.result == 'success'
     runs-on: ubuntu-latest
     concurrency:
       group: release-main
