@@ -1,5 +1,13 @@
 # @link-assistant/agent
 
+## 0.25.3
+
+### Patch Changes
+
+- 75dc5da: Eliminate AI SDK warnings from multi-turn OpenAI-compatible runs by passing
+  trusted system prompts through the dedicated `system` option and upgrading the
+  adapter to its AI SDK 6-compatible Language Model v3 release.
+
 ## 0.25.2
 
 ### Patch Changes
