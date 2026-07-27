@@ -1,4 +1,4 @@
-import { streamText, wrapLanguageModel, type ModelMessage } from 'ai';
+import { streamText, wrapLanguageModel } from 'ai';
 import { Session } from '.';
 import { Identifier } from '../id/id';
 import { Instance } from '../project/instance';
@@ -384,13 +384,8 @@ export namespace SessionCompaction {
         headers: model.info.headers,
         abortSignal: input.abort,
         tools: model.info.tool_call ? {} : undefined,
+        system: system.map((content) => ({ role: 'system', content })),
         messages: [
-          ...system.map(
-            (x): ModelMessage => ({
-              role: 'system',
-              content: x,
-            })
-          ),
           ...safeModelMessages,
           {
             role: 'user',

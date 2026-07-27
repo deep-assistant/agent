@@ -12,7 +12,6 @@ import { Provider } from '../provider/provider';
 import {
   generateText,
   streamText,
-  type ModelMessage,
   type Tool as AITool,
   tool,
   wrapLanguageModel,
@@ -990,15 +989,8 @@ export namespace SessionPrompt {
           stopWhen: stepCountIs(1),
           temperature: params.temperature,
           topP: params.topP,
-          messages: [
-            ...system.map(
-              (x): ModelMessage => ({
-                role: 'system',
-                content: x,
-              })
-            ),
-            ...safeModelMessages,
-          ],
+          system: system.map((content) => ({ role: 'system', content })),
+          messages: safeModelMessages,
           tools: model.info?.tool_call === false ? undefined : tools,
           model: wrapLanguageModel({
             model: model.language,
@@ -1925,13 +1917,11 @@ export namespace SessionPrompt {
         small.providerID,
         options
       ),
+      system: safeTitleSystemMessages.map((content) => ({
+        role: 'system',
+        content,
+      })),
       messages: [
-        ...safeTitleSystemMessages.map(
-          (x): ModelMessage => ({
-            role: 'system',
-            content: x,
-          })
-        ),
         {
           role: 'user' as const,
           content: `
