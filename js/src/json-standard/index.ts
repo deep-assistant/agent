@@ -111,13 +111,12 @@ export function convertOpenCodeToClaude(
     case 'tool_use':
       if (event.part && event.part.state) {
         const state = event.part.state as Record<string, unknown>;
-        const tool = state.tool as Record<string, unknown> | undefined;
         return {
           type: 'tool_use',
           timestamp,
           session_id,
-          name: (tool?.name as string) || 'unknown',
-          input: tool?.parameters || {},
+          name: (event.part.tool as string) || 'unknown',
+          input: state.input || {},
           tool_use_id: event.part.id as string,
         };
       }
