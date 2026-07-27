@@ -121,11 +121,13 @@ describe('JSON Standard Module - Unit Tests', () => {
         sessionID: 'ses_test123',
         part: {
           id: 'prt_tool123',
+          type: 'tool',
+          callID: 'call_tool123',
+          tool: 'write',
           state: {
-            tool: {
-              name: 'bash',
-              parameters: { command: 'ls' },
-            },
+            status: 'pending',
+            input: { filePath: 'hi.txt', content: 'hi\n' },
+            raw: '',
           },
         },
       };
@@ -134,8 +136,11 @@ describe('JSON Standard Module - Unit Tests', () => {
 
       expect(claudeEvent).not.toBeNull();
       expect(claudeEvent.type).toBe('tool_use');
-      expect(claudeEvent.name).toBe('bash');
-      expect(claudeEvent.input).toEqual({ command: 'ls' });
+      expect(claudeEvent.name).toBe('write');
+      expect(claudeEvent.input).toEqual({
+        filePath: 'hi.txt',
+        content: 'hi\n',
+      });
       expect(claudeEvent.tool_use_id).toBe('prt_tool123');
     });
 

@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.25.1
+
+### Patch Changes
+
+- ee63864: Report tool names and inputs correctly in `stream-json` tool-use events.
+
 ## 0.25.0
 
 ### Minor Changes
