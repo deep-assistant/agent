@@ -1,5 +1,11 @@
 # @link-assistant/agent
 
+## 0.25.2
+
+### Patch Changes
+
+- b50445f: Pin OpenTUI and Solid to compatible versions so Bun installs no longer emit an incorrect `solid-js` peer dependency warning.
+
 ## 0.25.1
 
 ### Patch Changes
