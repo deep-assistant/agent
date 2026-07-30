@@ -14,6 +14,7 @@ import { SessionPrompt } from './prompt';
 import { fn } from '../util/fn';
 import { Command } from '../command';
 import { Snapshot } from '../snapshot';
+import { VERSION } from '../version';
 
 export namespace Session {
   const log = Log.create({ service: 'session' });
@@ -226,7 +227,7 @@ export namespace Session {
   }) {
     const result: Info = {
       id: Identifier.descending('session', input.id),
-      version: 'agent-cli-1.0.0',
+      version: VERSION,
       projectID: Instance.project.id,
       directory: input.directory,
       parentID: input.parentID,

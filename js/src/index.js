@@ -46,22 +46,12 @@ import {
   outputInput,
 } from './cli/output.ts';
 import stripAnsi from 'strip-ansi';
-import { createRequire } from 'module';
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve as resolvePath } from 'path';
+import { VERSION } from './version.ts';
 
-const require = createRequire(import.meta.url);
-let pkg;
-try {
-  pkg = require('../package.json');
-} catch (_e) {
-  // Fallback: read package.json directly
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const pkgPath = join(__dirname, '../package.json');
-  const pkgContent = readFileSync(pkgPath, 'utf8');
-  pkg = JSON.parse(pkgContent);
-}
+// Version comes from the shared module so that `--version`, the process log
+// and stored session records can never disagree (#285).
+const pkg = { version: VERSION };
 
 // Track if any errors occurred during execution
 let hasError = false;
@@ -226,7 +216,7 @@ async function readSystemMessages(argv) {
   let appendSystemMessage = argv['append-system-message'];
 
   if (argv['system-message-file']) {
-    const resolvedPath = require('path').resolve(
+    const resolvedPath = resolvePath(
       process.cwd(),
       argv['system-message-file']
     );
@@ -242,7 +232,7 @@ async function readSystemMessages(argv) {
   }
 
   if (argv['append-system-message-file']) {
-    const resolvedPath = require('path').resolve(
+    const resolvedPath = resolvePath(
       process.cwd(),
       argv['append-system-message-file']
     );
