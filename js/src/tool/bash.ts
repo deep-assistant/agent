@@ -2,6 +2,7 @@ import z from 'zod';
 import { spawn } from 'child_process';
 import { Tool } from './tool';
 import DESCRIPTION from './bash.txt';
+import { Branding } from '../branding';
 import { Log } from '../util/log';
 import { Instance } from '../project/instance';
 import { lazy } from '../util/lazy';
@@ -53,7 +54,7 @@ const parser = lazy(async () => {
 });
 
 export const BashTool = Tool.define('bash', {
-  description: DESCRIPTION,
+  description: Branding.apply(DESCRIPTION),
   parameters: z.object({
     command: z.string().describe('The command to execute'),
     timeout: z.number().describe('Optional timeout in milliseconds').optional(),

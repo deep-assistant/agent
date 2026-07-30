@@ -18,27 +18,99 @@ import PROMPT_SUMMARIZE from './prompt/summarize.txt';
 import PROMPT_TITLE from './prompt/title.txt';
 import PROMPT_CODEX from './prompt/codex.txt';
 import PROMPT_GROK_CODE from './prompt/grok-code.txt';
+import { Branding } from '../branding';
+import { Log } from '../util/log';
 
 export namespace SystemPrompt {
-  export function header(providerID: string) {
-    if (providerID.includes('anthropic'))
-      return [PROMPT_ANTHROPIC_SPOOF.trim()];
-    return [];
+  const log = Log.create({ service: 'system-prompt' });
+
+  /** Identifiers of the selectable system prompts. */
+  export type PromptID =
+    | 'anthropic'
+    | 'anthropic-without-todo'
+    | 'beast'
+    | 'codex'
+    | 'gemini'
+    | 'grok-code'
+    | 'polaris';
+
+  const RAW: Record<PromptID, string> = {
+    anthropic: PROMPT_ANTHROPIC,
+    'anthropic-without-todo': PROMPT_ANTHROPIC_WITHOUT_TODO,
+    beast: PROMPT_BEAST,
+    codex: PROMPT_CODEX,
+    gemini: PROMPT_GEMINI,
+    'grok-code': PROMPT_GROK_CODE,
+    polaris: PROMPT_POLARIS,
+  };
+
+  /**
+   * The prompt used for any model that is not matched by an explicit rule.
+   * It is the full prompt (with todo/task-tracking discipline); models that
+   * genuinely break on todo tools must opt out explicitly via the
+   * `AGENT_SYSTEM_PROMPT` environment variable. See issue #285.
+   */
+  export const DEFAULT_PROMPT_ID: PromptID = 'anthropic';
+
+  const RULES: { matches: (modelID: string) => boolean; id: PromptID }[] = [
+    { matches: (m) => m.includes('gpt-5'), id: 'codex' },
+    {
+      matches: (m) =>
+        m.includes('gpt-') || m.includes('o1') || m.includes('o3'),
+      id: 'beast',
+    },
+    { matches: (m) => m.includes('gemini-'), id: 'gemini' },
+    { matches: (m) => m.includes('claude'), id: 'anthropic' },
+    { matches: (m) => m.includes('polaris-alpha'), id: 'polaris' },
+    { matches: (m) => m.includes('grok-code'), id: 'grok-code' },
+  ];
+
+  export function isPromptID(value: string): value is PromptID {
+    return value in RAW;
+  }
+
+  /**
+   * Resolve which prompt a model gets, and why.
+   *
+   * Resolution order:
+   * 1. explicit override via the `AGENT_SYSTEM_PROMPT` environment variable;
+   * 2. an explicit rule matching the model id;
+   * 3. {@link DEFAULT_PROMPT_ID}.
+   */
+  export function resolve(modelID: string): { id: PromptID; reason: string } {
+    const override = process.env['AGENT_SYSTEM_PROMPT']?.trim();
+    if (override) {
+      if (isPromptID(override))
+        return { id: override, reason: 'AGENT_SYSTEM_PROMPT override' };
+      log.warn(() => ({
+        message: 'unknown AGENT_SYSTEM_PROMPT value, ignoring',
+        value: override,
+        known: Object.keys(RAW),
+      }));
+    }
+    for (const rule of RULES) {
+      if (rule.matches(modelID))
+        return { id: rule.id, reason: `matched model id ${modelID}` };
+    }
+    return {
+      id: DEFAULT_PROMPT_ID,
+      reason: `default for unknown model ${modelID}`,
+    };
+  }
+
+  /** Get a prompt by id, with the product identity substituted in (#285). */
+  export function text(id: PromptID): string {
+    return Branding.apply(RAW[id]);
   }
 
   export function provider(modelID: string) {
-    if (modelID.includes('gpt-5')) return [PROMPT_CODEX];
-    if (
-      modelID.includes('gpt-') ||
-      modelID.includes('o1') ||
-      modelID.includes('o3')
-    )
-      return [PROMPT_BEAST];
-    if (modelID.includes('gemini-')) return [PROMPT_GEMINI];
-    if (modelID.includes('claude')) return [PROMPT_ANTHROPIC];
-    if (modelID.includes('polaris-alpha')) return [PROMPT_POLARIS];
-    if (modelID.includes('grok-code')) return [PROMPT_GROK_CODE];
-    return [PROMPT_ANTHROPIC_WITHOUT_TODO];
+    const resolved = resolve(modelID);
+    log.info(() => ({
+      message: `system prompt: ${resolved.id} (${resolved.reason})`,
+      prompt: resolved.id,
+      model: modelID,
+    }));
+    return [text(resolved.id)];
   }
 
   export async function environment() {
@@ -149,18 +221,21 @@ export namespace SystemPrompt {
   export function summarize(providerID: string) {
     switch (providerID) {
       case 'anthropic':
-        return [PROMPT_ANTHROPIC_SPOOF.trim(), PROMPT_SUMMARIZE];
+        return [
+          PROMPT_ANTHROPIC_SPOOF.trim(),
+          Branding.apply(PROMPT_SUMMARIZE),
+        ];
       default:
-        return [PROMPT_SUMMARIZE];
+        return [Branding.apply(PROMPT_SUMMARIZE)];
     }
   }
 
   export function title(providerID: string) {
     switch (providerID) {
       case 'anthropic':
-        return [PROMPT_ANTHROPIC_SPOOF.trim(), PROMPT_TITLE];
+        return [PROMPT_ANTHROPIC_SPOOF.trim(), Branding.apply(PROMPT_TITLE)];
       default:
-        return [PROMPT_TITLE];
+        return [Branding.apply(PROMPT_TITLE)];
     }
   }
 }
