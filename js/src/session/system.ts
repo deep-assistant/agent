@@ -24,6 +24,12 @@ import { Log } from '../util/log';
 export namespace SystemPrompt {
   const log = Log.create({ service: 'system-prompt' });
 
+  export function header(providerID: string) {
+    if (providerID.includes('anthropic'))
+      return [PROMPT_ANTHROPIC_SPOOF.trim()];
+    return [];
+  }
+
   /** Identifiers of the selectable system prompts. */
   export type PromptID =
     | 'anthropic'

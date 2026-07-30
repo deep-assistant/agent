@@ -60,6 +60,15 @@ describe('system prompt selection', () => {
   });
 });
 
+describe('system prompt api surface', () => {
+  test('header still returns the OAuth spoof for anthropic providers', () => {
+    const header = SystemPrompt.header('anthropic');
+    expect(header).toHaveLength(1);
+    expect(header[0]).toContain('Claude Code');
+    expect(SystemPrompt.header('openai')).toEqual([]);
+  });
+});
+
 describe('product identity in rendered prompts', () => {
   const PROMPT_IDS = [
     'anthropic',
