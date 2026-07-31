@@ -37,7 +37,10 @@ const defaultBump = getArg('default', process.env.DEFAULT_BUMP || 'patch');
 
 // Get Rust package root (auto-detect or use explicit config)
 const rustRootConfig = getArg('rust-root', '') || parseRustRootConfig();
-const rustRoot = getRustRoot({ rustRoot: rustRootConfig || undefined, verbose: true });
+const rustRoot = getRustRoot({
+  rustRoot: rustRootConfig || undefined,
+  verbose: true,
+});
 
 // Get paths based on detected/configured rust root
 const CHANGELOG_DIR = getChangelogDir({ rustRoot });

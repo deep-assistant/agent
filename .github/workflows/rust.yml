@@ -29,12 +29,24 @@ on:
         required: false
         type: string
 
+# Least privilege by default; jobs that need to write escalate individually.
+permissions:
+  contents: read
+
 concurrency:
   group: rust-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A release runs on push to main. Cancelling it mid-publish would leave a
+  # version bumped and tagged but not published, so main runs always finish.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   CARGO_TERM_COLOR: always
+  # actions/checkout runs `git init` before any repository config exists, which
+  # prints a hint about the default branch name on every job. Setting it via
+  # GIT_CONFIG_* silences the hint without an extra step.
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
   # Note: -Dwarnings is disabled while Rust implementation is WIP
   # Enable later with: RUSTFLAGS: -Dwarnings
 
@@ -43,6 +55,7 @@ jobs:
   changelog-check:
     name: Changelog Fragment Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -77,10 +90,23 @@ jobs:
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [changelog-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped') }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Needed to merge the base branch below.
+          fetch-depth: 0
+
+      # refs/pull/N/merge is built when the pull request is synchronized, so
+      # commits landing on the base branch afterwards are not checked. Merging
+      # them here makes the checks below validate the real merge result.
+      - name: Simulate fresh merge with base branch (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/simulate-fresh-merge.sh
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -93,7 +119,7 @@ jobs:
           node-version: '24.x'
 
       - name: Cache cargo registry
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -118,8 +144,9 @@ jobs:
   test:
     name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     needs: [changelog-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped') }}
     strategy:
       fail-fast: false
       matrix:
@@ -132,7 +159,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -151,8 +178,9 @@ jobs:
   build:
     name: Build Package
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [lint, test]
-    if: always() && needs.lint.result == 'success' && needs.test.result == 'success'
+    if: ${{ !cancelled() && needs.lint.result == 'success' && needs.test.result == 'success' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -160,7 +188,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -184,8 +212,9 @@ jobs:
     needs: [lint, test, build]
     # Use always() to ensure this job runs even when changelog-check was skipped (on push events)
     # Without always(), GitHub Actions skips jobs when any transitive dependency was skipped
-    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success'
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     concurrency:
       group: release-main
       cancel-in-progress: false
@@ -210,12 +239,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # Read crate name/version from the [package] section only. A plain
+      # `grep -Po '(?<=^name = ")'` also matches every [lib]/[[bin]]/[[test]]
+      # section, which produced a malformed crates.io URL and failed this job
+      # with curl exit code 3 (issue #287).
+      - name: Read crate metadata
+        id: crate
+        run: node scripts/rust-package-info.mjs
+
       - name: Recover missing GitHub release for current version
         id: recover
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
+          CURRENT_VERSION="${{ steps.crate.outputs.version }}"
           TAG_EXISTS=false
           RELEASE_EXISTS=false
 
@@ -253,11 +290,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
+          CURRENT_VERSION="${{ steps.crate.outputs.version }}"
+          CRATE_NAME="${{ steps.crate.outputs.name }}"
 
-          # Check if version is published on crates.io (source of truth for publish status)
-          CRATE_NAME=$(grep -Po '(?<=^name = ")[^"]*' rust/Cargo.toml)
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://crates.io/api/v1/crates/$CRATE_NAME/$CURRENT_VERSION")
+          # Check if version is published on crates.io (source of truth for publish status).
+          # A network hiccup must not fail the job, so curl retries and its exit
+          # status is tolerated; an unreachable registry simply reads as "not published".
+          HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --retry 3 --retry-delay 2 --retry-all-errors --max-time 30 \
+            -A "link-assistant-agent-ci" \
+            "https://crates.io/api/v1/crates/$CRATE_NAME/$CURRENT_VERSION" || echo "000")
+          echo "crates.io HTTP status: $HTTP_STATUS"
           CRATES_PUBLISHED=false
           if [ "$HTTP_STATUS" = "200" ]; then
             CRATES_PUBLISHED=true
@@ -302,12 +345,11 @@ jobs:
           node scripts/rust-version-and-commit.mjs \
             --bump-type "${{ steps.bump_type.outputs.bump_type }}"
 
+      # Re-read after the bump step so the released version is the bumped one.
       - name: Get current version
         id: current_version
         if: steps.check.outputs.should_release == 'true'
-        run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
-          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        run: node scripts/rust-package-info.mjs
 
       - name: Build release
         if: steps.check.outputs.should_release == 'true'
@@ -342,8 +384,9 @@ jobs:
     name: Manual Release
     needs: [lint, test, build]
     # Use always() to ensure this job runs even when changelog-check was skipped
-    if: always() && github.event_name == 'workflow_dispatch' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success'
+    if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     concurrency:
       group: release-main
       cancel-in-progress: false
@@ -381,10 +424,10 @@ jobs:
 
       - name: Version and commit
         id: version
-        run: |
-          node scripts/rust-version-and-commit.mjs \
-            --bump-type "${{ github.event.inputs.bump_type }}" \
-            --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node scripts/rust-version-and-commit.mjs
 
       - name: Build release
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'

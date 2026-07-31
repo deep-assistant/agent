@@ -183,9 +183,16 @@ export namespace RetryFetch {
         return;
       }
 
+      // The timer is deliberately NOT unref'd. Every caller awaits this
+      // promise, so an unref'd timer is the only pending work while a retry
+      // wait is in flight: the runtime is then free to stop waiting on it,
+      // which drops the retry instead of performing it. On Bun for Windows
+      // this showed up as `tests/retry-fetch.ts > retries on 429 and succeeds
+      // on second attempt` never resuming, burning the whole job timeout.
+      // See https://github.com/link-assistant/agent/issues/287.
+      // The abort path below clears the timer, so a cancelled wait still lets
+      // the process exit immediately (the concern behind #213).
       const timeout = setTimeout(resolve, ms);
-      // Prevent sleep timer from keeping event loop alive (#213)
-      if (timeout.unref) timeout.unref();
 
       if (signal) {
         const abortHandler = () => {

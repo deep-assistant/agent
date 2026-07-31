@@ -2,6 +2,8 @@ import { test, expect, setDefaultTimeout } from 'bun:test';
 // @ts-ignore
 import { sh } from 'command-stream';
 
+import { inspectVerboseHttpLog } from '../lib/verbose-http-log.js';
+
 // Increase default timeout to 120 seconds — real API calls may take longer
 setDefaultTimeout(120000);
 
@@ -14,7 +16,14 @@ setDefaultTimeout(120000);
  * This test uses a real API with free-tier limits. It is the ONLY real-API test
  * intended for CI/CD execution. Other integration tests are manual (workflow_dispatch).
  *
+ * What is asserted is the logging contract only. The HTTP status the provider
+ * returned is reported but not asserted: this test gates the release in js.yml,
+ * and asserting `status == 200` turned a provider rate limit into a red build.
+ * The parsing rules live in tests/lib/verbose-http-log.js and are unit tested
+ * in tests/verbose-http-log.js.
+ *
  * @see https://github.com/link-assistant/agent/issues/221
+ * @see https://github.com/link-assistant/agent/issues/287
  */
 
 test('Agent-cli --verbose mode logs HTTP requests and responses for "hi"', async () => {
@@ -34,95 +43,33 @@ test('Agent-cli --verbose mode logs HTTP requests and responses for "hi"', async
   console.log('\n=== Verbose test: stdout length:', stdout.length);
   console.log('=== Verbose test: stderr length:', stderr.length);
 
-  // --- 1. Verify the agent produced output (non-empty stdout) ---
+  // The agent must have produced output at all.
   expect(stdout.length).toBeGreaterThan(0);
 
-  // --- 2. Verify HTTP request logs are present ---
-  // The verbose wrapper logs "HTTP request" with method, URL, headers, body
-  const hasHttpRequest =
-    combined.includes('"message": "HTTP request"') ||
-    combined.includes('"message":"HTTP request"');
-  expect(hasHttpRequest).toBe(true);
+  const { checks, failures, status } = inspectVerboseHttpLog(combined);
 
-  // --- 3. Verify HTTP response logs are present ---
-  const hasHttpResponse =
-    combined.includes('"message": "HTTP response"') ||
-    combined.includes('"message":"HTTP response"');
-  expect(hasHttpResponse).toBe(true);
+  for (const [name, passed] of Object.entries(checks)) {
+    console.log(`   - ${name}: ${passed ? '✓' : '✗'}`);
+  }
+  console.log(`   - provider HTTP status: ${status ?? 'none logged'}`);
 
-  // --- 4. Verify verbose HTTP logging active diagnostic breadcrumb ---
-  const hasVerboseActive =
-    combined.includes('verbose HTTP logging active') ||
-    combined.includes('[verbose] HTTP logging active');
-  expect(hasVerboseActive).toBe(true);
-
-  // --- 5. Verify request details are logged (URL, method) ---
-  // Should contain an API endpoint URL (https://...)
-  expect(combined.includes('https://')).toBe(true);
-
-  // Should contain HTTP method (POST for LLM API calls)
-  expect(
-    combined.includes('"method": "POST"') ||
-      combined.includes('"method":"POST"')
-  ).toBe(true);
-
-  // --- 6. Verify response status is logged ---
-  expect(
-    combined.includes('"status": 200') || combined.includes('"status":200')
-  ).toBe(true);
-
-  // --- 7. Verify response body or stream is logged ---
-  const hasResponseBody =
-    combined.includes('"message": "HTTP response body"') ||
-    combined.includes('"message":"HTTP response body"') ||
-    combined.includes('"message": "HTTP response body (stream)"') ||
-    combined.includes('"message":"HTTP response body (stream)"');
-  expect(hasResponseBody).toBe(true);
-
-  // --- 8. Verify headers are logged (with sensitive values masked) ---
-  expect(combined.includes('"headers"')).toBe(true);
-
-  // Sensitive headers should NOT contain full API keys
-  // (They should be masked like "sk-a...5678" or "[REDACTED]")
-  const apiKeyPatterns = [
-    /["']?(?:x-api-key|authorization|api-key)["']?\s*:\s*["'][a-zA-Z0-9_-]{20,}["']/i,
-  ];
-  for (const pattern of apiKeyPatterns) {
-    const match = combined.match(pattern);
-    if (match) {
-      const value = match[0];
-      const isMasked = value.includes('...') || value.includes('[REDACTED]');
-      expect(isMasked).toBe(true);
-    }
+  if (status !== null && status !== 200) {
+    // Informational: the provider is having a bad day, the logging still works.
+    console.log(
+      `⚠ Provider responded with ${status}; verbose logging is still verified.`
+    );
   }
 
-  // --- 9. Verify request body is logged (should contain bodyPreview) ---
-  expect(combined.includes('"bodyPreview"')).toBe(true);
+  expect(failures).toEqual([]);
 
-  // --- 10. Verify duration is logged ---
-  expect(combined.includes('"durationMs"')).toBe(true);
-
-  // --- 11. Check if the AI responded (non-blocking) ---
-  // The agent should produce step_start/step_finish/text events when the model works.
-  // However, the default model may be temporarily unavailable or produce API errors,
-  // so this check is informational only — the test's purpose is verifying HTTP logging.
+  // Informational: the model may be temporarily unavailable, which does not
+  // affect what this test verifies.
   const hasStepStart =
     combined.includes('"type": "step_start"') ||
     combined.includes('"type":"step_start"') ||
     combined.includes('"type": "step-start"') ||
     combined.includes('"type":"step-start"');
-
-  console.log('\n✅ Verbose HTTP logging verification passed');
-  console.log('   - HTTP request logged: ✓');
-  console.log('   - HTTP response logged: ✓');
-  console.log('   - Verbose diagnostic breadcrumb: ✓');
-  console.log('   - Request URL and method: ✓');
-  console.log('   - Response status code: ✓');
-  console.log('   - Response body/stream: ✓');
-  console.log('   - Headers (sanitized): ✓');
-  console.log('   - Body preview: ✓');
-  console.log('   - Duration timing: ✓');
   console.log(
-    `   - Agent step events: ${hasStepStart ? '✓' : '⚠ (model may be temporarily unavailable)'}`
+    `   - agent step events: ${hasStepStart ? '✓' : '⚠ (model may be temporarily unavailable)'}`
   );
 });

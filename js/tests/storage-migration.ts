@@ -91,8 +91,11 @@ describe('storage migration path safety', () => {
   test('path.resolve does not introduce null bytes', () => {
     const dir = '/workspace/.local/share/link-assistant-agent/storage';
     const project = path.resolve(dir, '../project');
+    // Compared against path.resolve of the expected path rather than a literal:
+    // on Windows a rooted POSIX path resolves against the current drive and
+    // uses backslashes, so the literal only held on POSIX runners (#287).
     expect(project).toBe(
-      '/workspace/.local/share/link-assistant-agent/project'
+      path.resolve('/workspace/.local/share/link-assistant-agent/project')
     );
     expect(project.includes('\0')).toBe(false);
   });

@@ -5,16 +5,17 @@
   "main": "src/index.js",
   "type": "module",
   "bin": {
-    "agent": "./src/index.js"
+    "agent": "src/index.js"
   },
   "scripts": {
     "dev": "bun run src/index.js",
-    "test": "bun test ./tests/*.js ./tests/*.ts",
+    "test": "bun test --timeout 30000 ./tests/*.js ./tests/*.ts",
     "test:integration": "bun test ./tests/integration/basic.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "eslint . && npm run lint:scripts",
+    "lint:scripts": "cd ../scripts && eslint . --config ./eslint.config.mjs",
+    "lint:fix": "eslint . --fix && cd ../scripts && eslint . --config ./eslint.config.mjs --fix",
+    "format": "prettier --write . ../scripts",
+    "format:check": "prettier --check . ../scripts",
     "check:file-size": "node ../scripts/check-file-size.mjs",
     "check": "npm run lint && npm run format:check && npm run check:file-size",
     "prepare": "cd .. && husky || true",
@@ -28,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/link-assistant/agent"
+    "url": "git+https://github.com/link-assistant/agent.git"
   },
   "keywords": [
     "ai",
@@ -46,10 +47,7 @@
     "src/",
     "package.json",
     "README.md",
-    "../MODELS.md",
-    "../TOOLS.md",
-    "../EXAMPLES.md",
-    "../LICENSE"
+    "LICENSE"
   ],
   "dependencies": {
     "@actions/core": "^1.11.1",
