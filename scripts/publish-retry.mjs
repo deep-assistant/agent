@@ -30,21 +30,28 @@ export function sleep(ms) {
  * Such an error is a cue to verify, not to fail.
  */
 const ALREADY_PUBLISHED_PATTERNS = [
+  // npm / changesets
   'epublishconflict',
   'cannot publish over the previously published version',
   'cannot publish over previously published version',
   'you cannot publish over the previously published versions',
   'already published',
+  // cargo / crates.io
+  'already exists on crates.io index',
+  'crate already uploaded',
+  'already exists on the registry',
+  'crate version is already uploaded',
 ];
 
 /**
  * Check whether publish output indicates the version is already published.
  * @param {string} output
+ * @param {string[]} [extraPatterns] - Additional lowercase substrings to match
  * @returns {boolean}
  */
-export function isAlreadyPublishedError(output) {
+export function isAlreadyPublishedError(output, extraPatterns = []) {
   const lowerOutput = String(output || '').toLowerCase();
-  return ALREADY_PUBLISHED_PATTERNS.some((pattern) =>
+  return [...ALREADY_PUBLISHED_PATTERNS, ...extraPatterns].some((pattern) =>
     lowerOutput.includes(pattern)
   );
 }
@@ -119,12 +126,12 @@ function shouldVerify({ success, error, output, log }) {
  * @param {boolean} verified
  * @returns {{success: boolean, error: Error|null}}
  */
-function verificationOutcome(verified) {
+function verificationOutcome(verified, registryLabel) {
   if (verified) {
     return { success: true, error: null };
   }
   const error = new Error(
-    'Package not found on npm after publish; verification polling exhausted'
+    `Package not found on ${registryLabel} after publish; verification polling exhausted`
   );
   error.nonRetryable = true;
   error.verificationFailed = true;
@@ -159,6 +166,7 @@ export async function publishWithRetry({
   sleepFn = sleep,
   log = () => {},
   verifyOptions = {},
+  registryLabel = 'npm',
 }) {
   let publishAttempts = 0;
   let lastError = null;
@@ -175,7 +183,10 @@ export async function publishWithRetry({
         log,
         ...verifyOptions,
       });
-      return { ...verificationOutcome(verified), publishAttempts };
+      return {
+        ...verificationOutcome(verified, registryLabel),
+        publishAttempts,
+      };
     }
 
     lastError = error;

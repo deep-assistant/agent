@@ -61,6 +61,46 @@ export function readPackageKey(cargoTomlContent, key) {
 }
 
 /**
+ * Rewrite the `version` key of the `[package]` section, leaving every other
+ * section untouched. A bare `/^version\s*=\s*"[^"]+"/m` replacement would edit
+ * whichever `version = "…"` line comes first in the file.
+ * @param {string} cargoTomlContent
+ * @param {string} newVersion
+ * @returns {string} The updated Cargo.toml body
+ */
+export function setPackageVersion(cargoTomlContent, newVersion) {
+  let inPackageSection = false;
+  let replaced = false;
+
+  const lines = String(cargoTomlContent).split('\n').map((rawLine) => {
+    const line = rawLine.trim();
+
+    if (line.startsWith('[')) {
+      inPackageSection = line === '[package]';
+      return rawLine;
+    }
+
+    if (!inPackageSection || replaced) {
+      return rawLine;
+    }
+
+    const match = rawLine.match(/^(\s*version\s*=\s*")[^"]*(".*)$/);
+    if (!match) {
+      return rawLine;
+    }
+
+    replaced = true;
+    return `${match[1]}${newVersion}${match[2]}`;
+  });
+
+  if (!replaced) {
+    throw new Error('No version key found in the [package] section');
+  }
+
+  return lines.join('\n');
+}
+
+/**
  * Parse crate name and version from a Cargo.toml body.
  * @param {string} cargoTomlContent
  * @param {string} cargoTomlPath - Only used for error messages

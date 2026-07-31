@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * Publish Rust crate to crates.io with verification
+ * Publish the Rust crate to crates.io with verification.
  *
- * Usage: node scripts/publish-to-crates.mjs [--should-pull]
+ * Usage: node scripts/publish-to-crates.mjs [--should-pull] [--rust-root <path>]
  *
- * Features:
- * - Checks if version is already published before attempting
- * - Publishes with retry logic
- * - Verifies the crate actually appeared on crates.io after publishing
- * - Outputs `published=true` and `published_version=X.Y.Z` for GitHub Actions
+ * Behaviour:
+ * - Reads crate name/version from the [package] section of Cargo.toml only
+ *   (see scripts/rust-package-info.mjs for why a plain regex is not enough).
+ * - Skips publishing when the version is already on crates.io.
+ * - Retries only genuine publish failures. A successful publish, or an
+ *   "already uploaded" conflict, moves straight to bounded verification
+ *   polling and never re-enters the publish path.
+ * - Outputs `published=true` and `published_version=X.Y.Z` for GitHub Actions.
  *
  * Required environment variables (at least one must be set):
  * - CARGO_REGISTRY_TOKEN: API token for crates.io
@@ -19,20 +22,24 @@
  * - GITHUB_OUTPUT: GitHub Actions output file path
  */
 
-import { readFileSync, appendFileSync } from 'fs';
 import { execSync } from 'child_process';
+import { appendFileSync } from 'fs';
 
-import {
-  getRustRoot,
-  getCargoTomlPath,
-  needsCd,
-  parseRustRootConfig,
-} from './rust-paths.mjs';
+import { classifyCargoPublish } from './cargo-publish-result.mjs';
+import { isCrateVersionPublished } from './crates-registry.mjs';
+import { publishWithRetry, sleep } from './publish-retry.mjs';
+import { readCrateInfo } from './rust-package-info.mjs';
+import { getRustRoot, needsCd, parseRustRootConfig } from './rust-paths.mjs';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
-const VERIFY_DELAY = 20000; // 20 seconds for crates.io propagation
-const VERIFY_RETRIES = 5; // Number of verification attempts
+// crates.io index propagation is slower than npm's, so verification starts
+// later and is given more attempts.
+const VERIFY_OPTIONS = {
+  attempts: 8,
+  initialDelay: 10000,
+  maxDelay: 30000,
+};
 
 const args = process.argv.slice(2);
 const getArg = (name, defaultValue) => {
@@ -50,12 +57,6 @@ const rustRoot = getRustRoot({
   verbose: true,
 });
 
-const CARGO_TOML = getCargoTomlPath({ rustRoot });
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function setOutput(key, value) {
   const outputFile = process.env.GITHUB_OUTPUT;
   if (outputFile) {
@@ -64,139 +65,57 @@ function setOutput(key, value) {
   console.log(`Output: ${key}=${value}`);
 }
 
-function exec(command, options = {}) {
-  const { capture = false, allowFailure = false } = options;
+/**
+ * Run a command, returning its exit code and captured output instead of
+ * throwing, so the classifier decides what the outcome means.
+ */
+function runCommand(command) {
   try {
-    const result = execSync(command, {
-      encoding: 'utf-8',
-      stdio: capture ? 'pipe' : 'inherit',
-    });
-    return { code: 0, stdout: result || '', stderr: '' };
+    const stdout = execSync(command, { encoding: 'utf-8', stdio: 'pipe' });
+    return { code: 0, stdout: stdout || '', stderr: '' };
   } catch (error) {
-    if (allowFailure) {
-      return {
-        code: error.status || 1,
-        stdout: error.stdout || '',
-        stderr: error.stderr || '',
-      };
-    }
-    throw error;
-  }
-}
-
-function getPackageName() {
-  const cargoToml = readFileSync(CARGO_TOML, 'utf-8');
-  const match = cargoToml.match(/^name\s*=\s*"([^"]+)"/m);
-  if (!match) {
-    throw new Error(`Could not parse package name from ${CARGO_TOML}`);
-  }
-  return match[1];
-}
-
-function getCurrentVersion() {
-  const cargoToml = readFileSync(CARGO_TOML, 'utf-8');
-  const match = cargoToml.match(/^version\s*=\s*"([^"]+)"/m);
-  if (!match) {
-    throw new Error(`Could not parse version from ${CARGO_TOML}`);
-  }
-  return match[1];
-}
-
-/**
- * Check if a specific version of a crate is published on crates.io
- */
-async function checkCratesIo(packageName, version) {
-  try {
-    const response = await fetch(
-      `https://crates.io/api/v1/crates/${packageName}/${version}`
-    );
-    if (response.ok) {
-      const data = await response.json();
-      return data.version && data.version.num === version;
-    }
-    return false;
-  } catch {
-    return false;
+    return {
+      code: error.status || 1,
+      stdout: error.stdout || '',
+      stderr: error.stderr || '',
+    };
   }
 }
 
 /**
- * Check if the crate exists at all on crates.io (any version)
+ * Look the version up on crates.io, treating a transient registry error as
+ * "unknown" rather than "not published".
  */
-async function checkCrateExists(packageName) {
+async function verifyPublished(crateName, version) {
   try {
-    const response = await fetch(
-      `https://crates.io/api/v1/crates/${packageName}`
-    );
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        exists: true,
-        owners: data.crate?.owners || [],
-        versions: (data.versions || []).map((v) => v.num),
-      };
-    }
-    return { exists: false };
-  } catch {
-    return { exists: false };
+    return await isCrateVersionPublished(crateName, version);
+  } catch (error) {
+    console.log(`crates.io lookup failed: ${error.message}`);
+    return false;
   }
 }
 
-const ALREADY_EXISTS_PATTERNS = [
-  'already exists on crates.io index',
-  'crate already uploaded',
-  'already exists on the registry',
-];
-
-const FAILURE_PATTERNS = [
-  'error[E',
-  'error: ',
-  '403 Forbidden',
-  '401 Unauthorized',
-  'the remote server responded with an error',
-];
-
-function detectAlreadyExists(output) {
-  for (const pattern of ALREADY_EXISTS_PATTERNS) {
-    if (output.includes(pattern)) {
-      return true;
-    }
+function resolveCargoToken() {
+  if (!process.env.CARGO_REGISTRY_TOKEN && process.env.CARGO_TOKEN) {
+    console.log('CARGO_REGISTRY_TOKEN not set, using CARGO_TOKEN as fallback');
+    process.env.CARGO_REGISTRY_TOKEN = process.env.CARGO_TOKEN;
   }
-  return false;
-}
-
-function detectPublishFailure(output) {
-  if (detectAlreadyExists(output)) {
-    return null;
-  }
-  for (const pattern of FAILURE_PATTERNS) {
-    if (output.includes(pattern)) {
-      return pattern;
-    }
-  }
-  return null;
+  return Boolean(process.env.CARGO_REGISTRY_TOKEN);
 }
 
 async function main() {
   try {
     if (shouldPull) {
       console.log('Pulling latest changes...');
-      exec('git pull origin main');
+      execSync('git pull origin main', { stdio: 'inherit' });
     }
 
-    const packageName = getPackageName();
-    const currentVersion = getCurrentVersion();
-    console.log(
-      `Publishing ${packageName}@${currentVersion} to crates.io...`
-    );
+    const { name: crateName, version: currentVersion } = readCrateInfo({
+      rustRoot,
+    });
+    console.log(`Publishing ${crateName}@${currentVersion} to crates.io...`);
 
-    // Check if this version is already published
-    console.log(
-      `Checking if ${packageName}@${currentVersion} is already on crates.io...`
-    );
-    const alreadyPublished = await checkCratesIo(packageName, currentVersion);
-
-    if (alreadyPublished) {
+    if (await verifyPublished(crateName, currentVersion)) {
       console.log(
         `Version ${currentVersion} is already published on crates.io`
       );
@@ -206,149 +125,62 @@ async function main() {
       return;
     }
 
-    // Check if crate exists at all (to detect name conflicts early)
-    const crateInfo = await checkCrateExists(packageName);
-    if (crateInfo.exists) {
-      console.log(
-        `Crate ${packageName} exists on crates.io with versions: ${crateInfo.versions.join(', ')}`
-      );
-    } else {
-      console.log(
-        `Crate ${packageName} does not exist on crates.io yet (first publish)`
-      );
-    }
-
-    // Resolve CARGO_REGISTRY_TOKEN with CARGO_TOKEN as fallback
-    if (!process.env.CARGO_REGISTRY_TOKEN && process.env.CARGO_TOKEN) {
-      console.log(
-        'CARGO_REGISTRY_TOKEN not set, using CARGO_TOKEN as fallback'
-      );
-      process.env.CARGO_REGISTRY_TOKEN = process.env.CARGO_TOKEN;
-    }
-
-    if (!process.env.CARGO_REGISTRY_TOKEN) {
+    if (!resolveCargoToken()) {
       console.error(
         'Error: Neither CARGO_REGISTRY_TOKEN nor CARGO_TOKEN environment variable is set'
       );
+      setOutput('published', 'false');
       process.exit(1);
     }
 
-    // Publish with retry logic
     const cargoPublishCmd = needsCd({ rustRoot })
-      ? `cd ${rustRoot} && cargo publish --verbose --allow-dirty`
-      : 'cargo publish --verbose --allow-dirty';
+      ? `cd ${rustRoot} && cargo publish --allow-dirty`
+      : 'cargo publish --allow-dirty';
 
-    for (let i = 1; i <= MAX_RETRIES; i++) {
-      console.log(`\nPublish attempt ${i} of ${MAX_RETRIES}...`);
+    // Set when cargo itself accepted the upload; used to distinguish
+    // "the upload never happened" from "the index has not caught up yet".
+    let uploadAccepted = false;
 
-      // Before each attempt, check crates.io API to see if a prior attempt succeeded
-      // (crates.io propagation can cause verification to fail even when publish succeeded)
-      if (i > 1) {
-        console.log('Checking crates.io API before retry...');
-        const nowPublished = await checkCratesIo(packageName, currentVersion);
-        if (nowPublished) {
-          console.log(
-            `${packageName}@${currentVersion} is now confirmed on crates.io (prior attempt succeeded)`
-          );
-          setOutput('published', 'true');
-          setOutput('published_version', currentVersion);
-          setOutput('already_published', 'true');
-          return;
+    const { success, error } = await publishWithRetry({
+      publish: () => {
+        const result = runCommand(cargoPublishCmd);
+        const classified = classifyCargoPublish(result);
+        uploadAccepted = uploadAccepted || classified.success;
+        if (classified.output.trim()) {
+          console.log('cargo publish output:');
+          console.log(classified.output);
         }
-      }
+        return classified;
+      },
+      verify: () => verifyPublished(crateName, currentVersion),
+      maxRetries: MAX_RETRIES,
+      retryDelay: RETRY_DELAY,
+      sleepFn: sleep,
+      log: (message) => console.log(message),
+      verifyOptions: VERIFY_OPTIONS,
+      registryLabel: 'crates.io',
+    });
 
-      const result = exec(cargoPublishCmd, {
-        capture: true,
-        allowFailure: true,
-      });
+    if (success) {
+      setOutput('published', 'true');
+      setOutput('published_version', currentVersion);
+      console.log(`✅ Published ${crateName}@${currentVersion} to crates.io`);
+      return;
+    }
 
-      const combinedOutput = `${result.stdout}\n${result.stderr}`;
-
-      if (combinedOutput.trim()) {
-        console.log('cargo publish output:');
-        console.log(combinedOutput);
-      }
-
-      // "already exists" means the crate was published (possibly by a previous attempt)
-      if (detectAlreadyExists(combinedOutput)) {
-        console.log(
-          `Crate ${packageName}@${currentVersion} already exists on crates.io (treating as success)`
-        );
-        setOutput('published', 'true');
-        setOutput('published_version', currentVersion);
-        setOutput('already_published', 'true');
-        return;
-      }
-
-      // Check for real failure patterns in output
-      const failurePattern = detectPublishFailure(combinedOutput);
-      if (failurePattern) {
-        console.error(`Detected publish failure: "${failurePattern}"`);
-        if (i < MAX_RETRIES) {
-          console.log(
-            `Publish failed, waiting ${RETRY_DELAY / 1000}s before retry...`
-          );
-          await sleep(RETRY_DELAY);
-        }
-        continue;
-      }
-
-      // Check exit code for unexpected failures
-      if (result.code !== 0) {
-        console.error(`cargo publish exited with code ${result.code}`);
-        if (i < MAX_RETRIES) {
-          console.log(
-            `Publish failed, waiting ${RETRY_DELAY / 1000}s before retry...`
-          );
-          await sleep(RETRY_DELAY);
-        }
-        continue;
-      }
-
-      // Verify the crate is actually on crates.io (with retries for propagation delay)
-      let verified = false;
-      for (let v = 1; v <= VERIFY_RETRIES; v++) {
-        console.log(
-          `Waiting ${VERIFY_DELAY / 1000}s for crates.io propagation (verification ${v}/${VERIFY_RETRIES})...`
-        );
-        await sleep(VERIFY_DELAY);
-
-        console.log('Verifying crate was published to crates.io...');
-        const isPublished = await checkCratesIo(packageName, currentVersion);
-
-        if (isPublished) {
-          verified = true;
-          break;
-        }
-
-        if (v < VERIFY_RETRIES) {
-          console.log(
-            `Not found yet, retrying verification...`
-          );
-        }
-      }
-
-      if (verified) {
-        setOutput('published', 'true');
-        setOutput('published_version', currentVersion);
-        console.log(
-          `\u2705 Published ${packageName}@${currentVersion} to crates.io`
-        );
-        return;
-      }
-
+    // cargo accepted the upload but the crates.io index has not exposed it
+    // within the polling window. Failing here would mark a completed release
+    // as failed, so the accepted upload is reported as the outcome instead.
+    if (error?.verificationFailed && uploadAccepted) {
       console.warn(
-        `Verification could not confirm ${packageName}@${currentVersion} on crates.io after ${VERIFY_RETRIES} attempts`
-      );
-      console.warn(
-        'This may be a crates.io propagation delay. Treating as successful since cargo publish exited with code 0.'
+        `cargo publish succeeded but ${crateName}@${currentVersion} is not visible on crates.io yet; treating as published.`
       );
       setOutput('published', 'true');
       setOutput('published_version', currentVersion);
       return;
     }
 
-    console.error(`\u274c Failed to publish after ${MAX_RETRIES} attempts`);
+    console.error(`❌ Publish failed: ${error.message}`);
     setOutput('published', 'false');
     process.exit(1);
   } catch (error) {

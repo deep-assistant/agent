@@ -22,6 +22,14 @@ import {
   isPackageVersionPublished,
   normalizeRegistryUrl,
 } from '../../scripts/npm-registry.mjs';
+import {
+  classifyCargoPublish,
+  isNonRetryableCargoFailure,
+} from '../../scripts/cargo-publish-result.mjs';
+import {
+  buildCrateVersionUrl,
+  isCrateVersionPublished,
+} from '../../scripts/crates-registry.mjs';
 import { isNonRetryableFailure } from '../../scripts/publish-failure-classifier.mjs';
 import {
   isAlreadyPublishedError,
@@ -31,6 +39,7 @@ import {
 import {
   parseCrateInfo,
   readPackageKey,
+  setPackageVersion,
 } from '../../scripts/rust-package-info.mjs';
 
 const noSleep = () => Promise.resolve();
@@ -78,6 +87,27 @@ describe('rust-package-info', () => {
     expect(
       readPackageKey('name = "stray"\n[package]\nname = "real"\n', 'name')
     ).toBe('real');
+  });
+
+  test('bumps only the [package] version', () => {
+    const withDependency = `[package]
+name = "crate"
+version = "0.9.2"
+
+[dependencies.serde]
+version = "1.0.0"
+`;
+
+    const bumped = setPackageVersion(withDependency, '0.9.3');
+
+    expect(readPackageKey(bumped, 'version')).toBe('0.9.3');
+    expect(bumped).toContain('version = "1.0.0"');
+  });
+
+  test('refuses to rewrite a Cargo.toml without a package version', () => {
+    expect(() =>
+      setPackageVersion('[dependencies]\nversion = "1.0.0"\n', '2.0.0')
+    ).toThrow(/\[package\]/);
   });
 
   test('throws when the package name or version is missing', () => {
@@ -315,5 +345,90 @@ describe('publishWithRetry', () => {
     expect(publishes).toBe(1);
     expect(error.verificationFailed).toBe(true);
     expect(error.nonRetryable).toBe(true);
+  });
+});
+
+describe('cargo publish classification', () => {
+  test('a zero exit code is success even when the log mentions errors', () => {
+    // `cargo publish --verbose` prints dependency diagnostics that contain
+    // "error: " and "error[E...]"; scanning for them used to turn successful
+    // publishes into retried failures.
+    const result = classifyCargoPublish({
+      code: 0,
+      stdout: 'Compiling deps\nerror[E0382]: quoted in a doc example\n',
+      stderr: 'error: this string appears in a test name\n',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  test('an already-uploaded conflict is not a failure to retry', () => {
+    const result = classifyCargoPublish({
+      code: 101,
+      stderr: 'error: crate version is already uploaded',
+    });
+
+    expect(result.success).toBe(false);
+    expect(isAlreadyPublishedError(result.output)).toBe(true);
+    expect(result.error.nonRetryable).toBeUndefined();
+  });
+
+  test('marks auth failures as non-retryable', () => {
+    const result = classifyCargoPublish({
+      code: 101,
+      stderr: 'error: failed to publish: 403 Forbidden',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error.nonRetryable).toBe(true);
+    expect(isNonRetryableCargoFailure(result.output)).toBe(true);
+  });
+
+  test('retries an ordinary non-zero exit', () => {
+    const result = classifyCargoPublish({
+      code: 101,
+      stderr: 'error: failed to get a 200 OK response, got 502',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error.nonRetryable).toBeUndefined();
+  });
+});
+
+describe('crates-registry', () => {
+  test('builds the version metadata URL', () => {
+    expect(buildCrateVersionUrl('link-assistant-agent', '0.9.2')).toBe(
+      'https://crates.io/api/v1/crates/link-assistant-agent/0.9.2'
+    );
+  });
+
+  test('returns true only for an exact version match', async () => {
+    const fetchFn = async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ version: { num: '0.9.2' } }),
+    });
+
+    expect(await isCrateVersionPublished('crate', '0.9.2', { fetchFn })).toBe(
+      true
+    );
+    expect(await isCrateVersionPublished('crate', '0.9.3', { fetchFn })).toBe(
+      false
+    );
+  });
+
+  test('treats a 404 as not published', async () => {
+    const fetchFn = async () => ({ ok: false, status: 404 });
+    expect(await isCrateVersionPublished('crate', '0.9.2', { fetchFn })).toBe(
+      false
+    );
+  });
+
+  test('surfaces other registry errors instead of reporting "not published"', async () => {
+    const fetchFn = async () => ({ ok: false, status: 503 });
+    await expect(
+      isCrateVersionPublished('crate', '0.9.2', { fetchFn })
+    ).rejects.toThrow(/503/);
   });
 });

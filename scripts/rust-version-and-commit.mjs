@@ -16,8 +16,9 @@ import {
   unlinkSync,
 } from 'fs';
 import { join } from 'path';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
+import { readPackageKey, setPackageVersion } from './rust-package-info.mjs';
 import {
   getRustRoot,
   getCargoTomlPath,
@@ -91,10 +92,15 @@ function exec(command) {
  */
 function getCurrentVersion() {
   const cargoToml = readFileSync(CARGO_TOML, 'utf-8');
-  const match = cargoToml.match(/^version\s*=\s*"(\d+)\.(\d+)\.(\d+)"/m);
+  // Scoped to the [package] table: a bare /^version = "…"/m also matches
+  // sections such as [dependencies.*], which would bump the wrong value.
+  const packageVersion = readPackageKey(cargoToml, 'version');
+  const match = packageVersion?.match(/^(\d+)\.(\d+)\.(\d+)$/);
 
   if (!match) {
-    console.error('Error: Could not parse version from Cargo.toml');
+    console.error(
+      'Error: Could not parse a semver version from [package] in Cargo.toml'
+    );
     process.exit(1);
   }
 
@@ -131,12 +137,8 @@ function calculateNewVersion(current, bumpType) {
  * @param {string} newVersion
  */
 function updateCargoToml(newVersion) {
-  let cargoToml = readFileSync(CARGO_TOML, 'utf-8');
-  cargoToml = cargoToml.replace(
-    /^(version\s*=\s*")[^"]+(")/m,
-    `$1${newVersion}$2`
-  );
-  writeFileSync(CARGO_TOML, cargoToml, 'utf-8');
+  const cargoToml = readFileSync(CARGO_TOML, 'utf-8');
+  writeFileSync(CARGO_TOML, setPackageVersion(cargoToml, newVersion), 'utf-8');
   console.log(`Updated Cargo.toml to version ${newVersion}`);
 }
 
@@ -258,7 +260,11 @@ async function main() {
 
     // Pull latest changes from remote before starting
     console.log('Fetching latest changes from origin/main...');
-    exec('git fetch origin main');
+    // Tags must be fetched too: checkTagExists() below decides whether this
+    // version was already released, and without the remote tags it answers
+    // "no" for a tag that exists upstream. The release then proceeds and
+    // `git push --tags` is rejected, failing the job.
+    exec('git fetch origin main --tags');
 
     const localHead = exec('git rev-parse HEAD');
     const remoteHead = exec('git rev-parse origin/main');
@@ -320,14 +326,18 @@ async function main() {
     const commitMsg = description
       ? `chore(rust): release v${newVersion}\n\n${description}`
       : `chore(rust): release v${newVersion}`;
-    exec(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
+    // execFileSync (no shell) so a description containing quotes, backticks or
+    // $VAR cannot be interpreted by the shell or break the command.
+    execFileSync('git', ['commit', '-m', commitMsg], { stdio: 'pipe' });
     console.log(`Committed version ${newVersion}`);
 
     // Create tag
     const tagMsg = description
       ? `Rust Release v${newVersion}\n\n${description}`
       : `Rust Release v${newVersion}`;
-    exec(`git tag -a rust-v${newVersion} -m "${tagMsg.replace(/"/g, '\\"')}"`);
+    execFileSync('git', ['tag', '-a', `rust-v${newVersion}`, '-m', tagMsg], {
+      stdio: 'pipe',
+    });
     console.log(`Created tag rust-v${newVersion}`);
 
     // Push with retry: if another CI job (e.g. JS release) pushed to main
@@ -335,8 +345,11 @@ async function main() {
     for (let attempt = 1; attempt <= MAX_PUSH_RETRIES; attempt++) {
       try {
         exec('git push');
-        exec('git push --tags');
-        console.log('Pushed changes and tags');
+        // Push only the tag created above. `git push --tags` also pushes every
+        // unrelated local tag, so one stale or conflicting tag would fail the
+        // release even though this one is fine.
+        exec(`git push origin refs/tags/rust-v${newVersion}`);
+        console.log('Pushed changes and tag');
         break;
       } catch (pushError) {
         if (attempt < MAX_PUSH_RETRIES) {
