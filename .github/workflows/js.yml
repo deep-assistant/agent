@@ -47,6 +47,14 @@ concurrency:
   # version bumped and tagged but not published, so main runs always finish.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  # actions/checkout runs `git init` before any repository config exists, which
+  # prints a hint about the default branch name on every job. Setting it via
+  # GIT_CONFIG_* silences the hint without an extra step.
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
 jobs:
   # Changeset check - only runs on PRs
   changeset-check:

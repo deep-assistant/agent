@@ -232,6 +232,21 @@ describe('per-test timeouts', () => {
   });
 });
 
+describe('checkout hygiene', () => {
+  // actions/checkout runs `git init` before any config exists, so every job
+  // printed "hint: Using 'master' as the name for the initial branch" into the
+  // log. Observed in run 30657021842.
+  test('every workflow silences the git default-branch hint', () => {
+    const missing = workflows
+      .filter(
+        ({ body }) => !body.includes('GIT_CONFIG_KEY_0: init.defaultBranch')
+      )
+      .map(({ file }) => file);
+
+    expect(missing).toEqual([]);
+  });
+});
+
 describe('concurrency control', () => {
   test('every workflow declares a concurrency group', () => {
     const missing = workflows
