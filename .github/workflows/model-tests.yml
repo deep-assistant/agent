@@ -65,9 +65,19 @@ on:
           - without_tools
           - both
 
+# Least privilege by default; this workflow only reads the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-model:
+    name: Test Model
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
@@ -88,10 +98,14 @@ jobs:
 
       - name: Determine model to test
         id: model
+        # custom_model is a free-form string. Interpolating `${{ inputs.* }}`
+        # into the script substitutes it before the shell runs, so a value
+        # containing shell metacharacters would be executed as code. Passing it
+        # through env keeps it as data.
+        env:
+          CUSTOM_MODEL: ${{ inputs.custom_model }}
+          MODEL_FROM_DROPDOWN: ${{ inputs.model }}
         run: |
-          CUSTOM_MODEL="${{ inputs.custom_model }}"
-          MODEL_FROM_DROPDOWN="${{ inputs.model }}"
-
           if [ -n "$CUSTOM_MODEL" ]; then
             MODEL_ID="$CUSTOM_MODEL"
           else
@@ -99,24 +113,39 @@ jobs:
           fi
 
           # Extract provider and model name from provider/model format
-          PROVIDER=$(echo "$MODEL_ID" | cut -d'/' -f1)
-          MODEL_NAME=$(echo "$MODEL_ID" | cut -d'/' -f2-)
+          PROVIDER=${MODEL_ID%%/*}
+          MODEL_NAME=${MODEL_ID#*/}
 
-          echo "model_id=$MODEL_ID" >> $GITHUB_OUTPUT
-          echo "model_name=$MODEL_NAME" >> $GITHUB_OUTPUT
-          echo "provider=$PROVIDER" >> $GITHUB_OUTPUT
+          if [ "$PROVIDER" = "$MODEL_ID" ] || [ -z "$MODEL_NAME" ]; then
+            echo "::error::Model must be in provider/model format, got: $MODEL_ID"
+            exit 1
+          fi
+
+          {
+            echo "model_id=$MODEL_ID"
+            echo "model_name=$MODEL_NAME"
+            echo "provider=$PROVIDER"
+          } >> "$GITHUB_OUTPUT"
           echo "Testing model: $MODEL_ID (provider: $PROVIDER, model: $MODEL_NAME)"
 
       - name: Fetch model capabilities
         id: capabilities
+        env:
+          PROVIDER: ${{ steps.model.outputs.provider }}
+          MODEL_NAME: ${{ steps.model.outputs.model_name }}
         run: |
-          OUTPUT=$(node scripts/get-model-info.mjs "${{ steps.model.outputs.provider }}" "${{ steps.model.outputs.model_name }}")
+          OUTPUT=$(node scripts/get-model-info.mjs "$PROVIDER" "$MODEL_NAME")
           echo "$OUTPUT"
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
+          # Only well-formed key=value lines may reach $GITHUB_OUTPUT. Any other
+          # line makes the runner fail the step with "Invalid format", and a
+          # line containing `=` in an unexpected place could inject an output.
+          echo "$OUTPUT" | grep -E '^[A-Za-z_][A-Za-z0-9_]*=[^[:cntrl:]]*$' >> "$GITHUB_OUTPUT" || true
 
       - name: Check API key availability
+        env:
+          PROVIDER: ${{ steps.model.outputs.provider }}
         run: |
-          if [ "${{ steps.model.outputs.provider }}" = "groq" ]; then
+          if [ "$PROVIDER" = "groq" ]; then
             if [ -z "$GROQ_API_KEY" ]; then
               echo "::warning::GROQ_API_KEY is not set. Groq tests may fail."
             else
@@ -126,20 +155,33 @@ jobs:
 
       - name: Test without tools (simple response)
         if: inputs.test_type == 'without_tools' || inputs.test_type == 'both'
-        run: node scripts/test-model-simple.mjs "${{ steps.model.outputs.model_id }}"
+        env:
+          MODEL_ID: ${{ steps.model.outputs.model_id }}
+        run: node scripts/test-model-simple.mjs "$MODEL_ID"
 
       - name: Test with tools (tool calling)
         if: inputs.test_type == 'with_tools' || inputs.test_type == 'both'
-        run: node scripts/test-model-tools.mjs "${{ steps.model.outputs.model_id }}"
+        env:
+          MODEL_ID: ${{ steps.model.outputs.model_id }}
+        run: node scripts/test-model-tools.mjs "$MODEL_ID"
 
       - name: Summary
+        # The summary is most useful when a test failed, so it must not be
+        # skipped by the failure of a previous step.
+        if: ${{ !cancelled() }}
+        env:
+          MODEL_ID: ${{ steps.model.outputs.model_id }}
+          PROVIDER: ${{ steps.model.outputs.provider }}
+          TEST_TYPE: ${{ inputs.test_type }}
         run: |
-          echo "## Model Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Model**: ${{ steps.model.outputs.model_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Provider**: ${{ steps.model.outputs.provider }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Test Type**: ${{ inputs.test_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Model Test Summary"
+            echo ""
+            echo "- **Model**: $MODEL_ID"
+            echo "- **Provider**: $PROVIDER"
+            echo "- **Test Type**: $TEST_TYPE"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ -f test-output-simple.log ]; then
             echo "### Simple Test Output" >> $GITHUB_STEP_SUMMARY

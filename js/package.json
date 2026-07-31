@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "bun run src/index.js",
-    "test": "bun test ./tests/*.js ./tests/*.ts",
+    "test": "bun test --timeout 30000 ./tests/*.js ./tests/*.ts",
     "test:integration": "bun test ./tests/integration/basic.js",
     "lint": "eslint . && npm run lint:scripts",
     "lint:scripts": "cd ../scripts && eslint . --config ./eslint.config.mjs",

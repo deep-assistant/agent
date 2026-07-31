@@ -37,6 +37,10 @@ on:
         required: false
         type: string
 
+# Least privilege by default; jobs that need to write escalate individually.
+permissions:
+  contents: read
+
 concurrency:
   group: js-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -46,6 +50,7 @@ jobs:
   changeset-check:
     name: Check for Changesets
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -62,9 +67,13 @@ jobs:
         working-directory: js
 
       - name: Check for changesets
+        # HEAD_REF is a branch name chosen by the PR author. Interpolating it
+        # into the script would let a branch name execute shell code.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           # Skip changeset check for automated version PRs
-          if [[ "${{ github.head_ref }}" == "changeset-release/"* ]]; then
+          if [[ "$HEAD_REF" == "changeset-release/"* ]]; then
             echo "Skipping changeset check for automated release PR"
             exit 0
           fi
@@ -76,8 +85,9 @@ jobs:
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
       - uses: actions/checkout@v6
 
@@ -108,8 +118,9 @@ jobs:
   test:
     name: Unit Tests (Bun on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     strategy:
       fail-fast: false
       matrix:
@@ -169,8 +180,9 @@ jobs:
   verbose-integration:
     name: Verbose HTTP Logging Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -194,8 +206,9 @@ jobs:
   package-install:
     name: Clean Package Install
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success')
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
       - uses: actions/checkout@v6
 
@@ -230,8 +243,9 @@ jobs:
     needs: [lint, test, verbose-integration, package-install]
     # Use always() to ensure this job runs even if changeset-check was skipped
     # This is needed because lint/test jobs have a transitive dependency on changeset-check
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.verbose-integration.result == 'success' && needs.package-install.result == 'success'
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test.result == 'success' && needs.verbose-integration.result == 'success' && needs.package-install.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     concurrency:
       group: release-main
       cancel-in-progress: false
@@ -296,6 +310,7 @@ jobs:
     name: Instant Release
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     concurrency:
       group: release-main
       cancel-in-progress: false
@@ -324,7 +339,10 @@ jobs:
 
       - name: Version packages and commit to main
         id: version
-        run: node scripts/version-and-commit.mjs --mode instant --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node scripts/version-and-commit.mjs --mode instant
 
       - name: Publish to npm
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
@@ -349,6 +367,7 @@ jobs:
     name: Create Changeset PR
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changeset-pr'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write
@@ -367,7 +386,10 @@ jobs:
         working-directory: js
 
       - name: Create changeset file
-        run: node scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          DESCRIPTION: ${{ github.event.inputs.description }}
+        run: node scripts/create-manual-changeset.mjs
 
       - name: Format changeset with Prettier
         run: |
