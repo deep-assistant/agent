@@ -133,8 +133,11 @@ jobs:
         run: bun install
         working-directory: js
 
+      # Use the package script so CI and local runs execute the same suite.
+      # A hardcoded four-file list silently skipped 48 of the 52 unit test
+      # files, making CI green while regressions went unnoticed (issue #287).
       - name: Run unit tests
-        run: bun test ./tests/json-standard-unit.js ./tests/process-name.js ./tests/cli.ts ./tests/cli_options.ts
+        run: bun run test
         working-directory: js
 
       - name: Commit cached API responses

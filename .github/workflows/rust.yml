@@ -210,12 +210,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # Read crate name/version from the [package] section only. A plain
+      # `grep -Po '(?<=^name = ")'` also matches every [lib]/[[bin]]/[[test]]
+      # section, which produced a malformed crates.io URL and failed this job
+      # with curl exit code 3 (issue #287).
+      - name: Read crate metadata
+        id: crate
+        run: node scripts/rust-package-info.mjs
+
       - name: Recover missing GitHub release for current version
         id: recover
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
+          CURRENT_VERSION="${{ steps.crate.outputs.version }}"
           TAG_EXISTS=false
           RELEASE_EXISTS=false
 
@@ -253,11 +261,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
+          CURRENT_VERSION="${{ steps.crate.outputs.version }}"
+          CRATE_NAME="${{ steps.crate.outputs.name }}"
 
-          # Check if version is published on crates.io (source of truth for publish status)
-          CRATE_NAME=$(grep -Po '(?<=^name = ")[^"]*' rust/Cargo.toml)
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://crates.io/api/v1/crates/$CRATE_NAME/$CURRENT_VERSION")
+          # Check if version is published on crates.io (source of truth for publish status).
+          # A network hiccup must not fail the job, so curl retries and its exit
+          # status is tolerated; an unreachable registry simply reads as "not published".
+          HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --retry 3 --retry-delay 2 --retry-all-errors --max-time 30 \
+            -A "link-assistant-agent-ci" \
+            "https://crates.io/api/v1/crates/$CRATE_NAME/$CURRENT_VERSION" || echo "000")
+          echo "crates.io HTTP status: $HTTP_STATUS"
           CRATES_PUBLISHED=false
           if [ "$HTTP_STATUS" = "200" ]; then
             CRATES_PUBLISHED=true
@@ -302,12 +316,11 @@ jobs:
           node scripts/rust-version-and-commit.mjs \
             --bump-type "${{ steps.bump_type.outputs.bump_type }}"
 
+      # Re-read after the bump step so the released version is the bumped one.
       - name: Get current version
         id: current_version
         if: steps.check.outputs.should_release == 'true'
-        run: |
-          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' rust/Cargo.toml)
-          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        run: node scripts/rust-package-info.mjs
 
       - name: Build release
         if: steps.check.outputs.should_release == 'true'
