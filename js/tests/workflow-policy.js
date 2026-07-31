@@ -271,6 +271,31 @@ describe('checkout hygiene', () => {
   });
 });
 
+describe('action pinning', () => {
+  // A floating ref (@main, @master, a branch name) means a third party can
+  // change what runs in this repository's CI without a commit here.
+  test('every external action is pinned to a version tag or a commit', () => {
+    const offenders = [];
+
+    for (const { file, body } of workflows) {
+      for (const [, ref] of body.matchAll(/^\s*uses: (\S+)\s*$/gm)) {
+        if (ref.startsWith('./')) {
+          continue; // A local action lives in this repository.
+        }
+        const version = ref.split('@')[1];
+        if (
+          version === undefined ||
+          /^(main|master|latest|develop)$/.test(version)
+        ) {
+          offenders.push(`${file}: ${ref}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('concurrency control', () => {
   test('every workflow declares a concurrency group', () => {
     const missing = workflows
