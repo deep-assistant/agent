@@ -100,6 +100,18 @@ jobs:
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Needed to merge the base branch below.
+          fetch-depth: 0
+
+      # refs/pull/N/merge is built when the pull request is synchronized, so
+      # commits landing on the base branch afterwards are not checked. Merging
+      # them here makes the checks below validate the real merge result.
+      - name: Simulate fresh merge with base branch (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/simulate-fresh-merge.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -109,6 +121,9 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
         working-directory: js
+
+      - name: Scan for committed secrets
+        run: npx --yes -p secretlint -p @secretlint/secretlint-rule-preset-recommend secretlint "**/*"
 
       - name: Run ESLint
         run: npm run lint

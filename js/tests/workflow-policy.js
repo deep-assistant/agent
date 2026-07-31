@@ -232,6 +232,30 @@ describe('per-test timeouts', () => {
   });
 });
 
+describe('merge result validation', () => {
+  // GitHub builds refs/pull/N/merge when the pull request is synchronized, so
+  // commits pushed to the base branch afterwards are not part of what CI
+  // checked: a pull request can be green while its merge result is broken.
+  test('the lint job of each pipeline simulates a fresh merge', () => {
+    const missing = ['js.yml', 'rust.yml'].filter((file) => {
+      const body = workflows.find((workflow) => workflow.file === file)?.body;
+      return !getJobBlock(body ?? '', 'lint').includes(
+        'scripts/simulate-fresh-merge.sh'
+      );
+    });
+
+    expect(missing).toEqual([]);
+  });
+});
+
+describe('secrets detection', () => {
+  test('the js pipeline scans the repository for committed secrets', () => {
+    const body = workflows.find((workflow) => workflow.file === 'js.yml').body;
+
+    expect(getJobBlock(body, 'lint')).toContain('secretlint');
+  });
+});
+
 describe('checkout hygiene', () => {
   // actions/checkout runs `git init` before any config exists, so every job
   // printed "hint: Using 'master' as the name for the initial branch" into the
