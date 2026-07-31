@@ -35,7 +35,9 @@ permissions:
 
 concurrency:
   group: rust-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A release runs on push to main. Cancelling it mid-publish would leave a
+  # version bumped and tagged but not published, so main runs always finish.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   CARGO_TERM_COLOR: always

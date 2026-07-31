@@ -240,4 +240,16 @@ describe('concurrency control', () => {
 
     expect(missing).toEqual([]);
   });
+
+  // A push to main starts a release. `cancel-in-progress: true` at the
+  // workflow level lets the next push cancel it mid-publish, leaving a version
+  // bumped and tagged but never published. Only non-main runs may be cancelled.
+  test('workflows triggered by push to main never cancel main runs', () => {
+    const offenders = workflows
+      .filter(({ body }) => /^ {6}- main\s*$/m.test(body))
+      .filter(({ body }) => /^ {2}cancel-in-progress: true\s*$/m.test(body))
+      .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
 });
