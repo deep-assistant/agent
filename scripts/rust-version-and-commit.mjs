@@ -41,7 +41,10 @@ const description = getArg('description', process.env.DESCRIPTION || '');
 
 // Get Rust package root (auto-detect or use explicit config)
 const rustRootConfig = getArg('rust-root', '') || parseRustRootConfig();
-const rustRoot = getRustRoot({ rustRoot: rustRootConfig || undefined, verbose: true });
+const rustRoot = getRustRoot({
+  rustRoot: rustRootConfig || undefined,
+  verbose: true,
+});
 
 if (!bumpType || !['major', 'minor', 'patch'].includes(bumpType)) {
   console.error(
@@ -250,7 +253,7 @@ ${newEntry}
 
 const MAX_PUSH_RETRIES = 3;
 
-async function main() {
+function main() {
   try {
     // Configure git
     exec('git config user.name "github-actions[bot]"');

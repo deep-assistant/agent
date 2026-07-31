@@ -3,7 +3,7 @@
 // so both languages have parallel test files with the same base names.
 // This script is idempotent: it skips files that already exist.
 
-import { readdirSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,7 +15,7 @@ function jsToRustName(jsName) {
   // bash.tools.js -> integration_bash_tools.rs
   // plaintext.input.js -> integration_plaintext_input.rs
   const stem = jsName.replace(/\.js$/, '');
-  const rustStem = stem.replace(/[.\-]/g, '_');
+  const rustStem = stem.replace(/[.-]/g, '_');
   return `integration_${rustStem}.rs`;
 }
 
@@ -36,7 +36,7 @@ for (const jsFile of jsFiles) {
   }
 
   const stem = jsFile.replace(/\.js$/, '');
-  const featureName = stem.replace(/\.tools$/, '').replace(/[.\-]/g, ' ');
+  const featureName = stem.replace(/\.tools$/, '').replace(/[.-]/g, ' ');
   const content = `//! Rust counterpart of \`js/tests/integration/${jsFile}\`.
 //!
 //! The JS suite covers the ${featureName} integration path against the
@@ -75,4 +75,6 @@ fn agent_help_runs_cleanly() {
   console.log(`Created ${rustFile} for ${jsFile}`);
 }
 
-console.log(`\nDone: ${created} created, ${skipped} skipped (already existed).`);
+console.log(
+  `\nDone: ${created} created, ${skipped} skipped (already existed).`
+);

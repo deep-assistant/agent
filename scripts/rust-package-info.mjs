@@ -72,26 +72,28 @@ export function setPackageVersion(cargoTomlContent, newVersion) {
   let inPackageSection = false;
   let replaced = false;
 
-  const lines = String(cargoTomlContent).split('\n').map((rawLine) => {
-    const line = rawLine.trim();
+  const lines = String(cargoTomlContent)
+    .split('\n')
+    .map((rawLine) => {
+      const line = rawLine.trim();
 
-    if (line.startsWith('[')) {
-      inPackageSection = line === '[package]';
-      return rawLine;
-    }
+      if (line.startsWith('[')) {
+        inPackageSection = line === '[package]';
+        return rawLine;
+      }
 
-    if (!inPackageSection || replaced) {
-      return rawLine;
-    }
+      if (!inPackageSection || replaced) {
+        return rawLine;
+      }
 
-    const match = rawLine.match(/^(\s*version\s*=\s*")[^"]*(".*)$/);
-    if (!match) {
-      return rawLine;
-    }
+      const match = rawLine.match(/^(\s*version\s*=\s*")[^"]*(".*)$/);
+      if (!match) {
+        return rawLine;
+      }
 
-    replaced = true;
-    return `${match[1]}${newVersion}${match[2]}`;
-  });
+      replaced = true;
+      return `${match[1]}${newVersion}${match[2]}`;
+    });
 
   if (!replaced) {
     throw new Error('No version key found in the [package] section');
@@ -114,7 +116,9 @@ export function parseCrateInfo(cargoTomlContent, cargoTomlPath = 'Cargo.toml') {
 
   const version = readPackageKey(cargoTomlContent, 'version');
   if (!version) {
-    throw new Error(`Crate version is missing in [package] of ${cargoTomlPath}`);
+    throw new Error(
+      `Crate version is missing in [package] of ${cargoTomlPath}`
+    );
   }
 
   return { name, version };

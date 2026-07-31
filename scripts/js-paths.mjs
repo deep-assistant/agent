@@ -38,7 +38,9 @@ export function getJsRoot(options = {}) {
   // If explicitly configured, use that
   if (explicitRoot !== undefined) {
     if (verbose) {
-      console.log(`Using explicitly configured JavaScript root: ${explicitRoot}`);
+      console.log(
+        `Using explicitly configured JavaScript root: ${explicitRoot}`
+      );
     }
     return explicitRoot;
   }
@@ -69,13 +71,13 @@ export function getJsRoot(options = {}) {
   // No package.json found
   throw new Error(
     'Could not find package.json in expected locations.\n' +
-    'Searched in:\n' +
-    '  - ./package.json (single-language repository)\n' +
-    '  - ./js/package.json (multi-language repository)\n\n' +
-    'To fix this, either:\n' +
-    '  1. Run the script from the repository root\n' +
-    '  2. Explicitly configure the JavaScript root using --js-root option\n' +
-    '  3. Set the JS_ROOT environment variable'
+      'Searched in:\n' +
+      '  - ./package.json (single-language repository)\n' +
+      '  - ./js/package.json (multi-language repository)\n\n' +
+      'To fix this, either:\n' +
+      '  1. Run the script from the repository root\n' +
+      '  2. Explicitly configure the JavaScript root using --js-root option\n' +
+      '  3. Set the JS_ROOT environment variable'
   );
 }
 
@@ -96,7 +98,9 @@ export function getPackageJsonPath(options = {}) {
  */
 export function getPackageLockPath(options = {}) {
   const jsRoot = getJsRoot(options);
-  return jsRoot === '.' ? './package-lock.json' : join(jsRoot, 'package-lock.json');
+  return jsRoot === '.'
+    ? './package-lock.json'
+    : join(jsRoot, 'package-lock.json');
 }
 
 /**

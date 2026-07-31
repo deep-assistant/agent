@@ -69,13 +69,13 @@ export function getRustRoot(options = {}) {
   // No Cargo.toml found
   throw new Error(
     'Could not find Cargo.toml in expected locations.\n' +
-    'Searched in:\n' +
-    '  - ./Cargo.toml (single-language repository)\n' +
-    '  - ./rust/Cargo.toml (multi-language repository)\n\n' +
-    'To fix this, either:\n' +
-    '  1. Run the script from the repository root\n' +
-    '  2. Explicitly configure the Rust root using --rust-root option\n' +
-    '  3. Set the RUST_ROOT environment variable'
+      'Searched in:\n' +
+      '  - ./Cargo.toml (single-language repository)\n' +
+      '  - ./rust/Cargo.toml (multi-language repository)\n\n' +
+      'To fix this, either:\n' +
+      '  1. Run the script from the repository root\n' +
+      '  2. Explicitly configure the Rust root using --rust-root option\n' +
+      '  3. Set the RUST_ROOT environment variable'
   );
 }
 

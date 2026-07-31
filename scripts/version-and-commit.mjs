@@ -54,7 +54,8 @@ const config = makeConfig({
       .option('js-root', {
         type: 'string',
         default: getenv('JS_ROOT', ''),
-        describe: 'JavaScript package root directory (auto-detected if not specified)',
+        describe:
+          'JavaScript package root directory (auto-detected if not specified)',
       }),
 });
 
