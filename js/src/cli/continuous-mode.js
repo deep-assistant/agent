@@ -11,6 +11,7 @@ import { SessionPrompt } from '../session/prompt.ts';
 import { createEventHandler, serializeOutput } from '../json-standard/index.ts';
 import { createContinuousStdinReader } from './input-queue.js';
 import { outputBusEvent } from './event-handler.js';
+import { errorText } from '../util/error-text.ts';
 import { Permission } from '../permission/index.ts';
 import { Log } from '../util/log.ts';
 import { config } from '../config/config.ts';
@@ -385,6 +386,7 @@ export async function runContinuousServerMode(
           type: 'error',
           timestamp: Date.now(),
           sessionID,
+          message: errorText(error),
           error: error instanceof Error ? error.message : String(error),
         });
       });
@@ -601,6 +603,7 @@ export async function runContinuousDirectMode(
           type: 'error',
           timestamp: Date.now(),
           sessionID,
+          message: errorText(error),
           error: error instanceof Error ? error.message : String(error),
         });
       });
