@@ -440,6 +440,28 @@ Claude `stream-json` output:
 Drivers can flush queued `user_prompt` frames after this event instead of
 interrupting an in-progress turn.
 
+### Error Events
+
+Every emitted `error` event carries a human-readable `message` string next to
+the machine-readable `error` payload, so consumers never have to re-derive the
+text (and never publish `[object Object]`):
+
+```json
+{
+  "type": "error",
+  "timestamp": 1718630400000,
+  "sessionID": "ses_abc123",
+  "message": "RetryTimeoutExceededError: Retry timeout exceeded after 604800s",
+  "error": {
+    "name": "RetryTimeoutExceededError",
+    "data": { "message": "Retry timeout exceeded after 604800s" }
+  }
+}
+```
+
+The `error` field is unchanged — `message` is purely additive. Consumers should
+prefer `record.message` and fall back to rendering `record.error` themselves.
+
 ## Status Messages
 
 When entering listening mode, the CLI outputs a JSON status message (pretty-printed by default).
