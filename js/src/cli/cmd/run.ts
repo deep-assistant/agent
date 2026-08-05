@@ -264,7 +264,11 @@ export const RunCommand = cmd({
               err = String(props.error.data.message);
             }
             errorMsg = errorMsg ? errorMsg + EOL + err : err;
-            if (outputJsonEvent('error', { error: props.error })) continue;
+            // Always include the human-readable string alongside the
+            // machine-readable object so consumers never print
+            // "[object Object]" (#289).
+            if (outputJsonEvent('error', { message: err, error: props.error }))
+              continue;
             UI.error(err);
           }
 

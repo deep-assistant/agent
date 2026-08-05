@@ -27,6 +27,7 @@ import { McpCommand } from './cli/cmd/mcp.ts';
 import { AuthCommand } from './cli/cmd/auth.ts';
 import { FormatError } from './cli/error.ts';
 import { UI } from './cli/ui.ts';
+import { errorText } from './util/error-text.ts';
 import {
   createVerboseFetch,
   registerPendingStreamLogExitHandler,
@@ -520,6 +521,7 @@ async function runServerMode(
         type: 'error',
         timestamp: Date.now(),
         sessionID,
+        message: errorText(error),
         error: error instanceof Error ? error.message : String(error),
       });
     });
@@ -605,6 +607,7 @@ async function runDirectMode(
         type: 'error',
         timestamp: Date.now(),
         sessionID,
+        message: errorText(error),
         error: error instanceof Error ? error.message : String(error),
       });
     });

@@ -4,6 +4,7 @@
  */
 
 import { Bus } from '../bus/index.ts';
+import { errorText } from '../util/error-text.ts';
 
 /**
  * Create a subscription for session bus events that outputs events in the selected JSON format.
@@ -90,11 +91,13 @@ export function outputBusEvent({
 
       // If tool failed, also output an error event
       if (part.state?.status === 'error') {
+        const stateError = part.state.error;
         eventHandler.output({
           type: 'error',
           timestamp: Date.now(),
           sessionID,
-          error: part.state.error || 'Tool execution failed',
+          message: errorText(stateError, 'Tool execution failed'),
+          error: stateError || 'Tool execution failed',
         });
       }
     }
@@ -145,6 +148,7 @@ export function outputBusEvent({
       type: 'error',
       timestamp: Date.now(),
       sessionID,
+      message: errorText(props.error),
       error: props.error,
     });
   }
