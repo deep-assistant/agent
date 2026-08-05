@@ -1,5 +1,6 @@
 import { Log } from '../util/log';
 import { config } from '../config/config';
+import { isUnreachableNetworkError } from '../util/network-error';
 
 /**
  * Custom fetch wrapper that handles rate limits (HTTP 429) and server errors (HTTP 5xx)
@@ -295,12 +296,17 @@ export namespace RetryFetch {
   function isRetryableError(error: unknown): boolean {
     if (!(error instanceof Error)) return false;
 
+    // Connection refused / host not found is not transient — nothing will
+    // start listening as a side effect of retrying, so do not burn the
+    // (default 7 day) retry budget on it.
+    // See: https://github.com/link-assistant/agent/issues/290
+    if (isUnreachableNetworkError(error)) return false;
+
     // Socket/connection errors (Bun has known timeout issues)
     // See: https://github.com/oven-sh/bun/issues/14439
     if (
       error.message.includes('ConnectionClosed') ||
       error.message.includes('ECONNRESET') ||
-      error.message.includes('ECONNREFUSED') ||
       error.message.includes('socket') ||
       error.message.includes('connection')
     ) {

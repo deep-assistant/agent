@@ -365,7 +365,7 @@ export async function runContinuousServerMode(
       });
 
       // Send message
-      fetch(
+      const requestPromise = fetch(
         `http://${server.hostname}:${server.port}/session/${sessionID}/message`,
         {
           method: 'POST',
@@ -389,7 +389,10 @@ export async function runContinuousServerMode(
         });
       });
 
+      // See the direct-mode comment below: the request rejection must be
+      // observed before the process can exit (#290).
       await messagePromise;
+      await requestPromise;
       isProcessing = false;
 
       // Process next pending message if any
@@ -584,7 +587,7 @@ export async function runContinuousDirectMode(
       });
 
       // Send message directly
-      SessionPrompt.prompt({
+      const promptPromise = SessionPrompt.prompt({
         sessionID,
         parts,
         model: { providerID, modelID },
@@ -602,7 +605,12 @@ export async function runContinuousDirectMode(
         });
       });
 
+      // Await BOTH the idle event and the prompt promise. A fatal failure
+      // publishes `session.idle` while unwinding, so waiting only on the idle
+      // event let the process exit before the rejection handler above ran —
+      // no error record, exit code 0 (#290).
       await messagePromise;
+      await promptPromise;
       isProcessing = false;
 
       // Process next pending message if any

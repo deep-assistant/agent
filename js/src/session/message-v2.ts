@@ -13,6 +13,7 @@ import { Identifier } from '../id/id';
 import { Snapshot } from '../snapshot';
 import { fn } from '../util/fn';
 import { Storage } from '../storage/storage';
+import { isUnreachableNetworkError } from '../util/network-error';
 
 export namespace MessageV2 {
   export const OutputLengthError = NamedError.create(
@@ -920,7 +921,10 @@ export namespace MessageV2 {
           {
             message: e.message,
             statusCode: e.statusCode,
-            isRetryable: e.isRetryable,
+            // A refused connection / unresolvable host is not transient: the
+            // AI SDK marks it retryable, but retrying it for the 7-day global
+            // budget makes the CLI hang forever (#290).
+            isRetryable: isUnreachableNetworkError(e) ? false : e.isRetryable,
             responseHeaders: e.responseHeaders,
             responseBody: e.responseBody,
           },

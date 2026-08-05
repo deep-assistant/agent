@@ -457,6 +457,21 @@ export namespace SessionPrompt {
           stack: error instanceof Error ? error.stack : undefined,
           hint: 'Check that the model exists in the provider. Use --verbose for more details.',
         }));
+        // Publish the fatal error on the bus so streaming consumers see an
+        // `error` event instead of only a `log` record, and so the CLI can
+        // exit non-zero (#290, recurrence of #22).
+        const cause = error instanceof Error ? error : new Error(String(error));
+        const fatal = new Error(
+          `Failed to initialize model "${lastUser.model.providerID}/${lastUser.model.modelID}": ${cause.message || cause.name}`,
+          { cause }
+        );
+        fatal.name = cause.name;
+        Bus.publish(Session.Event.Error, {
+          sessionID,
+          error: MessageV2.fromError(fatal, {
+            providerID: lastUser.model.providerID,
+          }),
+        });
         // Re-throw the error so it can be handled by the caller
         throw error;
       }
