@@ -36,6 +36,7 @@ import {
   runContinuousServerMode,
   runContinuousDirectMode,
   resolveResumeSession,
+  getHasError,
 } from './cli/continuous-mode.js';
 import { parseStreamJsonInput } from './cli/input-queue.js';
 import { createBusEventSubscription } from './cli/event-handler.js';
@@ -425,6 +426,12 @@ async function runContinuousAgentMode(argv) {
     },
   });
 
+  // Continuous mode tracks its own error state in its module scope — fold it
+  // in here, otherwise a fatal run always exits 0 (#290, recurrence of #22).
+  if (getHasError()) {
+    hasError = true;
+  }
+
   // Explicitly exit to ensure process terminates (#213)
   Log.Default.info(() => ({
     message: 'Agent exiting',
@@ -497,8 +504,8 @@ async function runServerMode(
     const message = request.message || 'hi';
     const parts = [{ type: 'text', text: message }];
 
-    // Start the prompt (don't wait for response, events come via Bus)
-    fetch(
+    // Start the prompt (don't wait for the body, events come via Bus)
+    const requestPromise = fetch(
       `http://${server.hostname}:${server.port}/session/${sessionID}/message`,
       {
         method: 'POST',
@@ -526,8 +533,10 @@ async function runServerMode(
       });
     });
 
-    // Wait for session to become idle
+    // Wait for session to become idle, then for the request rejection to be
+    // observed (see runDirectMode, #290).
     await eventPromise;
+    await requestPromise;
   } finally {
     // Always clean up resources
     if (unsub) {
@@ -590,7 +599,7 @@ async function runDirectMode(
     const parts = [{ type: 'text', text: message }];
 
     // Start the prompt directly without HTTP
-    SessionPrompt.prompt({
+    const promptPromise = SessionPrompt.prompt({
       sessionID,
       parts,
       model: {
@@ -612,8 +621,12 @@ async function runDirectMode(
       });
     });
 
-    // Wait for session to become idle
+    // Wait for session to become idle, then for the prompt itself. A fatal
+    // failure publishes `session.idle` while unwinding, so awaiting only the
+    // idle event let the process exit before the rejection handler above ran
+    // — no error record, exit code 0 (#290).
     await eventPromise;
+    await promptPromise;
   } finally {
     // Always clean up resources
     if (unsub) {
