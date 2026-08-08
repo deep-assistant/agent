@@ -1,5 +1,16 @@
 # @link-assistant/agent
 
+## 0.25.8
+
+### Patch Changes
+
+- a2df1a5: fix: fail closed when a detected `--model` flag cannot be parsed
+
+  Malformed invocations that place `--model`, its value, and other flags in one
+  argv element now emit a structured `ModelResolutionError` and exit non-zero
+  before provider resolution or network access. The default model is never used
+  as a substitute for an unparseable caller-supplied model.
+
 ## 0.25.7
 
 ### Patch Changes
