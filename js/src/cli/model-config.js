@@ -15,6 +15,17 @@ import {
   getDefaultCompactionSafetyMarginPercent,
 } from './defaults.ts';
 
+export class ModelResolutionError extends Error {
+  constructor({ modelArgv, defaultModel }) {
+    super(
+      `Detected a --model flag that could not be parsed reliably from argv ${JSON.stringify(modelArgv)}. ` +
+        `Refusing to continue with default model "${defaultModel}". ` +
+        'Pass each option and value as a separate argv element, for example: ["--model", "provider/model", "--verbose"].'
+    );
+    this.name = 'ModelResolutionError';
+  }
+}
+
 /**
  * Parse model config from argv. Supports "provider/model" or short "model" format.
  * @param {object} argv - Parsed command line arguments
@@ -75,18 +86,13 @@ export async function parseModelConfig(
       rawArgvStr.includes('-m ') ||
       rawArgvStr.includes('-m=')
     ) {
-      Log.Default.error(() => ({
-        message:
-          'CRITICAL: --model flag detected in process.argv but both getModelFromProcessArgv() and yargs returned default. ' +
-          'This is likely a Bun/yargs argument parsing bug (oven-sh/bun#22157). ' +
-          'The requested model will NOT be used — the default model will be used instead.',
-        processArgv: process.argv,
-        bunArgv:
-          typeof globalThis.Bun !== 'undefined' && globalThis.Bun.argv
-            ? globalThis.Bun.argv
-            : '(not available)',
+      const modelArgv = process.argv.filter(
+        (arg) => typeof arg === 'string' && /(^|\s)(--model|-m)(=|\s)/.test(arg)
+      );
+      throw new ModelResolutionError({
+        modelArgv: modelArgv.length > 0 ? modelArgv : process.argv,
         defaultModel,
-      }));
+      });
     }
   }
 
