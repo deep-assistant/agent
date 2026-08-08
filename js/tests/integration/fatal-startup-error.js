@@ -1,5 +1,6 @@
 import { test, expect, describe, setDefaultTimeout } from 'bun:test';
 import { spawn } from 'child_process';
+import { createServer } from 'http';
 import { join } from 'path';
 
 setDefaultTimeout(60000);
@@ -20,14 +21,18 @@ setDefaultTimeout(60000);
  * @see https://github.com/link-assistant/agent/issues/22
  */
 
-function runAgent(input, args) {
+function runAgent(input, args, env = {}) {
   return new Promise((resolve, reject) => {
     const proc = spawn(
       'bun',
       ['run', join(process.cwd(), 'src/index.js'), ...args],
       {
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, LINK_ASSISTANT_AGENT_COMPACT_JSON: '1' },
+        env: {
+          ...process.env,
+          LINK_ASSISTANT_AGENT_COMPACT_JSON: '1',
+          ...env,
+        },
       }
     );
 
@@ -78,5 +83,62 @@ describe('Fatal startup error (#290)', () => {
     const errorEvent = events.find((e) => e.type === 'error');
     expect(errorEvent).toBeDefined();
     expect(JSON.stringify(errorEvent)).toContain('nonexistent-provider');
+  });
+});
+
+describe('Malformed model argv (#293)', () => {
+  test('fails before the default provider can receive a request', async () => {
+    let requestCount = 0;
+    const server = createServer((_request, response) => {
+      requestCount++;
+      response.writeHead(400, { 'content-type': 'application/json' });
+      response.end(JSON.stringify({ error: { message: 'test endpoint' } }));
+    });
+
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', resolve);
+    });
+
+    try {
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        throw new Error('Test HTTP server did not bind to a TCP port');
+      }
+
+      const malformedArg = '--model formalai/formal-ai --verbose';
+      const { stdout, stderr, exitCode } = await runAgent(
+        'say hi\n',
+        [
+          malformedArg,
+          '--output-format',
+          'json',
+          '--no-always-accept-stdin',
+          '--no-server',
+        ],
+        {
+          FORMAL_AI_API_KEY: 'local-test-token',
+          FORMAL_AI_BASE_URL: `http://127.0.0.1:${address.port}/v1`,
+          LINK_ASSISTANT_AGENT_CONFIG_CONTENT: '{}',
+          LINK_ASSISTANT_AGENT_DEFAULT_MODEL: 'formal-ai/formal-ai',
+          LINK_ASSISTANT_AGENT_DEFAULT_COMPACTION_MODELS: '(same)',
+        }
+      );
+
+      expect(exitCode).toBe(1);
+      expect(requestCount).toBe(0);
+
+      const events = [...parseNdjson(stdout), ...parseNdjson(stderr)];
+      const errorEvent = events.find(
+        (event) =>
+          event.type === 'error' && event.errorType === 'ModelResolutionError'
+      );
+      expect(errorEvent).toBeDefined();
+      expect(JSON.stringify(errorEvent)).toContain(malformedArg);
+    } finally {
+      await new Promise((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
   });
 });
