@@ -90,6 +90,34 @@ describe('JSON Standard Module - Unit Tests', () => {
       );
     });
 
+    test('init omits model when no model was supplied', () => {
+      const claudeEvent = convertOpenCodeToClaude(
+        {
+          type: 'step_start',
+          timestamp: startTime + 100,
+          sessionID: 'ses_test123',
+        },
+        startTime
+      );
+
+      expect(claudeEvent.model).toBeUndefined();
+    });
+
+    test('init reports the resolved model when supplied (#295)', () => {
+      const claudeEvent = convertOpenCodeToClaude(
+        {
+          type: 'step_start',
+          timestamp: startTime + 100,
+          sessionID: 'ses_test123',
+        },
+        startTime,
+        'formalai/formal-ai'
+      );
+
+      expect(claudeEvent.type).toBe('init');
+      expect(claudeEvent.model).toBe('formalai/formal-ai');
+    });
+
     test('converts text to message', () => {
       const opencodeEvent = {
         type: 'text',
@@ -233,6 +261,33 @@ describe('JSON Standard Module - Unit Tests', () => {
     test('handler.output exists and is a function', () => {
       const handler = createEventHandler('opencode', 'ses_test123');
       expect(typeof handler.output).toBe('function');
+    });
+
+    test('claude handler carries the resolved model onto init (#295)', () => {
+      const handler = createEventHandler('claude', 'ses_test123', {
+        model: 'formalai/formal-ai',
+      });
+
+      const written = [];
+      const originalWrite = process.stdout.write;
+      process.stdout.write = (chunk) => {
+        written.push(String(chunk));
+        return true;
+      };
+      try {
+        handler.output({
+          type: 'step_start',
+          timestamp: Date.now(),
+          sessionID: 'ses_test123',
+        });
+      } finally {
+        process.stdout.write = originalWrite;
+      }
+
+      expect(written.length).toBe(1);
+      const event = JSON.parse(written[0]);
+      expect(event.type).toBe('init');
+      expect(event.model).toBe('formalai/formal-ai');
     });
   });
 });

@@ -112,6 +112,25 @@ export function getDefaultModel(options: DefaultConfigOptions = {}): string {
   );
 }
 
+/**
+ * Report where the effective default model came from.
+ *
+ * `'config'` means an operator override is in effect (`defaultOptions.defaultModel`
+ * or `LINK_ASSISTANT_AGENT_DEFAULT_MODEL`); `'default'` means the built-in
+ * `DEFAULT_MODEL`. Used by the `model_resolved` attestation so a consumer can
+ * tell a configured fallback from the shipped one.
+ *
+ * @see https://github.com/link-assistant/agent/issues/295
+ */
+export function getDefaultModelSource(
+  options: DefaultConfigOptions = {}
+): 'config' | 'default' {
+  const env = options.env ?? process.env;
+  if (optionString(options.defaultModel)) return 'config';
+  if (envString(env, DEFAULT_MODEL_ENV)) return 'config';
+  return 'default';
+}
+
 export function getDefaultCompactionModel(
   options: DefaultConfigOptions = {}
 ): string {

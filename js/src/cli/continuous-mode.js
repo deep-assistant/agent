@@ -303,8 +303,11 @@ export async function runContinuousServerMode(
       }
     }
 
-    // Create event handler for the selected JSON standard
-    const eventHandler = createEventHandler(jsonStandard, sessionID);
+    // Create event handler for the selected JSON standard.
+    // The resolved model rides along so the Claude `init` event reports it (#295).
+    const eventHandler = createEventHandler(jsonStandard, sessionID, {
+      model: `${providerID}/${modelID}`,
+    });
 
     // Track if we're currently processing a message
     let isProcessing = false;
@@ -526,8 +529,11 @@ export async function runContinuousDirectMode(
       sessionID = session.id;
     }
 
-    // Create event handler for the selected JSON standard
-    const eventHandler = createEventHandler(jsonStandard, sessionID);
+    // Create event handler for the selected JSON standard.
+    // The resolved model rides along so the Claude `init` event reports it (#295).
+    const eventHandler = createEventHandler(jsonStandard, sessionID, {
+      model: `${providerID}/${modelID}`,
+    });
 
     // Track if we're currently processing a message
     let isProcessing = false;

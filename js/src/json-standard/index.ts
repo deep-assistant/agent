@@ -75,10 +75,14 @@ export function serializeOutput(
 
 /**
  * Convert OpenCode event to Claude event format
+ *
+ * @param model - Resolved `providerID/modelID`, reported on the `init` event so
+ *   Claude-standard consumers see which model the run settled on (#295)
  */
 export function convertOpenCodeToClaude(
   event: OpenCodeEvent,
-  startTime: number
+  startTime: number,
+  model?: string
 ): ClaudeEvent | null {
   const timestamp = new Date(event.timestamp).toISOString();
   const session_id = event.sessionID;
@@ -89,6 +93,7 @@ export function convertOpenCodeToClaude(
         type: 'init',
         timestamp,
         session_id,
+        ...(model ? { model } : {}),
       };
 
     case 'text':
@@ -157,9 +162,17 @@ export function convertOpenCodeToClaude(
 
 /**
  * Create an event output handler based on the selected standard
+ *
+ * @param options.model - Resolved `providerID/modelID` for the run; carried on
+ *   the Claude `init` event (#295)
  */
-export function createEventHandler(standard: JsonStandard, sessionID: string) {
+export function createEventHandler(
+  standard: JsonStandard,
+  sessionID: string,
+  options: { model?: string } = {}
+) {
   const startTime = Date.now();
+  const { model } = options;
 
   return {
     /**
@@ -169,7 +182,7 @@ export function createEventHandler(standard: JsonStandard, sessionID: string) {
       const outputStream =
         event.type === 'error' ? process.stderr : process.stdout;
       if (standard === 'claude') {
-        const claudeEvent = convertOpenCodeToClaude(event, startTime);
+        const claudeEvent = convertOpenCodeToClaude(event, startTime, model);
         if (claudeEvent) {
           outputStream.write(serializeOutput(claudeEvent, standard));
         }
