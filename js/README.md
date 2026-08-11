@@ -376,6 +376,30 @@ echo "hi" | agent --json-standard claude
 - **Event Types**: `init`, `message`, `tool_use`, `tool_result`, `result`
 - **Timestamps**: ISO 8601 strings
 - **Session ID**: `session_id` (snake_case)
+- **Model**: the `init` event reports the resolved model as `"model": "<provider>/<model>"`
+
+#### Model Routing Attestation
+
+Both standards emit exactly one `model_resolved` event per run, immediately after
+the model is resolved and before the first request reaches a provider:
+
+```json
+{
+  "type": "model_resolved",
+  "timestamp": "2026-08-11T00:12:31.320Z",
+  "requested": "formalai/formal-ai",
+  "selector": "formalai/formal-ai",
+  "providerID": "formalai",
+  "modelID": "formal-ai",
+  "source": "cli",
+  "matchesRequest": true
+}
+```
+
+Switch on `type` rather than matching the human-readable
+`using explicit provider/model` log message — the log message is prose and may be
+reworded, the event type is a contract. See
+[docs/model-resolved-event.md](../docs/model-resolved-event.md).
 
 ### Input Formats
 

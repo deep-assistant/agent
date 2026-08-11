@@ -10,10 +10,12 @@ import {
   DEFAULT_MODEL_ID,
   getDefaultModel,
   getDefaultModelParts,
+  getDefaultModelSource,
   getDefaultCompactionModel,
   getDefaultCompactionModels,
   getDefaultCompactionSafetyMarginPercent,
 } from './defaults.ts';
+import { outputModelResolved } from './model-resolution.ts';
 
 export class ModelResolutionError extends Error {
   constructor({ modelArgv, defaultModel }) {
@@ -95,6 +97,19 @@ export async function parseModelConfig(
       });
     }
   }
+
+  // Attestation inputs (#295): record what was requested, and where it came
+  // from, before resolution can rewrite the effective model. `argv.model` is
+  // only treated as a request when it differs from the default, because yargs
+  // fills it with the default value even when no --model flag was passed.
+  const argvModelArg =
+    typeof argv.model === 'string' && argv.model !== defaultModel
+      ? argv.model
+      : null;
+  const requestedModel = cliModelArg ?? argvModelArg;
+  const modelSource = requestedModel
+    ? 'cli'
+    : getDefaultModelSource(defaultOptions);
 
   let providerID;
   let modelID;
@@ -256,6 +271,28 @@ export async function parseModelConfig(
       // Don't override - respect user's explicit provider choice
     }
   }
+
+  // Machine-readable routing attestation (#295).
+  // Emitted last inside this function, which is still the earliest point where
+  // the effective model is final: --use-existing-claude-oauth above is the one
+  // path that can replace an already selected model, and the attestation must
+  // describe what actually runs. It is emitted before session creation and
+  // before any completion request, so a consumer can terminate the run before a
+  // request reaches a provider it did not ask for. Claude NDJSON streams must
+  // stay one line, so that standard forces compact output regardless of
+  // --compact-json.
+  const usesClaudeStandard =
+    argv['json-standard'] === 'claude' || argv.jsonStandard === 'claude';
+  outputModelResolved(
+    {
+      requested: requestedModel,
+      selector: modelArg,
+      providerID,
+      modelID,
+      source: modelSource,
+    },
+    usesClaudeStandard || argv['compact-json'] === true ? true : undefined
+  );
 
   return { providerID, modelID, compactionModel: compactionModelResult };
 }

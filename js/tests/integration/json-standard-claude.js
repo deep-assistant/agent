@@ -59,8 +59,17 @@ describe('Claude JSON Standard (experimental)', () => {
     );
     const events = parseNDJSON(result.stdout);
 
-    // Valid Claude event types
-    const validTypes = ['init', 'message', 'tool_use', 'tool_result', 'result'];
+    // Valid Claude event types.
+    // `model_resolved` is the CLI's routing attestation (#295): it is emitted
+    // before the session starts, so it rides on the claude stream too.
+    const validTypes = [
+      'init',
+      'message',
+      'tool_use',
+      'tool_result',
+      'result',
+      'model_resolved',
+    ];
 
     for (const event of events) {
       expect(validTypes.includes(event.type)).toBeTruthy();

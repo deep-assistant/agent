@@ -184,6 +184,8 @@ This agent reproduces OpenCode's `run --format json` command architecture:
 
 - **Streaming JSON Events**: Real-time event stream output
 - **Event Types**: `tool_use`, `text`, `step_start`, `step_finish`, `error`
+- **Model Routing Attestation**: one `model_resolved` event per run, emitted
+  before the first request — see [docs/model-resolved-event.md](docs/model-resolved-event.md)
 - **Session Management**: Unique session IDs for each request
 - **Tool Execution**: Tools with unrestricted access
 - **Compatible Format**: Events match OpenCode's JSON schema exactly

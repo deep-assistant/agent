@@ -28,7 +28,9 @@ export type OutputType =
   | 'init'
   | 'message'
   | 'tool_result'
-  | 'input';
+  | 'input'
+  // Routing attestation emitted once per run, see cli/model-resolution.ts (#295)
+  | 'model_resolved';
 
 /**
  * Base interface for all output messages
