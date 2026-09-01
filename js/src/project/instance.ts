@@ -58,6 +58,7 @@ export const Instance = {
   async dispose() {
     Log.Default.info('disposing instance', { directory: Instance.directory });
     await State.dispose(Instance.directory);
+    await Project.prune();
   },
   async disposeAll() {
     Log.Default.info('disposing all instances');
