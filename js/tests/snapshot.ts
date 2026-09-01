@@ -18,6 +18,7 @@ test('snapshot storage scenarios pass in an isolated process', () => {
       ['test', '--timeout', '30000', fixture],
       {
         encoding: 'utf8',
+        timeout: 30_000,
         env: {
           ...process.env,
           XDG_CACHE_HOME: path.join(xdgRoot, 'cache'),

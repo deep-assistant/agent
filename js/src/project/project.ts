@@ -161,6 +161,7 @@ export namespace Project {
         await Storage.remove(message);
       }
       await Storage.remove(['session_diff', sessionID]);
+      await Storage.remove(['todo', sessionID]);
       await Storage.remove(session);
     }
     await Storage.remove(['project', snapshot.id]);

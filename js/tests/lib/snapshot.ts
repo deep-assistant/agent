@@ -138,6 +138,9 @@ describe('snapshot object storage', () => {
       path.join(data, 'storage', 'session_diff', 'session-1.json'),
       []
     );
+    await writeJSON(path.join(data, 'storage', 'todo', 'session-1.json'), [
+      { content: 'left behind', status: 'pending', priority: 'high' },
+    ]);
 
     const prune = (Project as typeof Project & { prune?: () => Promise<void> })
       .prune;
@@ -172,6 +175,9 @@ describe('snapshot object storage', () => {
     ).toBe(false);
     expect(
       await exists(path.join(data, 'storage', 'session_diff', 'session-1.json'))
+    ).toBe(false);
+    expect(
+      await exists(path.join(data, 'storage', 'todo', 'session-1.json'))
     ).toBe(false);
   });
 
