@@ -255,7 +255,6 @@ jobs:
         run: |
           CONSUMER_DIR=$(mktemp -d)
           cd "$CONSUMER_DIR"
-          bun init -y
           bun add "$TARBALL" 2>&1 | tee install.log
           if grep -q 'warn: incorrect peer dependency' install.log; then
             echo "::error::Packed package installation emitted an incorrect peer dependency warning"

@@ -4,9 +4,12 @@ import path from 'path';
 import { $ } from 'bun';
 import { Storage } from '../storage/storage';
 import { Log } from '../util/log';
+import fs from 'node:fs/promises';
+import { Global } from '../global';
 
 export namespace Project {
   const log = Log.create({ service: 'project' });
+  const recentSnapshotAge = 15 * 60_000;
   export const Info = z
     .object({
       id: z.string(),
@@ -24,6 +27,7 @@ export namespace Project {
 
   export async function fromDirectory(directory: string) {
     log.info(() => ({ message: 'fromDirectory', directory }));
+    await prune();
     const matches = Filesystem.up({ targets: ['.git'], start: directory });
     const git = await matches.next().then((x) => x.value);
     await matches.return();
@@ -100,5 +104,67 @@ export namespace Project {
   export async function list() {
     const keys = await Storage.list(['project']);
     return await Promise.all(keys.map((x) => Storage.read<Info>(x)));
+  }
+
+  export async function prune() {
+    const root = path.join(Global.Path.data, 'snapshot');
+    const entries = await fs
+      .readdir(root, { withFileTypes: true })
+      .catch(() => []);
+    const snapshots: { id: string; path: string; modified: number }[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const snapshot = path.join(root, entry.name);
+      const modified = await fs
+        .stat(snapshot)
+        .then((stat) => stat.mtimeMs)
+        .catch(() => undefined);
+      if (modified === undefined) continue;
+      snapshots.push({ id: entry.name, path: snapshot, modified });
+    }
+    snapshots.sort((a, b) => b.modified - a.modified);
+
+    const newest = snapshots[0]?.id;
+    const recent = Date.now() - recentSnapshotAge;
+    for (const snapshot of snapshots) {
+      if (snapshot.id === newest || snapshot.modified >= recent) continue;
+      const project = await Storage.read<Info>(['project', snapshot.id]).catch(
+        () => undefined
+      );
+      const live = project
+        ? await fs
+            .stat(project.worktree)
+            .then((stat) => stat.isDirectory())
+            .catch(() => false)
+        : false;
+      if (live) continue;
+
+      await remove(snapshot).catch((error) =>
+        log.warn(() => ({
+          message: 'failed to prune snapshot',
+          projectID: snapshot.id,
+          error: error instanceof Error ? error.message : String(error),
+        }))
+      );
+    }
+  }
+
+  async function remove(snapshot: { id: string; path: string }) {
+    await fs.rm(snapshot.path, { recursive: true, force: true });
+    for (const session of await Storage.list(['session', snapshot.id])) {
+      const sessionID = session.at(-1)!;
+      for (const message of await Storage.list(['message', sessionID])) {
+        const messageID = message.at(-1)!;
+        for (const part of await Storage.list(['part', messageID])) {
+          await Storage.remove(part);
+        }
+        await Storage.remove(message);
+      }
+      await Storage.remove(['session_diff', sessionID]);
+      await Storage.remove(['todo', sessionID]);
+      await Storage.remove(session);
+    }
+    await Storage.remove(['project', snapshot.id]);
+    log.info(() => ({ message: 'pruned snapshot', projectID: snapshot.id }));
   }
 }
