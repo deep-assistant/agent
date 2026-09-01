@@ -30,6 +30,25 @@ export namespace Snapshot {
         .nothrow();
       log.info(() => ({ message: 'initialized' }));
     }
+    const objects =
+      await $`git rev-parse --path-format=absolute --git-path objects`
+        .quiet()
+        .cwd(Instance.worktree)
+        .nothrow();
+    if (objects.exitCode === 0) {
+      const info = path.join(git, 'objects', 'info');
+      await fs.mkdir(info, { recursive: true });
+      await fs.writeFile(
+        path.join(info, 'alternates'),
+        `${objects.text().trim()}\n`
+      );
+    } else {
+      log.warn(() => ({
+        message: 'failed to resolve repository objects',
+        exitCode: objects.exitCode,
+        stderr: objects.stderr.toString(),
+      }));
+    }
     await $`git --git-dir ${git} --work-tree ${Instance.worktree} add .`
       .quiet()
       .cwd(Instance.directory)
