@@ -15,6 +15,7 @@ makes without re-running the pipeline.
 | --- | --- |
 | [`ci-logs/`](ci-logs) | Full `gh run view --log` output for the failing and reference runs |
 | [`meta/`](meta) | `gh run view --json` job/step metadata and per-run summaries |
+| [`templates/`](templates) | Workflow and script inventories of the two pipeline templates, at the commit compared against |
 | [`timeline.md`](timeline.md) | Sequence of events reconstructed from the logs and git history |
 | [`requirements.md`](requirements.md) | Every requirement of the issue, enumerated, with status |
 | [`root-causes.md`](root-causes.md) | Each defect: symptom → evidence → root cause → fix |
