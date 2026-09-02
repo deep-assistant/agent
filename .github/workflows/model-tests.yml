@@ -96,7 +96,7 @@ jobs:
           submodules: false
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -192,15 +192,19 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           if [ -f test-output-simple.log ]; then
-            echo "### Simple Test Output" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            head -50 test-output-simple.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            {
+              echo "### Simple Test Output"
+              echo '```'
+              head -50 test-output-simple.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ -f test-output-tools.log ]; then
-            echo "### Tool Test Output" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            head -50 test-output-tools.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            {
+              echo "### Tool Test Output"
+              echo '```'
+              head -50 test-output-tools.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi

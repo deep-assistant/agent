@@ -161,7 +161,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -184,7 +184,10 @@ jobs:
           if [ -d "data/api-cache" ] && [ -n "$(git status --porcelain data/api-cache/)" ]; then
             echo "Found uncommitted cached API responses"
             git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
+            # The 41898282+ prefix links the commit to the github-actions[bot]
+            # account. Without it the commit is "unattributed" and a ruleset
+            # requiring extra approval for unattributed changes blocks it.
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/api-cache/
             git commit -m "chore: commit cached API responses (Links Notation format)
 
@@ -214,7 +217,7 @@ jobs:
           ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -238,7 +241,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -253,6 +256,9 @@ jobs:
         env:
           TARBALL: ${{ github.workspace }}/js/${{ steps.pack.outputs.tarball }}
         run: |
+          # `bun add | tee` reports tee's exit status without pipefail, so a
+          # failed install used to leave this job green.
+          set -o pipefail
           CONSUMER_DIR=$(mktemp -d)
           cd "$CONSUMER_DIR"
           bun add "$TARBALL" 2>&1 | tee install.log
@@ -302,7 +308,11 @@ jobs:
           # Count changeset files (excluding README.md and config.json)
           CHANGESET_COUNT=$(find js/.changeset -name "*.md" ! -name "README.md" | wc -l)
           echo "Found $CHANGESET_COUNT changeset file(s)"
-          echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          if [ "$CHANGESET_COUNT" -gt 0 ]; then
+            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Version packages and commit to main
         if: steps.check_changesets.outputs.has_changesets == 'true'
@@ -416,14 +426,17 @@ jobs:
         run: node scripts/create-manual-changeset.mjs
 
       - name: Format changeset with Prettier
+        # No `|| true`: the changeset this job just generated must be
+        # formattable, and swallowing the failure produced a pull request that
+        # then failed the format check in its own pipeline run.
+        working-directory: js
         run: |
           # Run Prettier on the changeset file to ensure it matches project style
-          cd js && npx prettier --write ".changeset/*.md" || true
-
+          npx prettier --write ".changeset/*.md"
           echo "Formatted changeset files"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore: add changeset for manual ${{ github.event.inputs.bump_type }} release'

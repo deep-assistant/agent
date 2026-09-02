@@ -63,15 +63,19 @@ jobs:
           fetch-depth: 0
 
       - name: Check for changelog fragments
+        # BASE_REF is a branch name. Interpolating it directly into the script
+        # would let a branch name execute shell code (zizmor template-injection).
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           # Get list of fragment files (excluding README)
           FRAGMENTS=$(find rust/changelog.d -name "*.md" ! -name "README.md" 2>/dev/null | wc -l)
 
           # Get changed files in PR
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          CHANGED_FILES=$(git diff --name-only "origin/$BASE_REF...HEAD")
 
           # Check if any Rust source files changed
-          SOURCE_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^rust/(src/|tests/|Cargo\.toml)" | wc -l)
+          SOURCE_CHANGED=$(echo "$CHANGED_FILES" | grep -cE "^rust/(src/|tests/|Cargo\.toml)" || true)
 
           if [ "$SOURCE_CHANGED" -gt 0 ] && [ "$FRAGMENTS" -eq 0 ]; then
             echo "::warning::No changelog fragment found. Please add a changelog entry in rust/changelog.d/"
@@ -109,7 +113,7 @@ jobs:
         run: bash scripts/simulate-fresh-merge.sh
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
         with:
           components: rustfmt, clippy
 
@@ -156,7 +160,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
       - name: Cache cargo registry
         uses: actions/cache@v5
@@ -185,7 +189,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
       - name: Cache cargo registry
         uses: actions/cache@v5
@@ -227,7 +231,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -237,7 +241,10 @@ jobs:
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # The 41898282+ prefix links the commit to the github-actions[bot]
+          # account. Without it the commit is "unattributed" and a ruleset
+          # requiring extra approval for unattributed changes blocks it.
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       # Read crate name/version from the [package] section only. A plain
       # `grep -Po '(?<=^name = ")'` also matches every [lib]/[[bin]]/[[test]]
@@ -273,12 +280,12 @@ jobs:
             node scripts/format-github-release.mjs \
               --release-version "$CURRENT_VERSION" \
               --repository "${{ github.repository }}" \
-              --commit-sha "$(git rev-list -1 rust-v$CURRENT_VERSION)" \
+              --commit-sha "$(git rev-list -1 "rust-v$CURRENT_VERSION")" \
               --prefix "rust-"
-            echo "recovered=true" >> $GITHUB_OUTPUT
+            echo "recovered=true" >> "$GITHUB_OUTPUT"
           else
             echo "No recovery needed (tag=$TAG_EXISTS, release=$RELEASE_EXISTS)"
-            echo "recovered=false" >> $GITHUB_OUTPUT
+            echo "recovered=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine bump type from changelog fragments
@@ -320,22 +327,22 @@ jobs:
 
           if [ "${{ steps.bump_type.outputs.has_fragments }}" = "true" ]; then
             echo "Found changelog fragments, proceeding with release"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "skip_bump=false" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "skip_bump=false" >> "$GITHUB_OUTPUT"
           elif [ "$TAG_EXISTS" = "true" ] && [ "$RELEASE_EXISTS" = "true" ] && [ "$CRATES_PUBLISHED" = "true" ]; then
             echo "No changelog fragments and rust-v$CURRENT_VERSION fully released (tag + GitHub release + crates.io)"
-            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
           elif [ "$TAG_EXISTS" = "true" ] && [ "$RELEASE_EXISTS" = "false" ]; then
             echo "Tag exists but GitHub release missing for rust-v$CURRENT_VERSION — recovering"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "skip_bump=true" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "skip_bump=true" >> "$GITHUB_OUTPUT"
           elif [ "$TAG_EXISTS" = "false" ]; then
             echo "No changelog fragments but rust-v$CURRENT_VERSION not yet tagged"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "skip_bump=true" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "skip_bump=true" >> "$GITHUB_OUTPUT"
           else
             echo "Version rust-v$CURRENT_VERSION appears fully released"
-            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Collect changelog and bump version
@@ -399,7 +406,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -409,7 +416,10 @@ jobs:
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # The 41898282+ prefix links the commit to the github-actions[bot]
+          # account. Without it the commit is "unattributed" and a ruleset
+          # requiring extra approval for unattributed changes blocks it.
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Collect changelog fragments
         run: |
