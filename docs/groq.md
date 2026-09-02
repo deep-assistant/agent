@@ -101,7 +101,7 @@ The following models support parallel tool calling:
 
 ## Pricing
 
-Groq offers competitive pricing for inference. Check [console.groq.com](https://console.groq.com/docs/pricing) for current pricing information.
+Groq offers competitive pricing for inference. Check [groq.com/pricing](https://groq.com/pricing/) for current pricing information.
 
 Key benefits:
 

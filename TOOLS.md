@@ -13,28 +13,28 @@ and last line ranges by default, and long lines can be inspected with explicit
 column windows.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/read.tools.test.js](tests/read.tools.test.js)
+**Test:** [js/tests/tool_read.js](js/tests/tool_read.js)
 
 ### write
 
 Writes content to files in the filesystem.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/write.tools.test.js](tests/write.tools.test.js)
+**Test:** [js/tests/tool_write.js](js/tests/tool_write.js)
 
 ### edit
 
 Performs exact string replacements in files.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/edit.tools.test.js](tests/edit.tools.test.js)
+**Test:** [js/tests/tool_edit.js](js/tests/tool_edit.js)
 
 ### list (ls)
 
 Lists files and directories.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/list.tools.test.js](tests/list.tools.test.js)
+**Test:** [js/tests/tool_list.js](js/tests/tool_list.js)
 
 ## Search Tools
 
@@ -43,7 +43,7 @@ Lists files and directories.
 Fast file pattern matching tool that works with any codebase size. Supports glob patterns like `**/*.js` or `src/**/*.ts`.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/glob.tools.test.js](tests/glob.tools.test.js)
+**Test:** [js/tests/tool_glob.js](js/tests/tool_glob.js)
 
 ### grep
 
@@ -51,14 +51,14 @@ Powerful search tool built on ripgrep. Supports full regex syntax, can filter by
 file type or glob pattern, and summarizes long matching lines around the match.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/grep.tools.test.js](tests/grep.tools.test.js)
+**Test:** [js/tests/tool_grep.js](js/tests/tool_grep.js)
 
 ### websearch
 
 Searches the web using Exa API for current information. Always enabled, no environment variables required.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/websearch.tools.test.js](tests/websearch.tools.test.js)
+**Test:** [js/tests/tool_websearch.js](js/tests/tool_websearch.js)
 **OpenCode Compatibility:** ✅ 100% compatible
 
 ### codesearch
@@ -66,7 +66,7 @@ Searches the web using Exa API for current information. Always enabled, no envir
 Searches code repositories and documentation using Exa API. Always enabled.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/codesearch.tools.test.js](tests/codesearch.tools.test.js)
+**Test:** [js/tests/tool_codesearch.js](js/tests/tool_codesearch.js)
 **OpenCode Compatibility:** ✅ 100% compatible
 
 ## Execution Tools
@@ -76,21 +76,21 @@ Searches code repositories and documentation using Exa API. Always enabled.
 Executes bash commands in a persistent shell session with optional timeout.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/bash.tools.test.js](tests/bash.tools.test.js)
+**Test:** [js/tests/tool_bash.js](js/tests/tool_bash.js)
 
 ### batch
 
 Batches multiple tool calls together for optimal performance. Executes multiple tools in a single operation. Always enabled.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/batch.tools.test.js](tests/batch.tools.test.js)
+**Test:** [js/tests/tool_batch.js](js/tests/tool_batch.js)
 
 ### task
 
 Launches specialized agents to handle complex, multi-step tasks autonomously.
 
-**Status:** ✅ Fully supported and tested
-**Test:** [tests/task.tools.test.js](tests/task.tools.test.js)
+**Status:** ✅ Fully supported
+**Test:** no dedicated test file; covered indirectly by [js/tests/tool_registry.js](js/tests/tool_registry.js)
 
 ## Utility Tools
 
@@ -99,14 +99,14 @@ Launches specialized agents to handle complex, multi-step tasks autonomously.
 Reads and writes TODO items for task tracking during execution.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/todo.tools.test.js](tests/todo.tools.test.js)
+**Test:** [js/tests/tool_todo.js](js/tests/tool_todo.js)
 
 ### webfetch
 
 Fetches content from a specified URL and processes it using an AI model.
 
 **Status:** ✅ Fully supported and tested
-**Test:** [tests/webfetch.tools.test.js](tests/webfetch.tools.test.js)
+**Test:** [js/tests/tool_webfetch.js](js/tests/tool_webfetch.js)
 
 ## Read-Only / Planning Mode
 
@@ -183,14 +183,14 @@ every mode, the JSON shapes, environment variables, and worked examples.
 ### Run All Tool Tests
 
 ```bash
-bun test tests/*.tools.test.js
+bun test js/tests/tool_*.js
 ```
 
 ### Run Specific Tool Test
 
 ```bash
-bun test tests/bash.tools.test.js
-bun test tests/websearch.tools.test.js
+bun test js/tests/tool_bash.js
+bun test js/tests/tool_websearch.js
 ```
 
 ### Test Coverage

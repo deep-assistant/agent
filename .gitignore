@@ -150,3 +150,7 @@ ci-logs/
 # analysis for an issue live under dev/log/issues/<issue>/pulls/<pr>/ and must
 # survive the generic "logs", "*.log" and "ci-logs/" rules above.
 !dev/log/**
+
+# lychee writes a cache file next to .lycheeignore when run locally with
+# --cache; it is machine-local state, never a repository artifact.
+.lycheecache
