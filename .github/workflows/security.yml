@@ -76,7 +76,41 @@ jobs:
         with:
           persist-credentials: false
 
+      # actions/dependency-review-action fails the job outright with
+      # "Dependency review is not supported on this repository" when the
+      # dependency graph is disabled, which turns every pull request red for a
+      # repository-settings reason rather than a dependency problem - exactly
+      # the kind of false positive issue #301 is about. Probe the API first and
+      # downgrade only that case to a warning; a real advisory still fails.
+      - name: Check whether the dependency graph is available
+        id: graph
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/dependency-graph/compare/$BASE_SHA...$HEAD_SHA")
+
+          case "$code" in
+            200)
+              echo 'available=true' >> "$GITHUB_OUTPUT"
+              ;;
+            403 | 404)
+              echo 'available=false' >> "$GITHUB_OUTPUT"
+              echo "::warning::Dependency review skipped: the dependency graph is not enabled for $GITHUB_REPOSITORY (dependency-graph API returned $code). Enable it under Settings -> Code security -> Dependency graph; npm audit and cargo audit still run."
+              ;;
+            *)
+              echo "::error::Unexpected HTTP $code from the dependency-graph API"
+              exit 1
+              ;;
+          esac
+
       - name: Review dependency changes
+        if: steps.graph.outputs.available == 'true'
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
