@@ -69,10 +69,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   # actions/checkout runs `git init` before any repository config exists, which
   # prints a hint about the default branch name on every job. Setting it via
@@ -86,6 +82,9 @@ jobs:
     name: Test Model
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-model-${{ inputs.model }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 

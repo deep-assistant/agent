@@ -33,12 +33,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: rust-${{ github.workflow }}-${{ github.ref }}
-  # A release runs on push to main. Cancelling it mid-publish would leave a
-  # version bumped and tagged but not published, so main runs always finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 env:
   CARGO_TERM_COLOR: always
   # actions/checkout runs `git init` before any repository config exists, which
@@ -50,12 +44,26 @@ env:
   # Note: -Dwarnings is disabled while Rust implementation is WIP
   # Enable later with: RUSTFLAGS: -Dwarnings
 
+# Concurrency is declared per job rather than once for the whole workflow
+# (principle 10 of the CI/CD best practices, and the shape both pipeline
+# templates use):
+#
+#   * read-only checks share `check-<workflow>-<ref>-<job>` and cancel in
+#     progress off the default branch, so a force-push stops only the stale
+#     copy of that one job instead of queueing the entire workflow;
+#   * jobs that push to main or publish share the repository-wide
+#     `main-writer-...` group and never cancel in progress, so a release is
+#     never interrupted between the version bump and the publish, and the JS
+#     and Rust releases cannot race each other.
 jobs:
   # Changelog fragment check - only runs on PRs
   changelog-check:
     name: Changelog Fragment Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-changelog-check
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -95,6 +103,9 @@ jobs:
     name: Lint and Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-lint
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changelog-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped') }}
     steps:
@@ -149,6 +160,9 @@ jobs:
     name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-${{ matrix.os }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changelog-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changelog-check.result == 'success' || needs.changelog-check.result == 'skipped') }}
     strategy:
@@ -173,8 +187,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      # The budget wrapper owns the deadline instead of the job's
+      # timeout-minutes backstop: GitHub reports a job killed by
+      # timeout-minutes as cancelled, not failed, so a suite that quietly
+      # doubles in runtime would never be reported (issue #301).
       - name: Run tests
-        run: cargo test --all-features --verbose
+        run: bash ../scripts/run-with-budget-warning.sh 1200 "Cargo test suite" cargo test --all-features --verbose
         working-directory: rust
         # Note: Doc tests skipped - this is a binary crate without lib target
 
@@ -183,6 +201,9 @@ jobs:
     name: Build Package
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-build
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [lint, test]
     if: ${{ !cancelled() && needs.lint.result == 'success' && needs.test.result == 'success' }}
     steps:
@@ -207,7 +228,7 @@ jobs:
         working-directory: rust
 
       - name: Build release
-        run: cargo build --release --verbose
+        run: bash ../scripts/run-with-budget-warning.sh 900 "Cargo release build" cargo build --release --verbose
         working-directory: rust
 
   # Automatic release on push to main using changelog fragments
@@ -220,7 +241,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     permissions:
       contents: write
@@ -368,7 +389,7 @@ jobs:
         if: steps.check.outputs.should_release == 'true'
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
-        run: node scripts/publish-to-crates.mjs --should-pull
+        run: bash scripts/run-with-budget-warning.sh 600 "crates.io publish" node scripts/publish-to-crates.mjs --should-pull
 
       - name: Create GitHub Release
         if: steps.check.outputs.should_release == 'true' && (steps.publish.outputs.published == 'true' || steps.publish.outcome == 'success')
@@ -395,7 +416,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     permissions:
       contents: write
@@ -449,7 +470,7 @@ jobs:
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
-        run: node scripts/publish-to-crates.mjs
+        run: bash scripts/run-with-budget-warning.sh 600 "crates.io publish" node scripts/publish-to-crates.mjs
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true' || steps.publish.outcome == 'success'
@@ -475,6 +496,9 @@ jobs:
     name: Pipeline Status
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-pipeline-status
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     if: always()
     needs:
       - changelog-check

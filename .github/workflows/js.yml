@@ -41,12 +41,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: js-${{ github.workflow }}-${{ github.ref }}
-  # A release runs on push to main. Cancelling it mid-publish would leave a
-  # version bumped and tagged but not published, so main runs always finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 env:
   # actions/checkout runs `git init` before any repository config exists, which
   # prints a hint about the default branch name on every job. Setting it via
@@ -55,12 +49,26 @@ env:
   GIT_CONFIG_KEY_0: init.defaultBranch
   GIT_CONFIG_VALUE_0: main
 
+# Concurrency is declared per job rather than once for the whole workflow
+# (principle 10 of the CI/CD best practices, and the shape both pipeline
+# templates use):
+#
+#   * read-only checks share `check-<workflow>-<ref>-<job>` and cancel in
+#     progress off the default branch, so a force-push stops only the stale
+#     copy of that one job instead of queueing the entire workflow;
+#   * jobs that push to main or publish share the repository-wide
+#     `main-writer-...` group and never cancel in progress, so a release is
+#     never interrupted between the version bump and the publish, and the JS
+#     and Rust releases cannot race each other.
 jobs:
   # Changeset check - only runs on PRs
   changeset-check:
     name: Check for Changesets
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-changeset-check
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -96,6 +104,9 @@ jobs:
     name: Lint and Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-lint
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
@@ -144,6 +155,9 @@ jobs:
     name: Unit Tests (Bun on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-${{ matrix.os }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     strategy:
@@ -172,8 +186,12 @@ jobs:
       # Use the package script so CI and local runs execute the same suite.
       # A hardcoded four-file list silently skipped 48 of the 52 unit test
       # files, making CI green while regressions went unnoticed (issue #287).
+      # The budget wrapper owns the deadline instead of the job's
+      # timeout-minutes backstop: GitHub reports a job killed by
+      # timeout-minutes as cancelled, not failed, so a suite that quietly
+      # doubles in runtime would never be reported (issue #301).
       - name: Run unit tests
-        run: bun run test
+        run: bash ../scripts/run-with-budget-warning.sh 600 "Bun test suite" bun run test
         working-directory: js
 
       - name: Commit cached API responses
@@ -209,6 +227,9 @@ jobs:
     name: Verbose HTTP Logging Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-verbose-integration
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
@@ -235,6 +256,9 @@ jobs:
     name: Clean Package Install
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-package-install
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
@@ -277,7 +301,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -296,7 +320,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: bash ../scripts/run-with-budget-warning.sh 300 "Release dependency install" npm install --legacy-peer-deps
         working-directory: js
 
       - name: Update npm for OIDC trusted publishing
@@ -323,7 +347,7 @@ jobs:
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish
-        run: node scripts/publish-to-npm.mjs --should-pull
+        run: bash scripts/run-with-budget-warning.sh 600 "npm publish" node scripts/publish-to-npm.mjs --should-pull
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
@@ -346,7 +370,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -365,7 +389,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: bash ../scripts/run-with-budget-warning.sh 300 "Release dependency install" npm install --legacy-peer-deps
         working-directory: js
 
       - name: Update npm for OIDC trusted publishing
@@ -382,7 +406,7 @@ jobs:
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish
-        run: node scripts/publish-to-npm.mjs
+        run: bash scripts/run-with-budget-warning.sh 600 "npm publish" node scripts/publish-to-npm.mjs
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
@@ -402,6 +426,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changeset-pr'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: main-writer-${{ github.repository }}-main
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
@@ -467,6 +494,9 @@ jobs:
     name: Pipeline Status
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-pipeline-status
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     if: always()
     needs:
       - changeset-check
