@@ -158,3 +158,34 @@ killed the step with no message (`ci-logs/run-28688932169-failed.log:600-670`).
 Already fixed on `main` (`.github/workflows/rust.yml:272-334`: a dedicated
 `crate` step output and `|| echo "000"` around the probe). Recorded here
 because the issue asks for *all* errors, including the ones already closed.
+
+## RC11 — Dependency Review failed for a repository setting, not a dependency
+
+The first Security workflow run on this branch
+(`33597326784`, Dependency Review job) failed with
+
+```text
+##[error]Dependency review is not supported on this repository. Please ensure
+that Dependency graph is enabled, see .../settings/security_analysis
+```
+
+`actions/dependency-review-action` reads
+`GET /repos/{owner}/{repo}/dependency-graph/compare/{base}...{head}` and turns a
+403/404 from it into a hard failure. Confirmed independently:
+
+```console
+$ gh api repos/link-assistant/agent/dependency-graph/compare/main...issue-301-ef35bbf03fb8
+{"message":"Forbidden", ... "status":"403"}
+$ gh api repos/link-assistant/agent/dependency-graph/sbom
+{"message":"Not Found", ... "status":"404"}
+```
+
+So the dependency graph is off for this repository, and no workflow change can
+turn it on - it is a repository/organization setting. Left as-is, the job would
+have marked **every** pull request red for a reason unrelated to its
+dependencies: a textbook false positive of the kind this issue is about.
+**Fix** — `9e5131f`: the job probes the same API first, skips the review with a
+`::warning::` on 403/404, and still fails on any other unexpected status and on
+every real advisory. `npm audit` and `cargo audit` keep covering the lockfiles
+meanwhile. Enabling the dependency graph in the repository settings restores the
+full check with no further code change.

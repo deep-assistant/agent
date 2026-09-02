@@ -13,6 +13,7 @@ A false positive here is CI reporting a problem that is not one.
 | R1.2 | The concurrency policy test reported the new check-only workflow as unprotected because it only recognised workflow-level `concurrency:`. | Fixed — `92ce582`. |
 | R1.3 | `bun test` invoked without an explicit file list matches only `*.test.*`, so a green "all tests pass" can mean "no tests ran". | Verified not present: `js/package.json` pins the file list. Documented in [open-findings.md](open-findings.md). |
 | R1.4 | Runs 30236123719 and 30572373896 went red *after a successful publish*: the post-publish check read npm's registry before the new version had propagated, reported "Verification failed: package not found on npm after publish", and two republish attempts then failed with "packages failed to publish" because the version already existed. | Already fixed on `main` before this issue: `scripts/publish-retry.mjs` treats propagation lag as retryable and `isAlreadyPublishedError` treats "already exists" as success. Documented, no change needed. |
+| R1.5 | `Dependency review is not supported on this repository` failed the Security workflow on every pull request because the dependency graph is disabled for the repository - a settings gap, not a dependency problem. | Fixed — `9e5131f`; see [root-causes.md](root-causes.md) RC11. |
 
 ## R2 — "… all **false negatives** …"
 
