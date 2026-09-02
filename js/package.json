@@ -50,8 +50,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.1",
     "@agentclientprotocol/sdk": "^0.5.1",
     "@ai-sdk/amazon-bedrock": "^3.0.74",
     "@ai-sdk/anthropic": "^2.0.58",
@@ -134,5 +132,12 @@
       "prettier --check"
     ]
   },
-  "license": "Unlicense"
+  "license": "Unlicense",
+  "allowScripts": {
+    "@parcel/watcher@2.5.1": true,
+    "tree-sitter-bash@0.25.1": true
+  },
+  "overrides": {
+    "undici": "^7.16.0"
+  }
 }
