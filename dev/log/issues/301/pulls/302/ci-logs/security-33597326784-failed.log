@@ -1,0 +1,11 @@
+Dependency Review	Review dependency changes	﻿2026-09-02T06:05:15.6351836Z ##[group]Run actions/dependency-review-action@v5
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6353202Z with:
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6354241Z   fail-on-severity: high
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6355303Z   comment-summary-in-pr: on-failure
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6366190Z   repo-token: ***
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6367108Z env:
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6367933Z   GIT_CONFIG_COUNT: 1
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6368927Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6370116Z   GIT_CONFIG_VALUE_0: main
+Dependency Review	Review dependency changes	2026-09-02T06:05:15.6371120Z ##[endgroup]
+Dependency Review	Review dependency changes	2026-09-02T06:05:16.0884753Z ##[error]Dependency review is not supported on this repository. Please ensure that Dependency graph is enabled, see https://github.com/link-assistant/agent/settings/security_analysis

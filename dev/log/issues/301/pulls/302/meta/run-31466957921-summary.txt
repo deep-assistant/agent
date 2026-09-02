@@ -1,0 +1,18 @@
+
+✓ main JS CI/CD Pipeline · 31466957921
+Triggered via push about 21 days ago
+
+JOBS
+✓ Verbose HTTP Logging Test in 13s (ID 93701741741)
+✓ Clean Package Install in 12s (ID 93701741743)
+✓ Lint and Format Check in 48s (ID 93701741817)
+✓ Unit Tests (Bun on windows-latest) in 2m3s (ID 93701741832)
+✓ Unit Tests (Bun on ubuntu-latest) in 34s (ID 93701741834)
+- Check for Changesets in 0s (ID 93701741861)
+✓ Unit Tests (Bun on macos-latest) in 40s (ID 93701741883)
+- Instant Release (ID 93701742146)
+- Create Changeset PR (ID 93701742434)
+✓ Release in 1m19s (ID 93702142016)
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/link-assistant/agent/actions/runs/31466957921

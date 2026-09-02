@@ -24,10 +24,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   # actions/checkout runs `git init` before any repository config exists, which
   # prints a hint about the default branch name on every job. Setting it via
@@ -45,6 +41,9 @@ jobs:
     name: Resolve OS Matrix
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-matrix
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     outputs:
       os: ${{ steps.resolve.outputs.os }}
     steps:
@@ -64,6 +63,9 @@ jobs:
     needs: [matrix]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-${{ matrix.os }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,7 +86,7 @@ jobs:
           submodules: false
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 

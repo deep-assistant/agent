@@ -1,0 +1,52 @@
+
+X main Rust CI/CD Pipeline · 28688932169
+Triggered via push about 2 months ago
+
+JOBS
+✓ Lint and Format Check in 45s (ID 85086532353)
+✓ Test (ubuntu-latest) in 1m11s (ID 85086532364)
+✓ Test (macos-latest) in 1m3s (ID 85086532366)
+- Changelog Fragment Check (ID 85086541178)
+✓ Build Package in 1m23s (ID 85086609224)
+X Auto Release in 16s (ID 85086704079)
+  ✓ Set up job
+  ✓ Run actions/checkout@v6
+  ✓ Setup Rust
+  ✓ Setup Node.js
+  ✓ Configure git
+  ✓ Recover missing GitHub release for current version
+  ✓ Determine bump type from changelog fragments
+  X Check if version already released or no fragments
+  - Collect changelog and bump version
+  - Get current version
+  - Build release
+  - Publish to crates.io
+  - Create GitHub Release
+  - Format GitHub release notes
+  - Post Setup Node.js
+  ✓ Post Run actions/checkout@v6
+  ✓ Complete job
+- Manual Release (ID 85086704132)
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Lint and Format Check: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Test (ubuntu-latest): .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Test (macos-latest): .github#2
+
+- The macos-latest label will migrate to macOS 26 beginning June 15, 2026. For more information see https://github.com/actions/runner-images/issues/14167
+Test (macos-latest): .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build Package: .github#2
+
+X Process completed with exit code 3.
+Auto Release: .github#50
+
+
+To see what failed, try: gh run view 28688932169 --log-failed
+View this run on GitHub: https://github.com/link-assistant/agent/actions/runs/28688932169

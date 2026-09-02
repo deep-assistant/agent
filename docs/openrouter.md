@@ -305,6 +305,6 @@ Other solutions:
 
 - [OpenRouter Documentation](https://openrouter.ai/docs)
 - [Available Models](https://openrouter.ai/models)
-- [API Reference](https://openrouter.ai/docs/api-reference)
-- [Pricing](https://openrouter.ai/docs/pricing)
-- [Rate Limits](https://openrouter.ai/docs/rate-limits)
+- [API Reference](https://openrouter.ai/docs/api-reference/overview)
+- [Pricing](https://openrouter.ai/models)
+- [Rate Limits](https://openrouter.ai/docs/api-reference/limits)

@@ -2,7 +2,7 @@ import { Provider } from '../provider/provider';
 import { fn } from '../util/fn';
 import z from 'zod';
 import { Session } from '.';
-import { generateText, type ModelMessage } from 'ai';
+import { generateText } from 'ai';
 import { MessageV2 } from './message-v2';
 import { Identifier } from '../id/id';
 import { Snapshot } from '../snapshot';
@@ -187,13 +187,14 @@ export namespace SessionSummary {
           model.providerID,
           {}
         ),
+        // The system prompt belongs in `system`, not in `messages`: the AI SDK
+        // warns that a system message inside `messages` enables prompt
+        // injection, and providers are free to treat it as ordinary content.
+        system: systemPrompts.map((content) => ({
+          role: 'system' as const,
+          content,
+        })),
         messages: [
-          ...systemPrompts.map(
-            (x): ModelMessage => ({
-              role: 'system',
-              content: x,
-            })
-          ),
           {
             role: 'user' as const,
             content: userContent,

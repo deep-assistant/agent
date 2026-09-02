@@ -41,12 +41,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: js-${{ github.workflow }}-${{ github.ref }}
-  # A release runs on push to main. Cancelling it mid-publish would leave a
-  # version bumped and tagged but not published, so main runs always finish.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 env:
   # actions/checkout runs `git init` before any repository config exists, which
   # prints a hint about the default branch name on every job. Setting it via
@@ -55,12 +49,26 @@ env:
   GIT_CONFIG_KEY_0: init.defaultBranch
   GIT_CONFIG_VALUE_0: main
 
+# Concurrency is declared per job rather than once for the whole workflow
+# (principle 10 of the CI/CD best practices, and the shape both pipeline
+# templates use):
+#
+#   * read-only checks share `check-<workflow>-<ref>-<job>` and cancel in
+#     progress off the default branch, so a force-push stops only the stale
+#     copy of that one job instead of queueing the entire workflow;
+#   * jobs that push to main or publish share the repository-wide
+#     `main-writer-...` group and never cancel in progress, so a release is
+#     never interrupted between the version bump and the publish, and the JS
+#     and Rust releases cannot race each other.
 jobs:
   # Changeset check - only runs on PRs
   changeset-check:
     name: Check for Changesets
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-changeset-check
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -96,6 +104,9 @@ jobs:
     name: Lint and Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-lint
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
@@ -144,6 +155,9 @@ jobs:
     name: Unit Tests (Bun on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-${{ matrix.os }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     strategy:
@@ -161,7 +175,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -172,8 +186,12 @@ jobs:
       # Use the package script so CI and local runs execute the same suite.
       # A hardcoded four-file list silently skipped 48 of the 52 unit test
       # files, making CI green while regressions went unnoticed (issue #287).
+      # The budget wrapper owns the deadline instead of the job's
+      # timeout-minutes backstop: GitHub reports a job killed by
+      # timeout-minutes as cancelled, not failed, so a suite that quietly
+      # doubles in runtime would never be reported (issue #301).
       - name: Run unit tests
-        run: bun run test
+        run: bash ../scripts/run-with-budget-warning.sh 600 "Bun test suite" bun run test
         working-directory: js
 
       - name: Commit cached API responses
@@ -184,7 +202,10 @@ jobs:
           if [ -d "data/api-cache" ] && [ -n "$(git status --porcelain data/api-cache/)" ]; then
             echo "Found uncommitted cached API responses"
             git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
+            # The 41898282+ prefix links the commit to the github-actions[bot]
+            # account. Without it the commit is "unattributed" and a ruleset
+            # requiring extra approval for unattributed changes blocks it.
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/api-cache/
             git commit -m "chore: commit cached API responses (Links Notation format)
 
@@ -206,6 +227,9 @@ jobs:
     name: Verbose HTTP Logging Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-verbose-integration
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
@@ -214,7 +238,7 @@ jobs:
           ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -232,13 +256,16 @@ jobs:
     name: Clean Package Install
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-package-install
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     needs: [changeset-check]
     if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.changeset-check.result == 'success') }}
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -253,6 +280,9 @@ jobs:
         env:
           TARBALL: ${{ github.workspace }}/js/${{ steps.pack.outputs.tarball }}
         run: |
+          # `bun add | tee` reports tee's exit status without pipefail, so a
+          # failed install used to leave this job green.
+          set -o pipefail
           CONSUMER_DIR=$(mktemp -d)
           cd "$CONSUMER_DIR"
           bun add "$TARBALL" 2>&1 | tee install.log
@@ -271,7 +301,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -290,7 +320,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: bash ../scripts/run-with-budget-warning.sh 300 "Release dependency install" npm install --legacy-peer-deps
         working-directory: js
 
       - name: Update npm for OIDC trusted publishing
@@ -302,7 +332,11 @@ jobs:
           # Count changeset files (excluding README.md and config.json)
           CHANGESET_COUNT=$(find js/.changeset -name "*.md" ! -name "README.md" | wc -l)
           echo "Found $CHANGESET_COUNT changeset file(s)"
-          echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          if [ "$CHANGESET_COUNT" -gt 0 ]; then
+            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Version packages and commit to main
         if: steps.check_changesets.outputs.has_changesets == 'true'
@@ -313,7 +347,7 @@ jobs:
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish
-        run: node scripts/publish-to-npm.mjs --should-pull
+        run: bash scripts/run-with-budget-warning.sh 600 "npm publish" node scripts/publish-to-npm.mjs --should-pull
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
@@ -336,7 +370,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
-      group: release-main
+      group: main-writer-${{ github.repository }}-main
       cancel-in-progress: false
     # Permissions required for npm OIDC trusted publishing
     permissions:
@@ -355,7 +389,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: bash ../scripts/run-with-budget-warning.sh 300 "Release dependency install" npm install --legacy-peer-deps
         working-directory: js
 
       - name: Update npm for OIDC trusted publishing
@@ -372,7 +406,7 @@ jobs:
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish
-        run: node scripts/publish-to-npm.mjs
+        run: bash scripts/run-with-budget-warning.sh 600 "npm publish" node scripts/publish-to-npm.mjs
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
@@ -392,6 +426,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changeset-pr'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: main-writer-${{ github.repository }}-main
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
@@ -416,14 +453,17 @@ jobs:
         run: node scripts/create-manual-changeset.mjs
 
       - name: Format changeset with Prettier
+        # No `|| true`: the changeset this job just generated must be
+        # formattable, and swallowing the failure produced a pull request that
+        # then failed the format check in its own pipeline run.
+        working-directory: js
         run: |
           # Run Prettier on the changeset file to ensure it matches project style
-          cd js && npx prettier --write ".changeset/*.md" || true
-
+          npx prettier --write ".changeset/*.md"
           echo "Formatted changeset files"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore: add changeset for manual ${{ github.event.inputs.bump_type }} release'
@@ -445,3 +485,35 @@ jobs:
             2. Merge this PR to main
             3. The automated release workflow will create a version PR
             4. Merge the version PR to publish to npm and create a GitHub release
+
+  # GitHub reports a job killed by timeout-minutes as cancelled rather than
+  # failed, and every gate above is written as `result == 'success'`, so a
+  # cancelled check silently skips the release and leaves the run green.
+  # Observing every job here makes that visible.
+  pipeline-status:
+    name: Pipeline Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-pipeline-status
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    if: always()
+    needs:
+      - changeset-check
+      - lint
+      - test
+      - verbose-integration
+      - package-install
+      - release
+      - instant-release
+      - changeset-pr
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Fail the run when a required job was cancelled or failed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          IS_MAIN: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        run: bash scripts/check-pipeline-status.sh

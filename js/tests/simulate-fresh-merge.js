@@ -37,20 +37,32 @@ function runScript(cwd) {
   });
 }
 
+/**
+ * The fixtures below are written with LF endings. Git for Windows defaults to
+ * `core.autocrlf=true`, which makes every commit here print "LF will be
+ * replaced by CRLF" - six warnings per run on the windows-latest matrix leg
+ * that say nothing about the code under test. Disable the conversion in the
+ * throwaway repositories instead of teaching reviewers to ignore the noise.
+ * @param {string} cwd
+ */
+function configureRepository(cwd) {
+  git(cwd, 'config', 'user.email', 'test@example.com');
+  git(cwd, 'config', 'user.name', 'Test');
+  git(cwd, 'config', 'core.autocrlf', 'false');
+}
+
 beforeEach(() => {
   workspace = mkdtempSync(join(tmpdir(), 'fresh-merge-'));
 
   // `origin` is a real repository on disk so `git fetch origin main` works.
   const origin = join(workspace, 'origin');
   execFileSync('git', ['init', '-q', '-b', 'main', origin]);
-  git(origin, 'config', 'user.email', 'test@example.com');
-  git(origin, 'config', 'user.name', 'Test');
+  configureRepository(origin);
   commit(origin, 'base.txt', 'one\n', 'base');
 
   const clone = join(workspace, 'clone');
   execFileSync('git', ['clone', '-q', origin, clone]);
-  git(clone, 'config', 'user.email', 'test@example.com');
-  git(clone, 'config', 'user.name', 'Test');
+  configureRepository(clone);
   git(clone, 'checkout', '-q', '-b', 'feature');
 });
 
