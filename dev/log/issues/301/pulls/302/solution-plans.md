@@ -90,9 +90,9 @@ with the adoption plan.
 
 | Repository | What to report | Status |
 | --- | --- | --- |
-| `link-foundation/use-m` | The Node 23+ CommonJS namespace interop bug, with the reproduction from [root-causes.md](root-causes.md#rc1) and the normalization fix. | Existing issue #72 - corroborating comment pending. |
-| `link-foundation/js-ai-driven-development-pipeline-template` | The same pattern lives in its `setup-npm.mjs` and seven sibling scripts (`const { $ } = await use('command-stream')`), so the template will fail the same way on a Node 24 runner. Report must carry the reproduction, the workaround and the `use-module.mjs` shape. | Pending. |
-| `link-foundation/rust-ai-driven-development-pipeline-template` | Not affected: its scripts are `rust-script`, not `use-m`. | No report needed. |
+| `link-foundation/use-m` | The Node 23+ CommonJS namespace interop bug, with the reproduction from [root-causes.md](root-causes.md#rc1) and the normalization fix. | Reported: comment on [use-m#72](https://github.com/link-foundation/use-m/issues/72#issuecomment-5505355202) with a fresh Node 24.20.0 reproduction, the downstream incident and the `'module.exports'` metadata-key fix. |
+| `link-foundation/js-ai-driven-development-pipeline-template` | The same pattern lives in its `setup-npm.mjs` and seven sibling scripts (`const { $ } = await use('command-stream')`), so the template will fail the same way on a Node 24 runner. Report must carry the reproduction, the workaround and the `use-module.mjs` shape. | Reported: [js-template#151](https://github.com/link-foundation/js-ai-driven-development-pipeline-template/issues/151). |
+| `link-foundation/rust-ai-driven-development-pipeline-template` | Not affected by the `use-m` bug: its scripts are `rust-script`. It does deviate from best-practice §10 though - all four writer jobs in `release.yml` use a workflow-scoped `${{ github.workflow }}-main-write` group, so `main` writers from another workflow are not serialized (the JS template already uses `main-writer-${{ github.repository }}-main`). | Reported: [rust-template#145](https://github.com/link-foundation/rust-ai-driven-development-pipeline-template/issues/145). |
 
 ## R7 — CI-CD-BEST-PRACTICES
 

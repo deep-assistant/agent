@@ -58,9 +58,15 @@ deliberately skipped.
 
 ## R6 — "If the same issue is found in a template, report the issue in the templates too"
 
-`link-foundation/js-ai-driven-development-pipeline-template` carries the same
-use-m/Node-24 pattern in `setup-npm.mjs` and seven sibling scripts. Report
-pending; see [solution-plans.md](solution-plans.md#r6-upstream-reports).
+Three reports filed, each with a reproduction, a workaround and a code fix:
+
+| Upstream | Report |
+| --- | --- |
+| `link-foundation/use-m` | [comment on #72](https://github.com/link-foundation/use-m/issues/72#issuecomment-5505355202) - fresh Node 24.20.0 reproduction of the CommonJS-namespace bug plus the `'module.exports'` metadata-key fix |
+| `link-foundation/js-ai-driven-development-pipeline-template` | [#151](https://github.com/link-foundation/js-ai-driven-development-pipeline-template/issues/151) - the same `const { $ } = await use('command-stream')` pattern in `setup-npm.mjs` and seven sibling scripts, on `node-version: '24.x'` runners |
+| `link-foundation/rust-ai-driven-development-pipeline-template` | [#145](https://github.com/link-foundation/rust-ai-driven-development-pipeline-template/issues/145) - workflow-scoped `main-write` concurrency group does not serialize `main` writers from another workflow |
+
+See [solution-plans.md](solution-plans.md#r6-upstream-reports).
 
 ## R7 — "Follow the CI/CD best practices collected in hive-mind/docs/CI-CD-BEST-PRACTICES.md"
 
