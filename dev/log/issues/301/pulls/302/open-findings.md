@@ -6,12 +6,20 @@ to rediscover them.
 
 ## OF1 — `npm warn deprecated node-domexception@1.0.0`
 
-Printed twice per `npm install` (`ci-logs/js-cicd-33551125228.log`). The chain
-is `google-auth-library` → `gaxios@7` → `node-fetch@3.3.2` → `fetch-blob` →
-`node-domexception`. Nothing in this repository chooses any of those versions,
-and the only fix is upstream (`node-fetch` 3.4+ drops it). Overriding it would
-mean pinning a transitive dependency of an authentication library for a
-cosmetic warning. Left alone, deliberately.
+Printed twice per `npm install` (`ci-logs/js-cicd-33551125228.log`, and still
+the only `npm warn` left in the green runs on this branch). The chain is
+`google-auth-library` → `gaxios@7` → `node-fetch@3.3.2` → `fetch-blob@3.2.0` →
+`node-domexception@1.0.0`.
+
+There is no version of that chain without it: `node-fetch` latest is 3.3.2, and
+even `fetch-blob@4.0.0` still declares `"node-domexception": "^1.0.0"`
+(verified against the registry). An npm `override` could only swap one
+deprecated package for the same deprecated package, so the warning cannot be
+removed downstream - it needs `fetch-blob` to move to the platform
+`DOMException`, which is tracked upstream in
+[node-fetch/fetch-blob#175](https://github.com/node-fetch/fetch-blob/issues/175)
+("All versions of node-domexception have been deprecated"). No new report filed:
+the existing one is open and describes exactly this. Left alone, deliberately.
 
 ## OF2 — TypeScript is never type-checked
 
