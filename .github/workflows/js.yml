@@ -458,3 +458,32 @@ jobs:
             2. Merge this PR to main
             3. The automated release workflow will create a version PR
             4. Merge the version PR to publish to npm and create a GitHub release
+
+  # GitHub reports a job killed by timeout-minutes as cancelled rather than
+  # failed, and every gate above is written as `result == 'success'`, so a
+  # cancelled check silently skips the release and leaves the run green.
+  # Observing every job here makes that visible.
+  pipeline-status:
+    name: Pipeline Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs:
+      - changeset-check
+      - lint
+      - test
+      - verbose-integration
+      - package-install
+      - release
+      - instant-release
+      - changeset-pr
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Fail the run when a required job was cancelled or failed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          IS_MAIN: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        run: bash scripts/check-pipeline-status.sh

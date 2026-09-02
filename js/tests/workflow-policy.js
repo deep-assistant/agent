@@ -214,6 +214,13 @@ describe('CI timeout policy', () => {
 });
 
 describe('cancellation propagation', () => {
+  /**
+   * The status aggregation job is the one job that must observe a cancelled
+   * run: it exists to report cancellations, so `!cancelled()` would skip it
+   * exactly when it is needed. It runs no build steps of its own.
+   */
+  const ALWAYS_ALLOWED_JOBS = new Set(['pipeline-status']);
+
   // always() still evaluates to true for a cancelled run, so dependent jobs
   // keep running after a cancel. !cancelled() stops the chain.
   // See hive-mind issue #1278.
@@ -222,6 +229,9 @@ describe('cancellation propagation', () => {
 
     for (const { file, body } of workflows) {
       for (const jobId of listJobs(body)) {
+        if (ALWAYS_ALLOWED_JOBS.has(jobId)) {
+          continue;
+        }
         const block = getJobBlock(body, jobId);
         const condition = block.match(/^ {4}if:(.*)$/m)?.[1] ?? '';
         if (condition.includes('always()')) {
@@ -231,6 +241,21 @@ describe('cancellation propagation', () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  // The exemption above is only safe while that job stays a pure observer.
+  test('the status aggregation job only reports the result', () => {
+    for (const { file, body } of workflows) {
+      if (!listJobs(body).includes('pipeline-status')) {
+        continue;
+      }
+      const block = getJobBlock(body, 'pipeline-status');
+      const scripts = listRunScripts(block);
+      expect([file, scripts]).toEqual([
+        file,
+        ['bash scripts/check-pipeline-status.sh'],
+      ]);
+    }
   });
 });
 
