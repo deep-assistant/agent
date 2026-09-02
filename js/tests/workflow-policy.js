@@ -68,6 +68,42 @@ export function getJobBlock(body, jobId) {
 }
 
 /**
+ * Read the `concurrency:` block of a single job.
+ * @param {string} body
+ * @param {string} jobId
+ * @returns {{group: string, cancelInProgress: string|undefined}|undefined}
+ */
+export function getJobConcurrency(body, jobId) {
+  const block = getJobBlock(body, jobId);
+  const group = block.match(/^ {6}group: (.+)$/m);
+  if (!group) {
+    return undefined;
+  }
+  const cancel = block.match(/^ {6}cancel-in-progress: (.+)$/m);
+  return {
+    group: group[1].trim(),
+    cancelInProgress: cancel?.[1].trim(),
+  };
+}
+
+/**
+ * A workflow is protected against overlapping runs when it declares one group
+ * for the whole run, or one group for every job it defines.
+ * @param {string} body
+ * @returns {boolean}
+ */
+export function declaresConcurrency(body) {
+  if (/^concurrency:\s*$/m.test(body)) {
+    return true;
+  }
+  const jobs = listJobs(body);
+  return (
+    jobs.length > 0 &&
+    jobs.every((jobId) => getJobConcurrency(body, jobId) !== undefined)
+  );
+}
+
+/**
  * Read the `permissions:` block declared at the workflow level.
  * Without one, jobs inherit the repository default, which is often
  * read/write-all for the whole GITHUB_TOKEN.
@@ -297,9 +333,14 @@ describe('action pinning', () => {
 });
 
 describe('concurrency control', () => {
+  // Principle 10 of the best-practices document allows two shapes: one group
+  // for the whole workflow, or one group per job. A check-only workflow uses
+  // the per-job shape so an unrelated check is not cancelled together with the
+  // stale one, so requiring the workflow-level block alone reported a
+  // correctly configured workflow as unprotected.
   test('every workflow declares a concurrency group', () => {
     const missing = workflows
-      .filter(({ body }) => !/^concurrency:\s*$/m.test(body))
+      .filter(({ body }) => !declaresConcurrency(body))
       .map(({ file }) => file);
 
     expect(missing).toEqual([]);
@@ -313,6 +354,27 @@ describe('concurrency control', () => {
       .filter(({ body }) => /^ {6}- main\s*$/m.test(body))
       .filter(({ body }) => /^ {2}cancel-in-progress: true\s*$/m.test(body))
       .map(({ file }) => file);
+
+    expect(offenders).toEqual([]);
+  });
+
+  // The same trap one level down: a job-level `cancel-in-progress: true` on a
+  // writer is invisible to the test above. Only a read-only check job, which
+  // the templates name with a `check-` group prefix, may be cancelled.
+  test('only check groups cancel jobs in progress', () => {
+    const offenders = [];
+
+    for (const { file, body } of workflows) {
+      for (const jobId of listJobs(body)) {
+        const concurrency = getJobConcurrency(body, jobId);
+        if (
+          concurrency?.cancelInProgress === 'true' &&
+          !concurrency.group.startsWith('check-')
+        ) {
+          offenders.push(`${file}: ${jobId}`);
+        }
+      }
+    }
 
     expect(offenders).toEqual([]);
   });
