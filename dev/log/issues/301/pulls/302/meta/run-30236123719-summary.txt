@@ -1,0 +1,36 @@
+
+X main JS CI/CD Pipeline · 30236123719
+Triggered via push about 1 month ago
+
+JOBS
+✓ Unit Tests (Bun on windows-latest) in 1m29s (ID 89884160886)
+✓ Verbose HTTP Logging Test in 10s (ID 89884160891)
+✓ Unit Tests (Bun on ubuntu-latest) in 9s (ID 89884160893)
+✓ Unit Tests (Bun on macos-latest) in 13s (ID 89884160897)
+✓ Lint and Format Check in 30s (ID 89884160899)
+✓ Clean Package Install in 12s (ID 89884160904)
+- Create Changeset PR in 0s (ID 89884160974)
+- Instant Release in 0s (ID 89884161097)
+- Check for Changesets in 0s (ID 89884161184)
+X Release in 1m17s (ID 89884339637)
+  ✓ Set up job
+  ✓ Run actions/checkout@v6
+  ✓ Setup Node.js
+  ✓ Install dependencies
+  ✓ Update npm for OIDC trusted publishing
+  ✓ Check for changesets
+  ✓ Version packages and commit to main
+  X Publish to npm
+  - Create GitHub Release
+  - Format GitHub release notes
+  - Post Setup Node.js
+  ✓ Post Run actions/checkout@v6
+  ✓ Complete job
+
+ANNOTATIONS
+X Process completed with exit code 1.
+Release: .github#139
+
+
+To see what failed, try: gh run view 30236123719 --log-failed
+View this run on GitHub: https://github.com/link-assistant/agent/actions/runs/30236123719

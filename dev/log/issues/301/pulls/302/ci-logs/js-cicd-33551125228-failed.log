@@ -1,0 +1,470 @@
+Release	UNKNOWN STEP	﻿2026-09-01T19:44:43.9131159Z Current runner version: '2.337.0'
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9155931Z ##[group]Runner Image Provisioner
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9156819Z Hosted Compute Agent
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9157470Z Version: 20260819.586
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9158158Z Commit: 3cc4a88dfa507ef76119ad1bb3eccc6378bb2b76
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9159094Z Build Date: 2026-08-18T23:20:18Z
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9159823Z Worker ID: {78351e4e-d217-4ed9-b77d-179c12eafeee}
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9160543Z Azure Region: westus3
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9161102Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9162531Z ##[group]Operating System
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9163150Z Ubuntu
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9163666Z 24.04.4
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9164183Z LTS
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9164768Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9165374Z ##[group]Runner Image
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9165977Z Image: ubuntu-24.04
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9166545Z Version: 20260823.283.1
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9167871Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260823.283/images/ubuntu/Ubuntu2404-Readme.md
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9169881Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260823.283
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9170889Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9172219Z ##[group]GITHUB_TOKEN Permissions
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9174620Z Contents: write
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9175247Z Metadata: read
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9175823Z PullRequests: write
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9176392Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9178440Z Secret source: Actions
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9179695Z Prepare workflow directory
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9504506Z Prepare all required actions
+Release	UNKNOWN STEP	2026-09-01T19:44:43.9547359Z Getting action download info
+Release	UNKNOWN STEP	2026-09-01T19:44:44.2777881Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Release	UNKNOWN STEP	2026-09-01T19:44:44.5766078Z Download action repository 'actions/setup-node@v6' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9067044Z Complete job name: Release
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9768463Z ##[group]Run actions/checkout@v6
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9769822Z with:
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9770465Z   fetch-depth: 0
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9771056Z   repository: link-assistant/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9775566Z   token: ***
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9776144Z   ssh-strict: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9776714Z   ssh-user: git
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9777269Z   persist-credentials: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9777877Z   clean: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9778440Z   sparse-checkout-cone-mode: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9779355Z   fetch-tags: false
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9779939Z   show-progress: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9780490Z   lfs: false
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9781032Z   submodules: false
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9781602Z   set-safe-directory: true
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9782248Z   allow-unsafe-pr-checkout: false
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9783116Z env:
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9783604Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9784234Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9784903Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-09-01T19:44:44.9785682Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.0722621Z Syncing repository: link-assistant/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:45.0725336Z ##[group]Getting Git version info
+Release	UNKNOWN STEP	2026-09-01T19:44:45.0726364Z Working directory is '/home/runner/work/agent/agent'
+Release	UNKNOWN STEP	2026-09-01T19:44:45.0728009Z [command]/usr/bin/git version
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3179756Z git version 2.55.0
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3202370Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3219512Z Temporarily overriding HOME='/home/runner/work/_temp/8ec2284f-86c2-48c8-aeb2-6e8821d36550' before making global git config changes
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3223721Z Adding repository directory to the temporary git global config as a safe directory
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3226951Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3272769Z Deleting the contents of '/home/runner/work/agent/agent'
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3276747Z ##[group]Determining repository object format
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3279815Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3282573Z ##[group]Initializing the repository
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3284813Z [command]/usr/bin/git init /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3615407Z Initialized empty Git repository in /home/runner/work/agent/agent/.git/
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3625098Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3827952Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3830885Z ##[group]Disabling automatic garbage collection
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3832881Z [command]/usr/bin/git config --local gc.auto 0
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3924256Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3926440Z ##[group]Setting up auth
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3928014Z Removing SSH command configuration
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3930280Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Release	UNKNOWN STEP	2026-09-01T19:44:45.3959747Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4390880Z Removing HTTP extra header
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4397626Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4431335Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4617374Z Removing includeIf entries pointing to credentials config files
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4625527Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4658123Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4845366Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4880543Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/agent/agent/.git.path /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4908206Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4959513Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:44:45.4995238Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:44:45.5023283Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:45.5025153Z ##[group]Fetching the repository
+Release	UNKNOWN STEP	2026-09-01T19:44:45.5030704Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0856161Z From https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0857972Z  * [new branch]      issue-100-a059c6e915ea -> origin/issue-100-a059c6e915ea
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0859322Z  * [new branch]      issue-102-6e0a44052594 -> origin/issue-102-6e0a44052594
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0860477Z  * [new branch]      issue-104-09ef4d9a60d7 -> origin/issue-104-09ef4d9a60d7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0861583Z  * [new branch]      issue-106-00050382cea1 -> origin/issue-106-00050382cea1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0862794Z  * [new branch]      issue-109-1e6d7f1b4e4d -> origin/issue-109-1e6d7f1b4e4d
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0864067Z  * [new branch]      issue-111-7a5c4ec5b152 -> origin/issue-111-7a5c4ec5b152
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0865063Z  * [new branch]      issue-113-e95eec3e2b2f -> origin/issue-113-e95eec3e2b2f
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0866232Z  * [new branch]      issue-115-6e59e3366a6e -> origin/issue-115-6e59e3366a6e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0867453Z  * [new branch]      issue-117-106178c8d9fa -> origin/issue-117-106178c8d9fa
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0869143Z  * [new branch]      issue-119-e6aa6636334b -> origin/issue-119-e6aa6636334b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0870143Z  * [new branch]      issue-121-9494c525351a -> origin/issue-121-9494c525351a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0871266Z  * [new branch]      issue-123-9d1b5673e203 -> origin/issue-123-9d1b5673e203
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0872344Z  * [new branch]      issue-125-8aa10b01c75e -> origin/issue-125-8aa10b01c75e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0873923Z  * [new branch]      issue-127-8d957d9dd1ee -> origin/issue-127-8d957d9dd1ee
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0875145Z  * [new branch]      issue-129-ecdf8eb6dcc5 -> origin/issue-129-ecdf8eb6dcc5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0876294Z  * [new branch]      issue-131-e0fcd2d405df -> origin/issue-131-e0fcd2d405df
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0877491Z  * [new branch]      issue-133-814817b2de1f -> origin/issue-133-814817b2de1f
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0878615Z  * [new branch]      issue-135-473f8cde60bb -> origin/issue-135-473f8cde60bb
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0879869Z  * [new branch]      issue-136-6f7074e8b3c7 -> origin/issue-136-6f7074e8b3c7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0880946Z  * [new branch]      issue-138-096c6bf88049 -> origin/issue-138-096c6bf88049
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0882107Z  * [new branch]      issue-14-8a0de63c9ac0  -> origin/issue-14-8a0de63c9ac0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0883105Z  * [new branch]      issue-140-a55a9a414169 -> origin/issue-140-a55a9a414169
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0884885Z  * [new branch]      issue-142-7cf30d32b875 -> origin/issue-142-7cf30d32b875
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0885659Z  * [new branch]      issue-144-d48eec4cec33 -> origin/issue-144-d48eec4cec33
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0886407Z  * [new branch]      issue-144-e4442be326dd -> origin/issue-144-e4442be326dd
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0887177Z  * [new branch]      issue-146-635c24f49ba7 -> origin/issue-146-635c24f49ba7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0887900Z  * [new branch]      issue-149-6a0e47e1a5de -> origin/issue-149-6a0e47e1a5de
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0889137Z  * [new branch]      issue-152-e45cb5fdb066 -> origin/issue-152-e45cb5fdb066
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0890430Z  * [new branch]      issue-155-0e29b9a2633a -> origin/issue-155-0e29b9a2633a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0891486Z  * [new branch]      issue-157-4959da89520c -> origin/issue-157-4959da89520c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0892320Z  * [new branch]      issue-157-7ec6d0dc0010 -> origin/issue-157-7ec6d0dc0010
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0893098Z  * [new branch]      issue-159-a7a243b457ff -> origin/issue-159-a7a243b457ff
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0894052Z  * [new branch]      issue-16-02a98d18139d  -> origin/issue-16-02a98d18139d
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0894969Z  * [new branch]      issue-162-9483818809c6 -> origin/issue-162-9483818809c6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0895651Z  * [new branch]      issue-165-4c64eabb9ce2 -> origin/issue-165-4c64eabb9ce2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0896252Z  * [new branch]      issue-167-581f7880949b -> origin/issue-167-581f7880949b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0896843Z  * [new branch]      issue-169-ed3644c88604 -> origin/issue-169-ed3644c88604
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0897511Z  * [new branch]      issue-171-2a4cd573cb33 -> origin/issue-171-2a4cd573cb33
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0898124Z  * [new branch]      issue-173-6bb51d117e4a -> origin/issue-173-6bb51d117e4a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0898674Z  * [new branch]      issue-173-b4f53b84ef84 -> origin/issue-173-b4f53b84ef84
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0899463Z  * [new branch]      issue-175-6f5f5eeae855 -> origin/issue-175-6f5f5eeae855
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0900048Z  * [new branch]      issue-177-c144aea88339 -> origin/issue-177-c144aea88339
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0900765Z  * [new branch]      issue-179-8f4f575e3d2d -> origin/issue-179-8f4f575e3d2d
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0901351Z  * [new branch]      issue-18-ee9e687096a6  -> origin/issue-18-ee9e687096a6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0901902Z  * [new branch]      issue-181-50f61654180d -> origin/issue-181-50f61654180d
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0902499Z  * [new branch]      issue-183-28ac41c8690c -> origin/issue-183-28ac41c8690c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0903121Z  * [new branch]      issue-186-d49a9a9bd545 -> origin/issue-186-d49a9a9bd545
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0903698Z  * [new branch]      issue-187-8d71545972a6 -> origin/issue-187-8d71545972a6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0904508Z  * [new branch]      issue-190-93f1987d1d09 -> origin/issue-190-93f1987d1d09
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0905106Z  * [new branch]      issue-192-e383545650af -> origin/issue-192-e383545650af
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0905671Z  * [new branch]      issue-194-4a5f5b201e8e -> origin/issue-194-4a5f5b201e8e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0906298Z  * [new branch]      issue-196-3e34fa3e426b -> origin/issue-196-3e34fa3e426b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0906880Z  * [new branch]      issue-198-b73d427525e1 -> origin/issue-198-b73d427525e1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0907518Z  * [new branch]      issue-2-f427e195b913   -> origin/issue-2-f427e195b913
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0908241Z  * [new branch]      issue-20-8704d00e8b4e  -> origin/issue-20-8704d00e8b4e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0909081Z  * [new branch]      issue-200-5ffb716ab612 -> origin/issue-200-5ffb716ab612
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0909737Z  * [new branch]      issue-200-b2d1c16c91ce -> origin/issue-200-b2d1c16c91ce
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0910296Z  * [new branch]      issue-200-cd1bc8036381 -> origin/issue-200-cd1bc8036381
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0910915Z  * [new branch]      issue-204-cddda97bf1e7 -> origin/issue-204-cddda97bf1e7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0911519Z  * [new branch]      issue-206-015289ba709a -> origin/issue-206-015289ba709a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0912063Z  * [new branch]      issue-208-1518358cc8fc -> origin/issue-208-1518358cc8fc
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0912663Z  * [new branch]      issue-208-db6310ccb7a1 -> origin/issue-208-db6310ccb7a1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0913229Z  * [new branch]      issue-211-ba03f381fd30 -> origin/issue-211-ba03f381fd30
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0913901Z  * [new branch]      issue-213-e4c047fc16a3 -> origin/issue-213-e4c047fc16a3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0914663Z  * [new branch]      issue-215-103f40049fcf -> origin/issue-215-103f40049fcf
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0915219Z  * [new branch]      issue-217-e1c4f8867b67 -> origin/issue-217-e1c4f8867b67
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0916211Z  * [new branch]      issue-219-04ededf61c77 -> origin/issue-219-04ededf61c77
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0916800Z  * [new branch]      issue-22-3ae2871ca86c  -> origin/issue-22-3ae2871ca86c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0917361Z  * [new branch]      issue-221-1598390b6b62 -> origin/issue-221-1598390b6b62
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0917935Z  * [new branch]      issue-223-ee2ccec2ad75 -> origin/issue-223-ee2ccec2ad75
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0918497Z  * [new branch]      issue-225-744eabdb1971 -> origin/issue-225-744eabdb1971
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0919426Z  * [new branch]      issue-227-aec5b6edc4b3 -> origin/issue-227-aec5b6edc4b3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0920014Z  * [new branch]      issue-230-fb58121277cf -> origin/issue-230-fb58121277cf
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0920796Z  * [new branch]      issue-231-8fb726b5bf3c -> origin/issue-231-8fb726b5bf3c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0921579Z  * [new branch]      issue-232-36180d84d898 -> origin/issue-232-36180d84d898
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0922509Z  * [new branch]      issue-235-349d7af59ce1 -> origin/issue-235-349d7af59ce1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0923377Z  * [new branch]      issue-236-1c5bb792eb51 -> origin/issue-236-1c5bb792eb51
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0924217Z  * [new branch]      issue-239-3952cfb405de -> origin/issue-239-3952cfb405de
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0925042Z  * [new branch]      issue-24-9e1c4ee0ed15  -> origin/issue-24-9e1c4ee0ed15
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0926039Z  * [new branch]      issue-241-d06e060818b2 -> origin/issue-241-d06e060818b2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0926900Z  * [new branch]      issue-242-182bfaaa3790 -> origin/issue-242-182bfaaa3790
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0927932Z  * [new branch]      issue-245-a2b2836a8af3 -> origin/issue-245-a2b2836a8af3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0929000Z  * [new branch]      issue-247-f9c2488a0da2 -> origin/issue-247-f9c2488a0da2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0929954Z  * [new branch]      issue-249-a017ff30d69a -> origin/issue-249-a017ff30d69a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0931001Z  * [new branch]      issue-251-7e9e7b39eeba -> origin/issue-251-7e9e7b39eeba
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0931901Z  * [new branch]      issue-253-2cc259d4dbc8 -> origin/issue-253-2cc259d4dbc8
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0932824Z  * [new branch]      issue-255-a04aa1055933 -> origin/issue-255-a04aa1055933
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0934092Z  * [new branch]      issue-257-664495cf8b36 -> origin/issue-257-664495cf8b36
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0934967Z  * [new branch]      issue-259-c0df50994403 -> origin/issue-259-c0df50994403
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0935835Z  * [new branch]      issue-26-1a4b69adfb64  -> origin/issue-26-1a4b69adfb64
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0936777Z  * [new branch]      issue-261-71e2fe0bd25b -> origin/issue-261-71e2fe0bd25b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0937636Z  * [new branch]      issue-261-72c724284fb2 -> origin/issue-261-72c724284fb2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0938552Z  * [new branch]      issue-264-e18289bec3c3 -> origin/issue-264-e18289bec3c3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0940011Z  * [new branch]      issue-266-47e831e15534 -> origin/issue-266-47e831e15534
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0940959Z  * [new branch]      issue-268-60db55a2b7be -> origin/issue-268-60db55a2b7be
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0941805Z  * [new branch]      issue-270-377e5a73eb84 -> origin/issue-270-377e5a73eb84
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0942423Z  * [new branch]      issue-271-3f282f6e5862 -> origin/issue-271-3f282f6e5862
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0943012Z  * [new branch]      issue-273-d5676a1f4939 -> origin/issue-273-d5676a1f4939
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0943588Z  * [new branch]      issue-275-0cfd401f04e4 -> origin/issue-275-0cfd401f04e4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0944207Z  * [new branch]      issue-279-ae8e3ffcdb93 -> origin/issue-279-ae8e3ffcdb93
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0944843Z  * [new branch]      issue-28-227b62c91030  -> origin/issue-28-227b62c91030
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0945420Z  * [new branch]      issue-280-1deba9817acd -> origin/issue-280-1deba9817acd
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0946302Z  * [new branch]      issue-281-8d4563b818c2 -> origin/issue-281-8d4563b818c2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0947095Z  * [new branch]      issue-285-531ca23a5284 -> origin/issue-285-531ca23a5284
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0947961Z  * [new branch]      issue-287-aa65665cb2fd -> origin/issue-287-aa65665cb2fd
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0949279Z  * [new branch]      issue-289-73f6875dc4ca -> origin/issue-289-73f6875dc4ca
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0949895Z  * [new branch]      issue-290-e19ae603adc8 -> origin/issue-290-e19ae603adc8
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0950550Z  * [new branch]      issue-293-90fd693afed4 -> origin/issue-293-90fd693afed4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0951126Z  * [new branch]      issue-295-bd196360809e -> origin/issue-295-bd196360809e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0951754Z  * [new branch]      issue-297-fc49272615ad -> origin/issue-297-fc49272615ad
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0952326Z  * [new branch]      issue-298-563f08b7679d -> origin/issue-298-563f08b7679d
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0952882Z  * [new branch]      issue-30-8c53504315c4  -> origin/issue-30-8c53504315c4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0953549Z  * [new branch]      issue-32-693cfcfdd6d5  -> origin/issue-32-693cfcfdd6d5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0954117Z  * [new branch]      issue-34-a5a973ebd576  -> origin/issue-34-a5a973ebd576
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0954985Z  * [new branch]      issue-36-33c80c585287  -> origin/issue-36-33c80c585287
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0955830Z  * [new branch]      issue-38-d6620330d024  -> origin/issue-38-d6620330d024
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0956689Z  * [new branch]      issue-39-481b45eeff2b  -> origin/issue-39-481b45eeff2b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0957500Z  * [new branch]      issue-41-9e36c91cba9a  -> origin/issue-41-9e36c91cba9a
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0958282Z  * [new branch]      issue-43-1d50271986ab  -> origin/issue-43-1d50271986ab
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0959382Z  * [new branch]      issue-45-a036d9c72e61  -> origin/issue-45-a036d9c72e61
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0960308Z  * [new branch]      issue-47-b7704cc6b9a4  -> origin/issue-47-b7704cc6b9a4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0961304Z  * [new branch]      issue-49-bef878bb5d38  -> origin/issue-49-bef878bb5d38
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0962213Z  * [new branch]      issue-51-bf685c43c881  -> origin/issue-51-bf685c43c881
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0963411Z  * [new branch]      issue-53-f9aa867296d4  -> origin/issue-53-f9aa867296d4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0964386Z  * [new branch]      issue-54-54fd1e88bb01  -> origin/issue-54-54fd1e88bb01
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0965193Z  * [new branch]      issue-58-bc11cbdc23dd  -> origin/issue-58-bc11cbdc23dd
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0967108Z  * [new branch]      issue-6-097eb11195ee   -> origin/issue-6-097eb11195ee
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0968109Z  * [new branch]      issue-60-e248fa950850  -> origin/issue-60-e248fa950850
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0969207Z  * [new branch]      issue-61-e7041ade0469  -> origin/issue-61-e7041ade0469
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0970272Z  * [new branch]      issue-62-c8dd711e089c  -> origin/issue-62-c8dd711e089c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0971336Z  * [new branch]      issue-66-4b5b645ed022  -> origin/issue-66-4b5b645ed022
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0972195Z  * [new branch]      issue-68-c0a8954ce69f  -> origin/issue-68-c0a8954ce69f
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0973084Z  * [new branch]      issue-7-8850c3e4bc8b   -> origin/issue-7-8850c3e4bc8b
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0974435Z  * [new branch]      issue-70-1e5f73ed6b3c  -> origin/issue-70-1e5f73ed6b3c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0975341Z  * [new branch]      issue-72-6975e4e75bc7  -> origin/issue-72-6975e4e75bc7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0975967Z  * [new branch]      issue-76-fe9d73dc3365  -> origin/issue-76-fe9d73dc3365
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0976663Z  * [new branch]      issue-77-677ebcec7a83  -> origin/issue-77-677ebcec7a83
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0977580Z  * [new branch]      issue-78-06a95192a461  -> origin/issue-78-06a95192a461
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0979080Z  * [new branch]      issue-8-62be6460b721   -> origin/issue-8-62be6460b721
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0979865Z  * [new branch]      issue-81-d58ba5a0ef88  -> origin/issue-81-d58ba5a0ef88
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0980613Z  * [new branch]      issue-82-506d1d545d4e  -> origin/issue-82-506d1d545d4e
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0981346Z  * [new branch]      issue-84-bb28b273e804  -> origin/issue-84-bb28b273e804
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0982189Z  * [new branch]      issue-86-cadafe19d775  -> origin/issue-86-cadafe19d775
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0983268Z  * [new branch]      issue-88-49422a8421a1  -> origin/issue-88-49422a8421a1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0984087Z  * [new branch]      issue-89-9a1b6226b579  -> origin/issue-89-9a1b6226b579
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0984927Z  * [new branch]      issue-9-17ad0ffde65c   -> origin/issue-9-17ad0ffde65c
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0985744Z  * [new branch]      issue-93-40e3ae1a14d3  -> origin/issue-93-40e3ae1a14d3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0986704Z  * [new branch]      issue-96-109dff6454e6  -> origin/issue-96-109dff6454e6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0987491Z  * [new branch]      main                   -> origin/main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0988152Z  * [new tag]         js-v0.10.0             -> js-v0.10.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0989168Z  * [new tag]         js-v0.10.1             -> js-v0.10.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0990102Z  * [new tag]         js-v0.11.0             -> js-v0.11.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0990869Z  * [new tag]         js-v0.12.0             -> js-v0.12.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0991548Z  * [new tag]         js-v0.12.1             -> js-v0.12.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0992190Z  * [new tag]         js-v0.12.3             -> js-v0.12.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0993015Z  * [new tag]         js-v0.13.0             -> js-v0.13.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0993642Z  * [new tag]         js-v0.13.1             -> js-v0.13.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0994288Z  * [new tag]         js-v0.13.2             -> js-v0.13.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0994937Z  * [new tag]         js-v0.13.4             -> js-v0.13.4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0995515Z  * [new tag]         js-v0.13.5             -> js-v0.13.5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0996396Z  * [new tag]         js-v0.14.0             -> js-v0.14.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0997074Z  * [new tag]         js-v0.16.0             -> js-v0.16.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0997849Z  * [new tag]         js-v0.16.1             -> js-v0.16.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0998461Z  * [new tag]         js-v0.16.10            -> js-v0.16.10
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0999323Z  * [new tag]         js-v0.16.11            -> js-v0.16.11
+Release	UNKNOWN STEP	2026-09-01T19:44:48.0999968Z  * [new tag]         js-v0.16.12            -> js-v0.16.12
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1000444Z  * [new tag]         js-v0.16.13            -> js-v0.16.13
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1000904Z  * [new tag]         js-v0.16.14            -> js-v0.16.14
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1001615Z  * [new tag]         js-v0.16.16            -> js-v0.16.16
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1002068Z  * [new tag]         js-v0.16.17            -> js-v0.16.17
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1002618Z  * [new tag]         js-v0.16.18            -> js-v0.16.18
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1003097Z  * [new tag]         js-v0.16.2             -> js-v0.16.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1003568Z  * [new tag]         js-v0.16.3             -> js-v0.16.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1004024Z  * [new tag]         js-v0.16.4             -> js-v0.16.4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1004529Z  * [new tag]         js-v0.16.5             -> js-v0.16.5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1005033Z  * [new tag]         js-v0.16.7             -> js-v0.16.7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1005475Z  * [new tag]         js-v0.16.8             -> js-v0.16.8
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1005968Z  * [new tag]         js-v0.16.9             -> js-v0.16.9
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1006445Z  * [new tag]         js-v0.17.0             -> js-v0.17.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1007018Z  * [new tag]         js-v0.18.0             -> js-v0.18.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1007493Z  * [new tag]         js-v0.18.1             -> js-v0.18.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1007945Z  * [new tag]         js-v0.18.2             -> js-v0.18.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1008413Z  * [new tag]         js-v0.18.3             -> js-v0.18.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1009371Z  * [new tag]         js-v0.19.0             -> js-v0.19.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1010095Z  * [new tag]         js-v0.19.2             -> js-v0.19.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1010797Z  * [new tag]         js-v0.20.0             -> js-v0.20.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1011458Z  * [new tag]         js-v0.20.2             -> js-v0.20.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1012062Z  * [new tag]         js-v0.21.0             -> js-v0.21.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1012691Z  * [new tag]         js-v0.22.0             -> js-v0.22.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1013369Z  * [new tag]         js-v0.22.1             -> js-v0.22.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1014064Z  * [new tag]         js-v0.22.10            -> js-v0.22.10
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1014609Z  * [new tag]         js-v0.22.2             -> js-v0.22.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1015148Z  * [new tag]         js-v0.22.3             -> js-v0.22.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1015639Z  * [new tag]         js-v0.22.4             -> js-v0.22.4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1016258Z  * [new tag]         js-v0.22.5             -> js-v0.22.5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1016767Z  * [new tag]         js-v0.22.6             -> js-v0.22.6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1017256Z  * [new tag]         js-v0.22.7             -> js-v0.22.7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1017751Z  * [new tag]         js-v0.22.8             -> js-v0.22.8
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1018232Z  * [new tag]         js-v0.22.9             -> js-v0.22.9
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1019083Z  * [new tag]         js-v0.23.0             -> js-v0.23.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1019571Z  * [new tag]         js-v0.24.0             -> js-v0.24.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1020203Z  * [new tag]         js-v0.24.1             -> js-v0.24.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1021056Z  * [new tag]         js-v0.24.2             -> js-v0.24.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1021610Z  * [new tag]         js-v0.24.3             -> js-v0.24.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1022073Z  * [new tag]         js-v0.25.0             -> js-v0.25.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1022565Z  * [new tag]         js-v0.25.5             -> js-v0.25.5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1023065Z  * [new tag]         js-v0.25.6             -> js-v0.25.6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1023562Z  * [new tag]         js-v0.25.7             -> js-v0.25.7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1024047Z  * [new tag]         js-v0.25.8             -> js-v0.25.8
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1024563Z  * [new tag]         js-v0.26.0             -> js-v0.26.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1025064Z  * [new tag]         js-v0.8.0              -> js-v0.8.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1025603Z  * [new tag]         js-v0.8.1              -> js-v0.8.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1026079Z  * [new tag]         js-v0.8.10             -> js-v0.8.10
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1026670Z  * [new tag]         js-v0.8.11             -> js-v0.8.11
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1027148Z  * [new tag]         js-v0.8.13             -> js-v0.8.13
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1027692Z  * [new tag]         js-v0.8.14             -> js-v0.8.14
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1028239Z  * [new tag]         js-v0.8.15             -> js-v0.8.15
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1028708Z  * [new tag]         js-v0.8.16             -> js-v0.8.16
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1029445Z  * [new tag]         js-v0.8.17             -> js-v0.8.17
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1030008Z  * [new tag]         js-v0.8.18             -> js-v0.8.18
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1030479Z  * [new tag]         js-v0.8.19             -> js-v0.8.19
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1030996Z  * [new tag]         js-v0.8.2              -> js-v0.8.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1031467Z  * [new tag]         js-v0.8.20             -> js-v0.8.20
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1031944Z  * [new tag]         js-v0.8.21             -> js-v0.8.21
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1032499Z  * [new tag]         js-v0.8.22             -> js-v0.8.22
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1032985Z  * [new tag]         js-v0.8.3              -> js-v0.8.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1033510Z  * [new tag]         js-v0.8.4              -> js-v0.8.4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1034011Z  * [new tag]         js-v0.8.5              -> js-v0.8.5
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1034464Z  * [new tag]         js-v0.8.6              -> js-v0.8.6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1034965Z  * [new tag]         js-v0.8.7              -> js-v0.8.7
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1035472Z  * [new tag]         js-v0.8.9              -> js-v0.8.9
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1035981Z  * [new tag]         js-v0.9.0              -> js-v0.9.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1036465Z  * [new tag]         rust-v0.10.0           -> rust-v0.10.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1036951Z  * [new tag]         rust-v0.8.0            -> rust-v0.8.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1037467Z  * [new tag]         rust-v0.9.0            -> rust-v0.9.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1037954Z  * [new tag]         rust-v0.9.1            -> rust-v0.9.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1038454Z  * [new tag]         rust-v0.9.2            -> rust-v0.9.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1039188Z  * [new tag]         v0.0.10                -> v0.0.10
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1039765Z  * [new tag]         v0.0.11                -> v0.0.11
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1040258Z  * [new tag]         v0.0.12                -> v0.0.12
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1040780Z  * [new tag]         v0.0.13                -> v0.0.13
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1041224Z  * [new tag]         v0.0.14                -> v0.0.14
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1041675Z  * [new tag]         v0.0.15                -> v0.0.15
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1042116Z  * [new tag]         v0.0.16                -> v0.0.16
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1042600Z  * [new tag]         v0.0.17                -> v0.0.17
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1043039Z  * [new tag]         v0.1.0                 -> v0.1.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1043549Z  * [new tag]         v0.1.1                 -> v0.1.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1044130Z  * [new tag]         v0.1.2                 -> v0.1.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1044566Z  * [new tag]         v0.1.3                 -> v0.1.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1045026Z  * [new tag]         v0.1.4                 -> v0.1.4
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1045492Z  * [new tag]         v0.2.0                 -> v0.2.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1045934Z  * [new tag]         v0.2.1                 -> v0.2.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1046586Z  * [new tag]         v0.3.0                 -> v0.3.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1047129Z  * [new tag]         v0.3.1                 -> v0.3.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1047627Z  * [new tag]         v0.4.0                 -> v0.4.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1048088Z  * [new tag]         v0.5.0                 -> v0.5.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1048520Z  * [new tag]         v0.5.1                 -> v0.5.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1049178Z  * [new tag]         v0.5.2                 -> v0.5.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1049809Z  * [new tag]         v0.5.3                 -> v0.5.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1050266Z  * [new tag]         v0.6.0                 -> v0.6.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1050794Z  * [new tag]         v0.6.1                 -> v0.6.1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1051250Z  * [new tag]         v0.6.2                 -> v0.6.2
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1051788Z  * [new tag]         v0.6.3                 -> v0.6.3
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1052292Z  * [new tag]         v0.7.0                 -> v0.7.0
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1053938Z [command]/usr/bin/git branch --list --remote origin/main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1054386Z   origin/main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1055285Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1055781Z f915209cf1d1e83a1db14e8c1b5b1bb6a4871a05
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1056878Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1057645Z ##[group]Determining the checkout info
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1058228Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:48.1058748Z [command]/usr/bin/git sparse-checkout disable
+Release	UNKNOWN STEP	2026-09-01T19:44:48.2186874Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Release	UNKNOWN STEP	2026-09-01T19:44:48.2800493Z ##[group]Checking out the ref
+Release	UNKNOWN STEP	2026-09-01T19:44:48.2805044Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.5993941Z Reset branch 'main'
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6168203Z branch 'main' set up to track 'origin/main'.
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6180258Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6353905Z [command]/usr/bin/git log -1 --format=%H
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6380349Z f915209cf1d1e83a1db14e8c1b5b1bb6a4871a05
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6638876Z ##[group]Run actions/setup-node@v6
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6639275Z with:
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6639613Z   node-version: 24.x
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6639967Z   registry-url: https://registry.npmjs.org
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6640330Z   check-latest: false
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6642520Z   token: ***
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6642909Z   package-manager-cache: true
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6643249Z env:
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6643565Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6643878Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6644204Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-09-01T19:44:48.6644586Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:48.8760639Z Found in cache @ /opt/hostedtoolcache/node/24.19.0/x64
+Release	UNKNOWN STEP	2026-09-01T19:44:48.8763102Z ##[group]Environment details
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2268115Z node: v24.19.0
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2268960Z npm: 11.17.0
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2269293Z yarn: 1.22.22
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2270582Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2384227Z ##[group]Run npm install --legacy-peer-deps
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2384745Z ^[[36;1mnpm install --legacy-peer-deps^[[0m
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2422799Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2423142Z env:
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2423484Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2423805Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2424295Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2424667Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2425096Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-09-01T19:44:52.2425456Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:45:02.4528193Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+Release	UNKNOWN STEP	2026-09-01T19:45:14.2257446Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.2259288Z > @link-assistant/agent@0.26.0 prepare
+Release	UNKNOWN STEP	2026-09-01T19:45:14.2261323Z > cd .. && husky || true
+Release	UNKNOWN STEP	2026-09-01T19:45:14.2261808Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.3235210Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.3236545Z added 738 packages, and audited 739 packages in 22s
+Release	UNKNOWN STEP	2026-09-01T19:45:14.3237298Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.3237612Z 149 packages are looking for funding
+Release	UNKNOWN STEP	2026-09-01T19:45:14.3238232Z   run `npm fund` for details
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4384183Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4385563Z 53 vulnerabilities (16 low, 25 moderate, 12 high)
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4386184Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4386613Z To address issues that do not require attention, run:
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4387197Z   npm audit fix
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4387503Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4387931Z To address all issues (including breaking changes), run:
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4388606Z   npm audit fix --force
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4388946Z 
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4389249Z Run `npm audit` for details.
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4398106Z npm warn allow-scripts 2 packages have install scripts not yet covered by allowScripts:
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4399543Z npm warn allow-scripts   @parcel/watcher@2.5.1 (install: node scripts/build-from-source.js)
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4400697Z npm warn allow-scripts   tree-sitter-bash@0.25.1 (install: node-gyp-build)
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4401753Z npm warn allow-scripts
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4402822Z npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4890890Z ##[group]Run node scripts/setup-npm.mjs
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4891439Z ^[[36;1mnode scripts/setup-npm.mjs^[[0m
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4921958Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4922367Z env:
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4922777Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4923182Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4923671Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4924195Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4924781Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-09-01T19:45:14.4925342Z ##[endgroup]
+Release	UNKNOWN STEP	2026-09-01T19:45:16.4504584Z Error updating npm: $ is not a function
+Release	UNKNOWN STEP	2026-09-01T19:45:16.4552615Z ##[error]Process completed with exit code 1.
+Release	UNKNOWN STEP	2026-09-01T19:45:16.4711896Z Post job cleanup.
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5467933Z [command]/usr/bin/git version
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5502806Z git version 2.55.0
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5535889Z Temporarily overriding HOME='/home/runner/work/_temp/c6f676cd-03e6-478a-b5d0-0c53e4ba9d16' before making global git config changes
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5537252Z Adding repository directory to the temporary git global config as a safe directory
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5540677Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5570479Z Removing SSH command configuration
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5574919Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5610050Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5875555Z Removing HTTP extra header
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5879653Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Release	UNKNOWN STEP	2026-09-01T19:45:16.5907681Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6083642Z Removing includeIf entries pointing to credentials config files
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6089883Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6117022Z includeif.gitdir:/home/runner/work/agent/agent/.git.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6118269Z includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6119096Z includeif.gitdir:/github/workspace/.git.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6119743Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6130132Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/agent/agent/.git.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6147615Z /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6158038Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/agent/agent/.git.path /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6210404Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6233669Z /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6244554Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6276639Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6297645Z /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6306006Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6337789Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6360009Z /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6368694Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6404822Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6584838Z Removing credentials config '/home/runner/work/_temp/git-credentials-6ecce403-9c29-4c78-ba90-cfe3e77ea088.config'
+Release	UNKNOWN STEP	2026-09-01T19:45:16.6727062Z Cleaning up orphan processes

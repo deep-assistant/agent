@@ -1,0 +1,654 @@
+Release	UNKNOWN STEP	﻿2026-08-11T06:58:33.2747135Z Current runner version: '2.336.0'
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2773735Z ##[group]Runner Image Provisioner
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2774649Z Hosted Compute Agent
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2775269Z Version: 20260707.563
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2776135Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2776950Z Build Date: 2026-07-07T19:33:50Z
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2777612Z Worker ID: {3359360d-7a7a-4bcf-9eb6-c9ee5d5b6dda}
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2778308Z Azure Region: westus2
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2778931Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2780478Z ##[group]Operating System
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2781212Z Ubuntu
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2781746Z 24.04.4
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2782240Z LTS
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2782779Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2783317Z ##[group]Runner Image
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2783890Z Image: ubuntu-24.04
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2784530Z Version: 20260720.247.2
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2786258Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260720.247/images/ubuntu/Ubuntu2404-Readme.md
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2787901Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260720.247
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2788848Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2790168Z ##[group]GITHUB_TOKEN Permissions
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2792109Z Contents: write
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2792818Z Metadata: read
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2793382Z PullRequests: write
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2794012Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2796677Z Secret source: Actions
+Release	UNKNOWN STEP	2026-08-11T06:58:33.2797707Z Prepare workflow directory
+Release	UNKNOWN STEP	2026-08-11T06:58:33.3242936Z Prepare all required actions
+Release	UNKNOWN STEP	2026-08-11T06:58:33.3316962Z Getting action download info
+Release	UNKNOWN STEP	2026-08-11T06:58:33.6838016Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Release	UNKNOWN STEP	2026-08-11T06:58:34.0173400Z Download action repository 'actions/setup-node@v6' (SHA:249970729cb0ef3589644e2896645e5dc5ba9c38)
+Release	UNKNOWN STEP	2026-08-11T06:58:34.3960005Z Complete job name: Release
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4778881Z ##[group]Run actions/checkout@v6
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4779806Z with:
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4780256Z   fetch-depth: 0
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4780716Z   repository: link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4784435Z   token: ***
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4784860Z   ssh-strict: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4785511Z   ssh-user: git
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4785984Z   persist-credentials: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4786466Z   clean: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4786893Z   sparse-checkout-cone-mode: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4787401Z   fetch-tags: false
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4787825Z   show-progress: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4788258Z   lfs: false
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4788671Z   submodules: false
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4789122Z   set-safe-directory: true
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4789622Z   allow-unsafe-pr-checkout: false
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4790399Z env:
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4790816Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4791309Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4791842Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:58:34.4792345Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5856373Z Syncing repository: link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5859168Z ##[group]Getting Git version info
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5860291Z Working directory is '/home/runner/work/agent/agent'
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5861907Z [command]/usr/bin/git version
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5978806Z git version 2.54.0
+Release	UNKNOWN STEP	2026-08-11T06:58:34.5995897Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6012225Z Temporarily overriding HOME='/home/runner/work/_temp/9218b1c6-715d-467a-a80a-b27365adbc8b' before making global git config changes
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6014533Z Adding repository directory to the temporary git global config as a safe directory
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6020059Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6084139Z Deleting the contents of '/home/runner/work/agent/agent'
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6096998Z ##[group]Determining repository object format
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6098550Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6099345Z ##[group]Initializing the repository
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6100017Z [command]/usr/bin/git init /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6242681Z Initialized empty Git repository in /home/runner/work/agent/agent/.git/
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6254775Z [command]/usr/bin/git remote add origin https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6310163Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6311473Z ##[group]Disabling automatic garbage collection
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6316139Z [command]/usr/bin/git config --local gc.auto 0
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6349489Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6350740Z ##[group]Setting up auth
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6352510Z Removing SSH command configuration
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6359660Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6406702Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6838561Z Removing HTTP extra header
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6845719Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Release	UNKNOWN STEP	2026-08-11T06:58:34.6883394Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7109289Z Removing includeIf entries pointing to credentials config files
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7115971Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7153275Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7389017Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7432350Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/agent/agent/.git.path /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7467561Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7506564Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7542025Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7572853Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7573601Z ##[group]Fetching the repository
+Release	UNKNOWN STEP	2026-08-11T06:58:34.7582104Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1886237Z From https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1888723Z  * [new branch]      issue-100-a059c6e915ea -> origin/issue-100-a059c6e915ea
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1891313Z  * [new branch]      issue-102-6e0a44052594 -> origin/issue-102-6e0a44052594
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1893946Z  * [new branch]      issue-104-09ef4d9a60d7 -> origin/issue-104-09ef4d9a60d7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1897155Z  * [new branch]      issue-106-00050382cea1 -> origin/issue-106-00050382cea1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1899842Z  * [new branch]      issue-109-1e6d7f1b4e4d -> origin/issue-109-1e6d7f1b4e4d
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1902404Z  * [new branch]      issue-111-7a5c4ec5b152 -> origin/issue-111-7a5c4ec5b152
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1904256Z  * [new branch]      issue-113-e95eec3e2b2f -> origin/issue-113-e95eec3e2b2f
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1906546Z  * [new branch]      issue-115-6e59e3366a6e -> origin/issue-115-6e59e3366a6e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1908738Z  * [new branch]      issue-117-106178c8d9fa -> origin/issue-117-106178c8d9fa
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1911103Z  * [new branch]      issue-119-e6aa6636334b -> origin/issue-119-e6aa6636334b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1913203Z  * [new branch]      issue-121-9494c525351a -> origin/issue-121-9494c525351a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1915227Z  * [new branch]      issue-123-9d1b5673e203 -> origin/issue-123-9d1b5673e203
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1917626Z  * [new branch]      issue-125-8aa10b01c75e -> origin/issue-125-8aa10b01c75e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1919668Z  * [new branch]      issue-127-8d957d9dd1ee -> origin/issue-127-8d957d9dd1ee
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1921695Z  * [new branch]      issue-129-ecdf8eb6dcc5 -> origin/issue-129-ecdf8eb6dcc5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1923714Z  * [new branch]      issue-131-e0fcd2d405df -> origin/issue-131-e0fcd2d405df
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1926528Z  * [new branch]      issue-133-814817b2de1f -> origin/issue-133-814817b2de1f
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1928882Z  * [new branch]      issue-135-473f8cde60bb -> origin/issue-135-473f8cde60bb
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1931130Z  * [new branch]      issue-136-6f7074e8b3c7 -> origin/issue-136-6f7074e8b3c7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1933369Z  * [new branch]      issue-138-096c6bf88049 -> origin/issue-138-096c6bf88049
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1935858Z  * [new branch]      issue-14-8a0de63c9ac0  -> origin/issue-14-8a0de63c9ac0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1938152Z  * [new branch]      issue-140-a55a9a414169 -> origin/issue-140-a55a9a414169
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1940420Z  * [new branch]      issue-142-7cf30d32b875 -> origin/issue-142-7cf30d32b875
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1942711Z  * [new branch]      issue-144-d48eec4cec33 -> origin/issue-144-d48eec4cec33
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1944977Z  * [new branch]      issue-144-e4442be326dd -> origin/issue-144-e4442be326dd
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1947572Z  * [new branch]      issue-146-635c24f49ba7 -> origin/issue-146-635c24f49ba7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1949844Z  * [new branch]      issue-149-6a0e47e1a5de -> origin/issue-149-6a0e47e1a5de
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1952381Z  * [new branch]      issue-152-e45cb5fdb066 -> origin/issue-152-e45cb5fdb066
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1954693Z  * [new branch]      issue-155-0e29b9a2633a -> origin/issue-155-0e29b9a2633a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1957250Z  * [new branch]      issue-157-4959da89520c -> origin/issue-157-4959da89520c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1959467Z  * [new branch]      issue-157-7ec6d0dc0010 -> origin/issue-157-7ec6d0dc0010
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1961680Z  * [new branch]      issue-159-a7a243b457ff -> origin/issue-159-a7a243b457ff
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1963869Z  * [new branch]      issue-16-02a98d18139d  -> origin/issue-16-02a98d18139d
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1966365Z  * [new branch]      issue-162-9483818809c6 -> origin/issue-162-9483818809c6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1968599Z  * [new branch]      issue-165-4c64eabb9ce2 -> origin/issue-165-4c64eabb9ce2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1970830Z  * [new branch]      issue-167-581f7880949b -> origin/issue-167-581f7880949b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1973043Z  * [new branch]      issue-169-ed3644c88604 -> origin/issue-169-ed3644c88604
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1975417Z  * [new branch]      issue-171-2a4cd573cb33 -> origin/issue-171-2a4cd573cb33
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1977730Z  * [new branch]      issue-173-6bb51d117e4a -> origin/issue-173-6bb51d117e4a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1979927Z  * [new branch]      issue-173-b4f53b84ef84 -> origin/issue-173-b4f53b84ef84
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1982106Z  * [new branch]      issue-175-6f5f5eeae855 -> origin/issue-175-6f5f5eeae855
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1984275Z  * [new branch]      issue-177-c144aea88339 -> origin/issue-177-c144aea88339
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1986726Z  * [new branch]      issue-179-8f4f575e3d2d -> origin/issue-179-8f4f575e3d2d
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1988867Z  * [new branch]      issue-18-ee9e687096a6  -> origin/issue-18-ee9e687096a6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1990962Z  * [new branch]      issue-181-50f61654180d -> origin/issue-181-50f61654180d
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1993041Z  * [new branch]      issue-183-28ac41c8690c -> origin/issue-183-28ac41c8690c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1995123Z  * [new branch]      issue-186-d49a9a9bd545 -> origin/issue-186-d49a9a9bd545
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1997333Z  * [new branch]      issue-187-8d71545972a6 -> origin/issue-187-8d71545972a6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.1999605Z  * [new branch]      issue-190-93f1987d1d09 -> origin/issue-190-93f1987d1d09
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2001670Z  * [new branch]      issue-192-e383545650af -> origin/issue-192-e383545650af
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2003739Z  * [new branch]      issue-194-4a5f5b201e8e -> origin/issue-194-4a5f5b201e8e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2006067Z  * [new branch]      issue-196-3e34fa3e426b -> origin/issue-196-3e34fa3e426b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2008147Z  * [new branch]      issue-198-b73d427525e1 -> origin/issue-198-b73d427525e1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2010182Z  * [new branch]      issue-2-f427e195b913   -> origin/issue-2-f427e195b913
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2012226Z  * [new branch]      issue-20-8704d00e8b4e  -> origin/issue-20-8704d00e8b4e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2014319Z  * [new branch]      issue-200-5ffb716ab612 -> origin/issue-200-5ffb716ab612
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2016608Z  * [new branch]      issue-200-b2d1c16c91ce -> origin/issue-200-b2d1c16c91ce
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2018742Z  * [new branch]      issue-200-cd1bc8036381 -> origin/issue-200-cd1bc8036381
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2020876Z  * [new branch]      issue-204-cddda97bf1e7 -> origin/issue-204-cddda97bf1e7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2023041Z  * [new branch]      issue-206-015289ba709a -> origin/issue-206-015289ba709a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2025172Z  * [new branch]      issue-208-1518358cc8fc -> origin/issue-208-1518358cc8fc
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2027584Z  * [new branch]      issue-208-db6310ccb7a1 -> origin/issue-208-db6310ccb7a1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2029766Z  * [new branch]      issue-211-ba03f381fd30 -> origin/issue-211-ba03f381fd30
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2031890Z  * [new branch]      issue-213-e4c047fc16a3 -> origin/issue-213-e4c047fc16a3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2034038Z  * [new branch]      issue-215-103f40049fcf -> origin/issue-215-103f40049fcf
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2036409Z  * [new branch]      issue-217-e1c4f8867b67 -> origin/issue-217-e1c4f8867b67
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2038723Z  * [new branch]      issue-219-04ededf61c77 -> origin/issue-219-04ededf61c77
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2040852Z  * [new branch]      issue-22-3ae2871ca86c  -> origin/issue-22-3ae2871ca86c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2043002Z  * [new branch]      issue-221-1598390b6b62 -> origin/issue-221-1598390b6b62
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2045118Z  * [new branch]      issue-223-ee2ccec2ad75 -> origin/issue-223-ee2ccec2ad75
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2047475Z  * [new branch]      issue-225-744eabdb1971 -> origin/issue-225-744eabdb1971
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2049574Z  * [new branch]      issue-227-aec5b6edc4b3 -> origin/issue-227-aec5b6edc4b3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2051674Z  * [new branch]      issue-230-fb58121277cf -> origin/issue-230-fb58121277cf
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2053762Z  * [new branch]      issue-231-8fb726b5bf3c -> origin/issue-231-8fb726b5bf3c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2055971Z  * [new branch]      issue-232-36180d84d898 -> origin/issue-232-36180d84d898
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2058072Z  * [new branch]      issue-235-349d7af59ce1 -> origin/issue-235-349d7af59ce1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2060157Z  * [new branch]      issue-236-1c5bb792eb51 -> origin/issue-236-1c5bb792eb51
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2062255Z  * [new branch]      issue-239-3952cfb405de -> origin/issue-239-3952cfb405de
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2064329Z  * [new branch]      issue-24-9e1c4ee0ed15  -> origin/issue-24-9e1c4ee0ed15
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2066678Z  * [new branch]      issue-241-d06e060818b2 -> origin/issue-241-d06e060818b2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2068806Z  * [new branch]      issue-242-182bfaaa3790 -> origin/issue-242-182bfaaa3790
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2070865Z  * [new branch]      issue-245-a2b2836a8af3 -> origin/issue-245-a2b2836a8af3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2072915Z  * [new branch]      issue-247-f9c2488a0da2 -> origin/issue-247-f9c2488a0da2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2074928Z  * [new branch]      issue-249-a017ff30d69a -> origin/issue-249-a017ff30d69a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2077113Z  * [new branch]      issue-251-7e9e7b39eeba -> origin/issue-251-7e9e7b39eeba
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2079147Z  * [new branch]      issue-253-2cc259d4dbc8 -> origin/issue-253-2cc259d4dbc8
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2081165Z  * [new branch]      issue-255-a04aa1055933 -> origin/issue-255-a04aa1055933
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2083335Z  * [new branch]      issue-257-664495cf8b36 -> origin/issue-257-664495cf8b36
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2085521Z  * [new branch]      issue-259-c0df50994403 -> origin/issue-259-c0df50994403
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2087606Z  * [new branch]      issue-26-1a4b69adfb64  -> origin/issue-26-1a4b69adfb64
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2089636Z  * [new branch]      issue-261-71e2fe0bd25b -> origin/issue-261-71e2fe0bd25b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2091686Z  * [new branch]      issue-261-72c724284fb2 -> origin/issue-261-72c724284fb2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2093747Z  * [new branch]      issue-264-e18289bec3c3 -> origin/issue-264-e18289bec3c3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2095927Z  * [new branch]      issue-266-47e831e15534 -> origin/issue-266-47e831e15534
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2098003Z  * [new branch]      issue-268-60db55a2b7be -> origin/issue-268-60db55a2b7be
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2100074Z  * [new branch]      issue-270-377e5a73eb84 -> origin/issue-270-377e5a73eb84
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2102107Z  * [new branch]      issue-271-3f282f6e5862 -> origin/issue-271-3f282f6e5862
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2104124Z  * [new branch]      issue-273-d5676a1f4939 -> origin/issue-273-d5676a1f4939
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2106412Z  * [new branch]      issue-275-0cfd401f04e4 -> origin/issue-275-0cfd401f04e4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2108484Z  * [new branch]      issue-279-ae8e3ffcdb93 -> origin/issue-279-ae8e3ffcdb93
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2110511Z  * [new branch]      issue-28-227b62c91030  -> origin/issue-28-227b62c91030
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2112529Z  * [new branch]      issue-280-1deba9817acd -> origin/issue-280-1deba9817acd
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2114552Z  * [new branch]      issue-281-8d4563b818c2 -> origin/issue-281-8d4563b818c2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2116882Z  * [new branch]      issue-285-531ca23a5284 -> origin/issue-285-531ca23a5284
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2118910Z  * [new branch]      issue-287-aa65665cb2fd -> origin/issue-287-aa65665cb2fd
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2121086Z  * [new branch]      issue-289-73f6875dc4ca -> origin/issue-289-73f6875dc4ca
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2123140Z  * [new branch]      issue-290-e19ae603adc8 -> origin/issue-290-e19ae603adc8
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2125171Z  * [new branch]      issue-293-90fd693afed4 -> origin/issue-293-90fd693afed4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2127432Z  * [new branch]      issue-295-bd196360809e -> origin/issue-295-bd196360809e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2129410Z  * [new branch]      issue-30-8c53504315c4  -> origin/issue-30-8c53504315c4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2131399Z  * [new branch]      issue-32-693cfcfdd6d5  -> origin/issue-32-693cfcfdd6d5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2133370Z  * [new branch]      issue-34-a5a973ebd576  -> origin/issue-34-a5a973ebd576
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2135478Z  * [new branch]      issue-36-33c80c585287  -> origin/issue-36-33c80c585287
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2137441Z  * [new branch]      issue-38-d6620330d024  -> origin/issue-38-d6620330d024
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2139419Z  * [new branch]      issue-39-481b45eeff2b  -> origin/issue-39-481b45eeff2b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2141385Z  * [new branch]      issue-41-9e36c91cba9a  -> origin/issue-41-9e36c91cba9a
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2143377Z  * [new branch]      issue-43-1d50271986ab  -> origin/issue-43-1d50271986ab
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2145441Z  * [new branch]      issue-45-a036d9c72e61  -> origin/issue-45-a036d9c72e61
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2147415Z  * [new branch]      issue-47-b7704cc6b9a4  -> origin/issue-47-b7704cc6b9a4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2149369Z  * [new branch]      issue-49-bef878bb5d38  -> origin/issue-49-bef878bb5d38
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2151318Z  * [new branch]      issue-51-bf685c43c881  -> origin/issue-51-bf685c43c881
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2153255Z  * [new branch]      issue-53-f9aa867296d4  -> origin/issue-53-f9aa867296d4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2155186Z  * [new branch]      issue-54-54fd1e88bb01  -> origin/issue-54-54fd1e88bb01
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2157436Z  * [new branch]      issue-58-bc11cbdc23dd  -> origin/issue-58-bc11cbdc23dd
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2159405Z  * [new branch]      issue-6-097eb11195ee   -> origin/issue-6-097eb11195ee
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2161338Z  * [new branch]      issue-60-e248fa950850  -> origin/issue-60-e248fa950850
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2163441Z  * [new branch]      issue-61-e7041ade0469  -> origin/issue-61-e7041ade0469
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2165580Z  * [new branch]      issue-62-c8dd711e089c  -> origin/issue-62-c8dd711e089c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2167539Z  * [new branch]      issue-66-4b5b645ed022  -> origin/issue-66-4b5b645ed022
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2169493Z  * [new branch]      issue-68-c0a8954ce69f  -> origin/issue-68-c0a8954ce69f
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2171422Z  * [new branch]      issue-7-8850c3e4bc8b   -> origin/issue-7-8850c3e4bc8b
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2173361Z  * [new branch]      issue-70-1e5f73ed6b3c  -> origin/issue-70-1e5f73ed6b3c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2175414Z  * [new branch]      issue-72-6975e4e75bc7  -> origin/issue-72-6975e4e75bc7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2177355Z  * [new branch]      issue-76-fe9d73dc3365  -> origin/issue-76-fe9d73dc3365
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2179303Z  * [new branch]      issue-77-677ebcec7a83  -> origin/issue-77-677ebcec7a83
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2181214Z  * [new branch]      issue-78-06a95192a461  -> origin/issue-78-06a95192a461
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2183094Z  * [new branch]      issue-8-62be6460b721   -> origin/issue-8-62be6460b721
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2185012Z  * [new branch]      issue-81-d58ba5a0ef88  -> origin/issue-81-d58ba5a0ef88
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2187084Z  * [new branch]      issue-82-506d1d545d4e  -> origin/issue-82-506d1d545d4e
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2189004Z  * [new branch]      issue-84-bb28b273e804  -> origin/issue-84-bb28b273e804
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2190950Z  * [new branch]      issue-86-cadafe19d775  -> origin/issue-86-cadafe19d775
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2192860Z  * [new branch]      issue-88-49422a8421a1  -> origin/issue-88-49422a8421a1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2194763Z  * [new branch]      issue-89-9a1b6226b579  -> origin/issue-89-9a1b6226b579
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2197029Z  * [new branch]      issue-9-17ad0ffde65c   -> origin/issue-9-17ad0ffde65c
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2199114Z  * [new branch]      issue-93-40e3ae1a14d3  -> origin/issue-93-40e3ae1a14d3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2201103Z  * [new branch]      issue-96-109dff6454e6  -> origin/issue-96-109dff6454e6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2202804Z  * [new branch]      main                   -> origin/main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2204255Z  * [new tag]         js-v0.10.0             -> js-v0.10.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2205863Z  * [new tag]         js-v0.10.1             -> js-v0.10.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2207272Z  * [new tag]         js-v0.11.0             -> js-v0.11.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2208666Z  * [new tag]         js-v0.12.0             -> js-v0.12.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2210051Z  * [new tag]         js-v0.12.1             -> js-v0.12.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2211440Z  * [new tag]         js-v0.12.3             -> js-v0.12.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2212824Z  * [new tag]         js-v0.13.0             -> js-v0.13.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2298343Z  * [new tag]         js-v0.13.1             -> js-v0.13.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2300914Z  * [new tag]         js-v0.13.2             -> js-v0.13.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2303244Z  * [new tag]         js-v0.13.4             -> js-v0.13.4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2305880Z  * [new tag]         js-v0.13.5             -> js-v0.13.5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2308202Z  * [new tag]         js-v0.14.0             -> js-v0.14.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2310682Z  * [new tag]         js-v0.16.0             -> js-v0.16.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2313009Z  * [new tag]         js-v0.16.1             -> js-v0.16.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2315536Z  * [new tag]         js-v0.16.10            -> js-v0.16.10
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2317856Z  * [new tag]         js-v0.16.11            -> js-v0.16.11
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2320142Z  * [new tag]         js-v0.16.12            -> js-v0.16.12
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2322424Z  * [new tag]         js-v0.16.13            -> js-v0.16.13
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2324699Z  * [new tag]         js-v0.16.14            -> js-v0.16.14
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2328540Z  * [new tag]         js-v0.16.16            -> js-v0.16.16
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2330859Z  * [new tag]         js-v0.16.17            -> js-v0.16.17
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2333467Z  * [new tag]         js-v0.16.18            -> js-v0.16.18
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2336073Z  * [new tag]         js-v0.16.2             -> js-v0.16.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2338384Z  * [new tag]         js-v0.16.3             -> js-v0.16.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2340783Z  * [new tag]         js-v0.16.4             -> js-v0.16.4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2343294Z  * [new tag]         js-v0.16.5             -> js-v0.16.5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2345771Z  * [new tag]         js-v0.16.7             -> js-v0.16.7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2348083Z  * [new tag]         js-v0.16.8             -> js-v0.16.8
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2350362Z  * [new tag]         js-v0.16.9             -> js-v0.16.9
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2352640Z  * [new tag]         js-v0.17.0             -> js-v0.17.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2354905Z  * [new tag]         js-v0.18.0             -> js-v0.18.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2357475Z  * [new tag]         js-v0.18.1             -> js-v0.18.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2359756Z  * [new tag]         js-v0.18.2             -> js-v0.18.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2362033Z  * [new tag]         js-v0.18.3             -> js-v0.18.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2364300Z  * [new tag]         js-v0.19.0             -> js-v0.19.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2366788Z  * [new tag]         js-v0.19.2             -> js-v0.19.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2369040Z  * [new tag]         js-v0.20.0             -> js-v0.20.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2371293Z  * [new tag]         js-v0.20.2             -> js-v0.20.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2373507Z  * [new tag]         js-v0.21.0             -> js-v0.21.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2376009Z  * [new tag]         js-v0.22.0             -> js-v0.22.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2378269Z  * [new tag]         js-v0.22.1             -> js-v0.22.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2380485Z  * [new tag]         js-v0.22.10            -> js-v0.22.10
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2382659Z  * [new tag]         js-v0.22.2             -> js-v0.22.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2384297Z  * [new tag]         js-v0.22.3             -> js-v0.22.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2386302Z  * [new tag]         js-v0.22.4             -> js-v0.22.4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2388655Z  * [new tag]         js-v0.22.5             -> js-v0.22.5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2390934Z  * [new tag]         js-v0.22.6             -> js-v0.22.6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2393238Z  * [new tag]         js-v0.22.7             -> js-v0.22.7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2395100Z  * [new tag]         js-v0.22.8             -> js-v0.22.8
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2397108Z  * [new tag]         js-v0.22.9             -> js-v0.22.9
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2398826Z  * [new tag]         js-v0.23.0             -> js-v0.23.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2401068Z  * [new tag]         js-v0.24.0             -> js-v0.24.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2403270Z  * [new tag]         js-v0.24.1             -> js-v0.24.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2405685Z  * [new tag]         js-v0.24.2             -> js-v0.24.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2408109Z  * [new tag]         js-v0.24.3             -> js-v0.24.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2410432Z  * [new tag]         js-v0.25.0             -> js-v0.25.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2412693Z  * [new tag]         js-v0.25.5             -> js-v0.25.5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2415006Z  * [new tag]         js-v0.25.6             -> js-v0.25.6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2417569Z  * [new tag]         js-v0.25.7             -> js-v0.25.7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2419904Z  * [new tag]         js-v0.25.8             -> js-v0.25.8
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2422221Z  * [new tag]         js-v0.8.0              -> js-v0.8.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2423976Z  * [new tag]         js-v0.8.1              -> js-v0.8.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2425746Z  * [new tag]         js-v0.8.10             -> js-v0.8.10
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2427668Z  * [new tag]         js-v0.8.11             -> js-v0.8.11
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2429109Z  * [new tag]         js-v0.8.13             -> js-v0.8.13
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2430692Z  * [new tag]         js-v0.8.14             -> js-v0.8.14
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2432899Z  * [new tag]         js-v0.8.15             -> js-v0.8.15
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2434831Z  * [new tag]         js-v0.8.16             -> js-v0.8.16
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2436797Z  * [new tag]         js-v0.8.17             -> js-v0.8.17
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2438398Z  * [new tag]         js-v0.8.18             -> js-v0.8.18
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2439776Z  * [new tag]         js-v0.8.19             -> js-v0.8.19
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2441156Z  * [new tag]         js-v0.8.2              -> js-v0.8.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2442521Z  * [new tag]         js-v0.8.20             -> js-v0.8.20
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2443925Z  * [new tag]         js-v0.8.21             -> js-v0.8.21
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2445546Z  * [new tag]         js-v0.8.22             -> js-v0.8.22
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2446962Z  * [new tag]         js-v0.8.3              -> js-v0.8.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2448324Z  * [new tag]         js-v0.8.4              -> js-v0.8.4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2449690Z  * [new tag]         js-v0.8.5              -> js-v0.8.5
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2451067Z  * [new tag]         js-v0.8.6              -> js-v0.8.6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2452427Z  * [new tag]         js-v0.8.7              -> js-v0.8.7
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2453786Z  * [new tag]         js-v0.8.9              -> js-v0.8.9
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2455162Z  * [new tag]         js-v0.9.0              -> js-v0.9.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2456799Z  * [new tag]         rust-v0.10.0           -> rust-v0.10.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2458223Z  * [new tag]         rust-v0.8.0            -> rust-v0.8.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2459632Z  * [new tag]         rust-v0.9.0            -> rust-v0.9.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2461031Z  * [new tag]         rust-v0.9.1            -> rust-v0.9.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2462431Z  * [new tag]         rust-v0.9.2            -> rust-v0.9.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2463803Z  * [new tag]         v0.0.10                -> v0.0.10
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2465121Z  * [new tag]         v0.0.11                -> v0.0.11
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2466740Z  * [new tag]         v0.0.12                -> v0.0.12
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2468229Z  * [new tag]         v0.0.13                -> v0.0.13
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2469572Z  * [new tag]         v0.0.14                -> v0.0.14
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2470899Z  * [new tag]         v0.0.15                -> v0.0.15
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2472213Z  * [new tag]         v0.0.16                -> v0.0.16
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2473523Z  * [new tag]         v0.0.17                -> v0.0.17
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2474842Z  * [new tag]         v0.1.0                 -> v0.1.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2476422Z  * [new tag]         v0.1.1                 -> v0.1.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2477732Z  * [new tag]         v0.1.2                 -> v0.1.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2479029Z  * [new tag]         v0.1.3                 -> v0.1.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2480334Z  * [new tag]         v0.1.4                 -> v0.1.4
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2481624Z  * [new tag]         v0.2.0                 -> v0.2.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2482934Z  * [new tag]         v0.2.1                 -> v0.2.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2484226Z  * [new tag]         v0.3.0                 -> v0.3.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2485763Z  * [new tag]         v0.3.1                 -> v0.3.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2487075Z  * [new tag]         v0.4.0                 -> v0.4.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2488354Z  * [new tag]         v0.5.0                 -> v0.5.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2489643Z  * [new tag]         v0.5.1                 -> v0.5.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2490952Z  * [new tag]         v0.5.2                 -> v0.5.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2492247Z  * [new tag]         v0.5.3                 -> v0.5.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2493551Z  * [new tag]         v0.6.0                 -> v0.6.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2494843Z  * [new tag]         v0.6.1                 -> v0.6.1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2496378Z  * [new tag]         v0.6.2                 -> v0.6.2
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2497670Z  * [new tag]         v0.6.3                 -> v0.6.3
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2498964Z  * [new tag]         v0.7.0                 -> v0.7.0
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2501978Z [command]/usr/bin/git branch --list --remote origin/main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2503301Z   origin/main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2505778Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2507372Z af533da87e7617fe6450504c70687c1937491104
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2510165Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2511620Z ##[group]Determining the checkout info
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2513246Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2514192Z [command]/usr/bin/git sparse-checkout disable
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2517287Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2520522Z ##[group]Checking out the ref
+Release	UNKNOWN STEP	2026-08-11T06:58:36.2522103Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.4872667Z Reset branch 'main'
+Release	UNKNOWN STEP	2026-08-11T06:58:36.4875129Z branch 'main' set up to track 'origin/main'.
+Release	UNKNOWN STEP	2026-08-11T06:58:36.4900053Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:36.4951930Z [command]/usr/bin/git log -1 --format=%H
+Release	UNKNOWN STEP	2026-08-11T06:58:36.4986532Z af533da87e7617fe6450504c70687c1937491104
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5353047Z ##[group]Run actions/setup-node@v6
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5354105Z with:
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5354874Z   node-version: 24.x
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5356057Z   registry-url: https://registry.npmjs.org
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5357184Z   check-latest: false
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5366118Z   token: ***
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5367001Z   package-manager-cache: true
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5367960Z env:
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5368700Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5369611Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5370677Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:58:36.5371590Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:36.6806006Z Found in cache @ /opt/hostedtoolcache/node/24.18.0/x64
+Release	UNKNOWN STEP	2026-08-11T06:58:36.6809064Z ##[group]Environment details
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1259946Z node: v24.18.0
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1260702Z npm: 11.16.0
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1261207Z yarn: 1.22.22
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1262359Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1400118Z ##[group]Run npm install --legacy-peer-deps
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1400614Z ^[[36;1mnpm install --legacy-peer-deps^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1458753Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1459089Z env:
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1459356Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1459651Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1459974Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1460307Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1460699Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:58:37.1461023Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:41.9313962Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+Release	UNKNOWN STEP	2026-08-11T06:58:55.1972422Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.1973313Z > @link-assistant/agent@0.25.8 prepare
+Release	UNKNOWN STEP	2026-08-11T06:58:55.1973904Z > cd .. && husky || true
+Release	UNKNOWN STEP	2026-08-11T06:58:55.1974167Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.3186059Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.3187295Z added 738 packages, and audited 739 packages in 18s
+Release	UNKNOWN STEP	2026-08-11T06:58:55.3191326Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.3191958Z 149 packages are looking for funding
+Release	UNKNOWN STEP	2026-08-11T06:58:55.3203900Z   run `npm fund` for details
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4219755Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4220801Z 52 vulnerabilities (16 low, 25 moderate, 11 high)
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4221400Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4222047Z To address issues that do not require attention, run:
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4222913Z   npm audit fix
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4223378Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4224221Z To address all issues (including breaking changes), run:
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4225060Z   npm audit fix --force
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4226030Z 
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4226453Z Run `npm audit` for details.
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4233836Z npm warn allow-scripts 2 packages have install scripts not yet covered by allowScripts:
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4236045Z npm warn allow-scripts   @parcel/watcher@2.5.1 (install: node scripts/build-from-source.js)
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4237865Z npm warn allow-scripts   tree-sitter-bash@0.25.1 (install: node-gyp-build)
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4239208Z npm warn allow-scripts
+Release	UNKNOWN STEP	2026-08-11T06:58:55.4240917Z npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5019970Z ##[group]Run node scripts/setup-npm.mjs
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5020519Z ^[[36;1mnode scripts/setup-npm.mjs^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5088585Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5088857Z env:
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5089097Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5089474Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5089785Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5090167Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5090589Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:58:55.5090927Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:58:57.5770043Z 11.16.0
+Release	UNKNOWN STEP	2026-08-11T06:58:57.5828897Z Current npm version: 11.16.0
+Release	UNKNOWN STEP	2026-08-11T06:59:01.2981658Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:01.2982377Z removed 8 packages, and changed 77 packages in 4s
+Release	UNKNOWN STEP	2026-08-11T06:59:01.2982859Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:01.2983787Z 15 packages are looking for funding
+Release	UNKNOWN STEP	2026-08-11T06:59:01.2984407Z   run `npm fund` for details
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4135745Z 12.0.2
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4209302Z Updated npm version: 12.0.2
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4321609Z ##[group]Run # Count changeset files (excluding README.md and config.json)
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4322235Z ^[[36;1m# Count changeset files (excluding README.md and config.json)^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4322757Z ^[[36;1mCHANGESET_COUNT=$(find js/.changeset -name "*.md" ! -name "README.md" | wc -l)^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4323228Z ^[[36;1mecho "Found $CHANGESET_COUNT changeset file(s)"^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4323752Z ^[[36;1mecho "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4368973Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4369219Z env:
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4369408Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4369645Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4369918Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4370203Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4370552Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4370827Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4465694Z Found 1 changeset file(s)
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4523364Z ##[group]Run node scripts/version-and-commit.mjs --mode changeset
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4523864Z ^[[36;1mnode scripts/version-and-commit.mjs --mode changeset^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4567953Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4568201Z env:
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4568391Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4568620Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4568894Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4569181Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4569526Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:59:01.4569799Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5063422Z Detected multi-language repository (package.json in js/)
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5065596Z Parsed configuration: {
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5066071Z   mode: 'changeset',
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5066458Z   bumpType: '',
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5066859Z   description: '(none)',
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5067341Z   jsRoot: 'js'
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5067733Z }
+Release	UNKNOWN STEP	2026-08-11T06:59:03.5280989Z Checking for remote changes...
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8445232Z From https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8446520Z  * branch            main       -> FETCH_HEAD
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8591635Z af533da87e7617fe6450504c70687c1937491104
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8677001Z af533da87e7617fe6450504c70687c1937491104
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8687893Z Current version: 0.25.8
+Release	UNKNOWN STEP	2026-08-11T06:59:03.8688506Z Running changeset version...
+Release	UNKNOWN STEP	2026-08-11T06:59:03.9760789Z npm notice run @link-assistant/agent@0.25.8 changeset:version
+Release	UNKNOWN STEP	2026-08-11T06:59:03.9762270Z npm notice run node ../scripts/changeset-version.mjs
+Release	UNKNOWN STEP	2026-08-11T06:59:04.6020338Z Running changeset version...
+Release	UNKNOWN STEP	2026-08-11T06:59:04.8826239Z npm notice run @link-assistant/agent@0.25.8 npx
+Release	UNKNOWN STEP	2026-08-11T06:59:04.8827340Z npm notice run 'changeset' version
+Release	UNKNOWN STEP	2026-08-11T06:59:05.5188989Z 🦋  All files have been updated. Review them and commit at your leisure
+Release	UNKNOWN STEP	2026-08-11T06:59:05.5489823Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:05.5490842Z Synchronizing package-lock.json...
+Release	UNKNOWN STEP	2026-08-11T06:59:07.0369199Z npm notice run @link-assistant/agent@0.26.0 prepare
+Release	UNKNOWN STEP	2026-08-11T06:59:07.0376558Z npm notice run cd .. && husky || true
+Release	UNKNOWN STEP	2026-08-11T06:59:07.1488923Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.1489969Z up to date, audited 739 packages in 2s
+Release	UNKNOWN STEP	2026-08-11T06:59:07.1503469Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.1503787Z 149 packages are looking for funding
+Release	UNKNOWN STEP	2026-08-11T06:59:07.1504298Z   run `npm fund` for details
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2809895Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2810836Z 52 vulnerabilities (16 low, 25 moderate, 11 high)
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2811335Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2811746Z To address issues that do not require attention, run:
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2812394Z   npm audit fix
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2812634Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2813067Z To address all issues (including breaking changes), run:
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2813740Z   npm audit fix --force
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2814037Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2814249Z Run `npm audit` for details.
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2823799Z npm warn install-scripts 2 packages had install scripts blocked because they are not covered by allowScripts:
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2840036Z npm warn install-scripts   @parcel/watcher@2.5.1 (install: node-gyp rebuild)
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2841175Z npm warn install-scripts   tree-sitter-bash@0.25.1 (install: node-gyp rebuild)
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2841965Z npm warn install-scripts
+Release	UNKNOWN STEP	2026-08-11T06:59:07.2843089Z npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Release	UNKNOWN STEP	2026-08-11T06:59:07.3034614Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:07.3036027Z ✅ Version bump complete with synchronized package-lock.json
+Release	UNKNOWN STEP	2026-08-11T06:59:07.3183212Z New version: 0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:07.6231901Z  D js/.changeset/model-resolved-event.md
+Release	UNKNOWN STEP	2026-08-11T06:59:07.6232578Z  M js/CHANGELOG.md
+Release	UNKNOWN STEP	2026-08-11T06:59:07.6233088Z  M js/package-lock.json
+Release	UNKNOWN STEP	2026-08-11T06:59:07.6233581Z  M js/package.json
+Release	UNKNOWN STEP	2026-08-11T06:59:07.6240734Z Changes detected, committing...
+Release	UNKNOWN STEP	2026-08-11T06:59:07.9415759Z npm notice run @link-assistant/agent@0.26.0 npx
+Release	UNKNOWN STEP	2026-08-11T06:59:07.9417045Z npm notice run 'lint-staged'
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0605888Z ^[[33m[STARTED]^[[39m Backing up original state...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0982757Z ^[[32m[COMPLETED]^[[39m Backed up original state in git stash (c6f38bd)
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0984923Z ^[[33m[STARTED]^[[39m Running tasks for staged files...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0989760Z ^[[33m[STARTED]^[[39m package.json^[[0;90m — 3 files^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0992923Z ^[[33m[STARTED]^[[39m *.{js,mjs,cjs}^[[0;90m — 0 files^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0993842Z ^[[33m[STARTED]^[[39m *.md^[[0;90m — 1 file^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0994664Z ^[[33m[SKIPPED]^[[39m *.{js,mjs,cjs}^[[0;90m — no files^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.0995863Z ^[[33m[STARTED]^[[39m prettier --write
+Release	UNKNOWN STEP	2026-08-11T06:59:08.5056952Z ^[[32m[COMPLETED]^[[39m prettier --write
+Release	UNKNOWN STEP	2026-08-11T06:59:08.5057920Z ^[[33m[STARTED]^[[39m prettier --check
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8665996Z ^[[32m[COMPLETED]^[[39m prettier --check
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8667715Z ^[[32m[COMPLETED]^[[39m *.md^[[0;90m — 1 file^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8669490Z ^[[32m[COMPLETED]^[[39m package.json^[[0;90m — 3 files^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8670865Z ^[[32m[COMPLETED]^[[39m Running tasks for staged files...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8672052Z ^[[33m[STARTED]^[[39m Applying modifications from tasks...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8755786Z ^[[32m[COMPLETED]^[[39m Applying modifications from tasks...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8757043Z ^[[33m[STARTED]^[[39m Cleaning up temporary files...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.8854425Z ^[[32m[COMPLETED]^[[39m Cleaning up temporary files...
+Release	UNKNOWN STEP	2026-08-11T06:59:08.9272894Z [main af6b724] 0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:08.9273329Z  4 files changed, 20 insertions(+), 19 deletions(-)
+Release	UNKNOWN STEP	2026-08-11T06:59:08.9273803Z  delete mode 100644 js/.changeset/model-resolved-event.md
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0258272Z To https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0258895Z    af533da..af6b724  main -> main
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0304313Z ✅ Version bump committed and pushed to main
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0442600Z ##[group]Run node scripts/publish-to-npm.mjs --should-pull
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0443072Z ^[[36;1mnode scripts/publish-to-npm.mjs --should-pull^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0487594Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0487841Z env:
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0488028Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0488269Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0488538Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0488822Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0489166Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:59:11.0489439Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:59:12.1341325Z Detected multi-language repository (package.json in js/)
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4701785Z From https://github.com/link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4702482Z  * branch            main       -> FETCH_HEAD
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4783310Z Already up to date.
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4804469Z Package to publish: @link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4805285Z Current version to publish: 0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:12.4806218Z Checking if version 0.26.0 is already published...
+Release	UNKNOWN STEP	2026-08-11T06:59:12.7284674Z Version 0.26.0 not found on npm, proceeding with publish...
+Release	UNKNOWN STEP	2026-08-11T06:59:12.7285889Z Publish attempt 1 of 3...
+Release	UNKNOWN STEP	2026-08-11T06:59:12.8322739Z npm notice run @link-assistant/agent@0.26.0 changeset:publish
+Release	UNKNOWN STEP	2026-08-11T06:59:12.8324274Z npm notice run changeset publish
+Release	UNKNOWN STEP	2026-08-11T06:59:13.1375789Z 🦋  ^[[36minfo^[[39m npm info @link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:13.4919605Z 🦋  ^[[36minfo^[[39m @link-assistant/agent is being published because our local version (0.26.0) has not been published on npm
+Release	UNKNOWN STEP	2026-08-11T06:59:13.4921853Z 🦋  ^[[36minfo^[[39m Publishing ^[[36m"@link-assistant/agent"^[[39m at ^[[32m"0.26.0"^[[39m
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9587878Z 🦋  ^[[32msuccess^[[39m packages published successfully:
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9588845Z 🦋  @link-assistant/agent@0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9589274Z 🦋  Creating git tag...
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9589823Z 🦋  New tag:  v0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9791987Z Changeset output: 🦋  ^[[36minfo^[[39m npm info @link-assistant/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9793416Z 🦋  ^[[36minfo^[[39m @link-assistant/agent is being published because our local version (0.26.0) has not been published on npm
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9794806Z 🦋  ^[[36minfo^[[39m Publishing ^[[36m"@link-assistant/agent"^[[39m at ^[[32m"0.26.0"^[[39m
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9796030Z 🦋  ^[[32msuccess^[[39m packages published successfully:
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9796778Z 🦋  @link-assistant/agent@0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9797376Z 🦋  Creating git tag...
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9797953Z 🦋  New tag:  v0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9798276Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9798783Z npm notice run @link-assistant/agent@0.26.0 changeset:publish
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9799271Z npm notice run changeset publish
+Release	UNKNOWN STEP	2026-08-11T06:59:27.9799482Z 
+Release	UNKNOWN STEP	2026-08-11T06:59:30.0458364Z Verification attempt 1 of 7: version not visible yet
+Release	UNKNOWN STEP	2026-08-11T06:59:34.1116731Z Verification attempt 2 of 7: version not visible yet
+Release	UNKNOWN STEP	2026-08-11T06:59:42.1807912Z Verification succeeded on attempt 3
+Release	UNKNOWN STEP	2026-08-11T06:59:42.1810337Z ✅ Published @link-assistant/agent@0.26.0 to npm
+Release	UNKNOWN STEP	2026-08-11T06:59:42.1959405Z ##[group]Run node scripts/create-github-release.mjs --release-version "0.26.0" --repository "link-assistant/agent" --prefix "js-"
+Release	UNKNOWN STEP	2026-08-11T06:59:42.1960384Z ^[[36;1mnode scripts/create-github-release.mjs --release-version "0.26.0" --repository "link-assistant/agent" --prefix "js-"^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2005025Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2005490Z env:
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2005718Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2005967Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2006243Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2006537Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2006874Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2009394Z   GH_TOKEN: ***
+Release	UNKNOWN STEP	2026-08-11T06:59:42.2009608Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:59:43.2441365Z Creating GitHub release for js-v0.26.0...
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1574544Z {"url":"https://api.github.com/repos/link-assistant/agent/releases/368380439","assets_url":"https://api.github.com/repos/link-assistant/agent/releases/368380439/assets","upload_url":"https://uploads.github.com/repos/link-assistant/agent/releases/368380439/assets{?name,label}","html_url":"https://github.com/link-assistant/agent/releases/tag/js-v0.26.0","id":368380439,"author":{"login":"github-actions[bot]","id":41898282,"node_id":"MDM6Qm90NDE4OTgyODI=","avatar_url":"https://avatars.githubusercontent.com/in/15368?v=4","gravatar_id":"","url":"https://api.github.com/users/github-actions%5Bbot%5D","html_url":"https://github.com/apps/github-actions","followers_url":"https://api.github.com/users/github-actions%5Bbot%5D/followers","following_url":"https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/github-actions%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/github-actions%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/github-actions%5Bbot%5D/repos","events_url":"https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/github-actions%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"node_id":"RE_kwDOQYTy3M4V9QoX","tag_name":"js-v0.26.0","target_commitish":"main","name":"[js] 0.26.0","draft":false,"immutable":false,"prerelease":false,"created_at":"2026-08-11T06:59:07Z","updated_at":"2026-08-11T06:59:43Z","published_at":"2026-08-11T06:59:43Z","assets":[],"tarball_url":"https://api.github.com/repos/link-assistant/agent/tarball/js-v0.26.0","zipball_url":"https://api.github.com/repos/link-assistant/agent/zipball/js-v0.26.0","body":"### Minor Changes\n\n- 4bc4332: feat: emit `model_resolved`, a machine-readable model routing event\n\n  Every run now emits exactly one `model_resolved` event on stdout — on every\n  resolution path (`--model provider/model`, `--model <bare id>`, and the default)\n  — immediately after the model is resolved and before the first `step_start` and\n  the first upstream request. It reports `requested`, `selector`, `providerID`,\n  `modelID`, `source` (`cli` | `config` | `default`) and `matchesRequest`, so a\n  caller can verify routing without matching the human-readable\n  `using explicit provider/model` log message, which is unchanged.\n\n  The Claude stream-json standard now also reports the resolved model on its `init`\n  event as `\"model\": \"<providerID>/<modelID>\"`."}✅ Created GitHub release: js-v0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1684558Z ##[group]Run node scripts/format-github-release.mjs --release-version "0.26.0" --repository "link-assistant/agent" --commit-sha "af533da87e7617fe6450504c70687c1937491104" --prefix "js-"
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1687142Z ^[[36;1mnode scripts/format-github-release.mjs --release-version "0.26.0" --repository "link-assistant/agent" --commit-sha "af533da87e7617fe6450504c70687c1937491104" --prefix "js-"^[[0m
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1752991Z shell: /usr/bin/bash -e {0}
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1753412Z env:
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1753732Z   GIT_CONFIG_COUNT: 1
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1754199Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1754696Z   GIT_CONFIG_VALUE_0: main
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1755202Z   NPM_CONFIG_USERCONFIG: /home/runner/work/_temp/.npmrc
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1756170Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1760647Z   GH_TOKEN: ***
+Release	UNKNOWN STEP	2026-08-11T06:59:44.1761033Z ##[endgroup]
+Release	UNKNOWN STEP	2026-08-11T06:59:45.5033882Z 368380439
+Release	UNKNOWN STEP	2026-08-11T06:59:45.5070468Z Formatting release notes for js-v0.26.0...
+Release	UNKNOWN STEP	2026-08-11T06:59:46.7884749Z {"url":"https://api.github.com/repos/link-assistant/agent/releases/368380439","assets_url":"https://api.github.com/repos/link-assistant/agent/releases/368380439/assets","upload_url":"https://uploads.github.com/repos/link-assistant/agent/releases/368380439/assets{?name,label}","html_url":"https://github.com/link-assistant/agent/releases/tag/js-v0.26.0","id":368380439,"author":{"login":"github-actions[bot]","id":41898282,"node_id":"MDM6Qm90NDE4OTgyODI=","avatar_url":"https://avatars.githubusercontent.com/in/15368?v=4","gravatar_id":"","url":"https://api.github.com/users/github-actions%5Bbot%5D","html_url":"https://github.com/apps/github-actions","followers_url":"https://api.github.com/users/github-actions%5Bbot%5D/followers","following_url":"https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/github-actions%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/github-actions%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/github-actions%5Bbot%5D/repos","events_url":"https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/github-actions%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"node_id":"RE_kwDOQYTy3M4V9QoX","tag_name":"js-v0.26.0","target_commitish":"main","name":"[js] 0.26.0","draft":false,"immutable":false,"prerelease":false,"created_at":"2026-08-11T06:59:07Z","updated_at":"2026-08-11T06:59:43Z","published_at":"2026-08-11T06:59:43Z","assets":[],"tarball_url":"https://api.github.com/repos/link-assistant/agent/tarball/js-v0.26.0","zipball_url":"https://api.github.com/repos/link-assistant/agent/zipball/js-v0.26.0","body":"### Minor Changes\n\n- 4bc4332: feat: emit `model_resolved`, a machine-readable model routing event\n\n  Every run now emits exactly one `model_resolved` event on stdout — on every\n  resolution path (`--model provider/model`, `--model <bare id>`, and the default)\n  — immediately after the model is resolved and before the first `step_start` and\n  the first upstream request. It reports `requested`, `selector`, `providerID`,\n  `modelID`, `source` (`cli` | `config` | `default`) and `matchesRequest`, so a\n  caller can verify routing without matching the human-readable\n  `using explicit provider/model` log message, which is unchanged.\n\n  The Claude stream-json standard now also reports the resolved model on its `init`\n  event as `\"model\": \"<providerID>/<modelID>\"`."}ℹ️ Found Minor Changes section
+Release	UNKNOWN STEP	2026-08-11T06:59:46.7895730Z ℹ️ Looking up PR for commit 4bc4332 (from changelog)
+Release	UNKNOWN STEP	2026-08-11T06:59:47.2946283Z [{"url":"https://api.github.com/repos/link-assistant/agent/pulls/296","id":4249100289,"node_id":"PR_kwDOQYTy3M79RCAB","html_url":"https://github.com/link-assistant/agent/pull/296","diff_url":"https://github.com/link-assistant/agent/pull/296.diff","patch_url":"https://github.com/link-assistant/agent/pull/296.patch","issue_url":"https://api.github.com/repos/link-assistant/agent/issues/296","number":296,"state":"closed","locked":false,"title":"feat: expose model routing as a machine-readable model_resolved event","user":{"login":"konard","id":1431904,"node_id":"MDQ6VXNlcjE0MzE5MDQ=","avatar_url":"https://avatars.githubusercontent.com/u/1431904?v=4","gravatar_id":"","url":"https://api.github.com/users/konard","html_url":"https://github.com/konard","followers_url":"https://api.github.com/users/konard/followers","following_url":"https://api.github.com/users/konard/following{/other_user}","gists_url":"https://api.github.com/users/konard/gists{/gist_id}","starred_url":"https://api.github.com/users/konard/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/konard/subscriptions","organizations_url":"https://api.github.com/users/konard/orgs","repos_url":"https://api.github.com/users/konard/repos","events_url":"https://api.github.com/users/konard/events{/privacy}","received_events_url":"https://api.github.com/users/konard/received_events","type":"User","user_view_type":"public","site_admin":false},"body":"## Problem\n\nModel routing was only observable as an English log record:\n\n```json\n{ \"type\": \"log\", \"level\": \"info\", \"message\": \"using explicit provider/model\", \"providerID\": \"formalai\", \"modelID\": \"formal-ai\" }\n```\n\nA supervisor that must *verify* routing — e.g. kill the run when the agent resolves anything other than the requested model — has to match prose. An ordinary reword upstream then silently disables a downstream safety check, and the log record is not emitted at all on some paths.\n\nFixes #295 (follow-up to #293 / #294, released as `js-0.25.8`).\n\n## Solution\n\nA new first-class event in the `OutputType` vocabulary, emitted **exactly once per run** on **every** resolution path — explicit `provider/model`, bare model id, and default:\n\n```json\n{\n  \"type\": \"model_resolved\",\n  \"timestamp\": \"2026-08-11T00:12:31.320Z\",\n  \"requested\": \"formalai/formal-ai\",\n  \"selector\": \"formalai/formal-ai\",\n  \"providerID\": \"formalai\",\n  \"modelID\": \"formal-ai\",\n  \"source\": \"cli\",\n  \"matchesRequest\": true\n}\n```\n\n- `requested` — raw `--model`/`-m` value, `null` when nothing was requested.\n- `selector` — what was actually applied (`requested`, or the effective default), so `matchesRequest` is explicable when `requested` is `null`.\n- `source` — `cli` (from `--model`/`-m`), `config` (operator default via `LINK_ASSISTANT_AGENT_DEFAULT_MODEL` / `defaultOptions.defaultModel`), `default` (built-in `DEFAULT_MODEL`).\n- `matchesRequest` — whether `providerID`/`modelID` satisfies `selector`. A qualified selector must match both parts; a bare selector names only the model. Today the only in-tree path that makes this `false` is `--use-existing-claude-oauth` substituting `claude-oauth/claude-sonnet-4-5`.\n\n**Where it is emitted:** at the end of `parseModelConfig()`, which is the earliest point where the effective model is final — after resolution *and* after `--use-existing-claude-oauth`, the one override that can still replace an already selected model, and before session creation and any completion request. So the attestation can never lie, and a consumer can terminate the run before a request reaches a provider it did not ask for.\n\n**Claude standard:** `convertOpenCodeToClaude` now populates the already-declared optional `model` on the `init` event with `providerID/modelID`. Under `--json-standard claude` / `--output-format stream-json` the attestation is forced compact so the NDJSON stream stays one JSON object per line.\n\nThe existing `Log.Default.info({ message: 'using explicit provider/model', ... })` record is **unchanged** — this change is purely additive (`git diff js/src/cli/model-config.js` shows insertions only).\n\n## How to reproduce / verify manually\n\n```bash\ncd js\nbun experiments/model-resolved-fake-provider.mjs                  # opencode standard\nFMT=stream-json bun experiments/model-resolved-fake-provider.mjs  # claude standard\nMODEL= bun experiments/model-resolved-fake-provider.mjs           # default path\n```\n\nThe probe runs the real CLI against a local fake OpenAI-compatible provider and prints the event order plus the time of the first upstream request:\n\n```\nevent order: [\"config\",\"status\",\"input\",\"model_resolved\",...,\"step_start\",\"text\",\"step_finish\",...]\nmodel_resolved: {\"type\":\"model_resolved\",\"timestamp\":\"...\",\"requested\":\"formalai/formal-ai\",\"selector\":\"formalai/formal-ai\",\"providerID\":\"formalai\",\"modelID\":\"formal-ai\",\"source\":\"cli\",\"matchesRequest\":true}\ninit (stream-json): {\"type\":\"init\",\"timestamp\":\"...\",\"session_id\":\"ses_...\",\"model\":\"formalai/formal-ai\"}\n```\n\n## Tests\n\n`js/tests/model-resolved-event.ts` (unit, runs in CI):\n\n- asserts the literal `type` string `'model_resolved'`, so a reword of the human-readable log cannot silently change the machine contract;\n- payload shape, `requested: null` on the default path, and `matchesRequest: false` for the oauth-style substitution;\n- `selectorMatchesModel` for qualified / bare / `@scope/model` selectors;\n- child-process runs of the real `parseModelConfig`: `--model formalai/formal-ai` → one event, `source: \"cli\"`; `--model formal-ai` → one event, `source: \"cli\"`; no `--model` → one event, `source: \"default\"`, `requested: null`; `LINK_ASSISTANT_AGENT_DEFAULT_MODEL` set → `source: \"config\"`;\n- `--json-standard claude` keeps the event on a single NDJSON line;\n- an unknown explicit model still fails closed (non-zero exit, no attestation) — #293 behaviour preserved.\n\n`js/tests/json-standard-unit.js` (unit, runs in CI): `init` omits `model` when none is supplied and reports it when it is; the claude event handler carries it through.\n\n`js/tests/integration/model-resolved-event.js` (fake local provider, no network): exactly one event per run; emitted before the first `step_start`; its timestamp is `<=` the fake provider's first request time; under `--output-format stream-json` a single NDJSON line and `init.model === \"formalai/formal-ai\"`.\n\n`js/tests/integration/json-standard-claude.js`: `model_resolved` added to the valid claude event types.\n\nLocal run: `bun run test` → 717 pass / 0 fail; `npm run check` (eslint + prettier + file-size) clean.\n\n## Docs\n\n- `docs/model-resolved-event.md` — field table, ordering guarantees, why not to parse the log message, shell example.\n- `examples/verify-model-routing.mjs` — supervisor that kills the run when `matchesRequest` is `false`.\n- README pointers (root + `js/`).\n\n## Notes\n\n- Changeset `js/.changeset/model-resolved-event.md` (minor — additive feature) triggers the next release.\n- Unrelated observation, not changed here: with `--use-existing-claude-oauth`, compaction `\"same\"` still binds to the *pre*-substitution model, because compaction parsing runs before the oauth override. Worth a separate issue.\n- `js/tests/integration/json-standard-claude.js` has pre-existing staleness (its `validTypes` / `initIndex === 0` assertions do not account for the `config`/`status`/`input` envelope events the CLI emits); this PR only adds `model_resolved` to that list and does not attempt to fix the rest.\n","created_at":"2026-08-10T23:54:26Z","updated_at":"2026-08-11T06:56:18Z","closed_at":"2026-08-11T06:56:18Z","merged_at":"2026-08-11T06:56:18Z","merge_commit_sha":"af533da87e7617fe6450504c70687c1937491104","assignees":[{"login":"konard","id":1431904,"node_id":"MDQ6VXNlcjE0MzE5MDQ=","avatar_url":"https://avatars.githubusercontent.com/u/1431904?v=4","gravatar_id":"","url":"https://api.github.com/users/konard","html_url":"https://github.com/konard","followers_url":"https://api.github.com/users/konard/followers","following_url":"https://api.github.com/users/konard/following{/other_user}","gists_url":"https://api.github.com/users/konard/gists{/gist_id}","starred_url":"https://api.github.com/users/konard/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/konard/subscriptions","organizations_url":"https://api.github.com/users/konard/orgs","repos_url":"https://api.github.com/users/konard/repos","events_url":"https://api.github.com/users/konard/events{/privacy}","received_events_url":"https://api.github.com/users/konard/received_events","type":"User","user_view_type":"public","site_admin":false}],"requested_reviewers":[],"requested_teams":[],"labels":[],"milestone":null,"draft":false,"commits_url":"https://api.github.com/repos/link-assistant/agent/pulls/296/commits","review_comments_url":"https://api.github.com/repos/link-assistant/agent/pulls/296/comments","review_comment_url":"https://api.github.com/repos/link-assistant/agent/pulls/comments{/number}","comments_url":"https://api.github.com/repos/link-assistant/agent/issues/296/comments","statuses_url":"https://api.github.com/repos/link-assistant/agent/statuses/1d82f28f0ea1d621fedb1cddbf02ddbef0ad5c1d","head":{"label":"link-assistant:issue-295-bd196360809e","ref":"issue-295-bd196360809e","sha":"1d82f28f0ea1d621fedb1cddbf02ddbef0ad5c1d","user":{"login":"link-assistant","id":245352401,"node_id":"O_kgDODp_H0Q","avatar_url":"https://avatars.githubusercontent.com/u/245352401?v=4","gravatar_id":"","url":"https://api.github.com/users/link-assistant","html_url":"https://github.com/link-assistant","followers_url":"https://api.github.com/users/link-assistant/followers","following_url":"https://api.github.com/users/link-assistant/following{/other_user}","gists_url":"https://api.github.com/users/link-assistant/gists{/gist_id}","starred_url":"https://api.github.com/users/link-assistant/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/link-assistant/subscriptions","organizations_url":"https://api.github.com/users/link-assistant/orgs","repos_url":"https://api.github.com/users/link-assistant/repos","events_url":"https://api.github.com/users/link-assistant/events{/privacy}","received_events_url":"https://api.github.com/users/link-assistant/received_events","type":"Organization","user_view_type":"public","site_admin":false},"repo":{"id":1099231964,"node_id":"R_kgDOQYTy3A","name":"agent","full_name":"link-assistant/agent","private":false,"owner":{"login":"link-assistant","id":245352401,"node_id":"O_kgDODp_H0Q","avatar_url":"https://avatars.githubusercontent.com/u/245352401?v=4","gravatar_id":"","url":"https://api.github.com/users/link-assistant","html_url":"https://github.com/link-assistant","followers_url":"https://api.github.com/users/link-assistant/followers","following_url":"https://api.github.com/users/link-assistant/following{/other_user}","gists_url":"https://api.github.com/users/link-assistant/gists{/gist_id}","starred_url":"https://api.github.com/users/link-assistant/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/link-assistant/subscriptions","organizations_url":"https://api.github.com/users/link-assistant/orgs","repos_url":"https://api.github.com/users/link-assistant/repos","events_url":"https://api.github.com/users/link-assistant/events{/privacy}","received_events_url":"https://api.github.com/users/link-assistant/received_events","type":"Organization","user_view_type":"public","site_admin":false},"html_url":"https://github.com/link-assistant/agent","description":"Thin agent based on OpenCode CLI (without TUI)","fork":false,"url":"https://api.github.com/repos/link-assistant/agent","forks_url":"https://api.github.com/repos/link-assistant/agent/forks","keys_url":"https://api.github.com/repos/link-assistant/agent/keys{/key_id}","collaborators_url":"https://api.github.com/repos/link-assistant/agent/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/link-assistant/agent/teams","hooks_url":"https://api.github.com/repos/link-assistant/agent/hooks","issue_events_url":"https://api.github.com/repos/link-assistant/agent/issues/events{/number}","events_url":"https://api.github.com/repos/link-assistant/agent/events","assignees_url":"https://api.github.com/repos/link-assistant/agent/assignees{/user}","branches_url":"https://api.github.com/repos/link-assistant/agent/branches{/branch}","tags_url":"https://api.github.com/repos/link-assistant/agent/tags","blobs_url":"https://api.github.com/repos/link-assistant/agent/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/link-assistant/agent/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/link-assistant/agent/git/refs{/sha}","trees_url":"https://api.github.com/repos/link-assistant/agent/git/trees{/sha}","statuses_url":"https://api.github.com/repos/link-assistant/agent/statuses/{sha}","languages_url":"https://api.github.com/repos/link-assistant/agent/languages","stargazers_url":"https://api.github.com/repos/link-assistant/agent/stargazers","contributors_url":"https://api.github.com/repos/link-assistant/agent/contributors","subscribers_url":"https://api.github.com/repos/link-assistant/agent/subscribers","subscription_url":"https://api.github.com/repos/link-assistant/agent/subscription","commits_url":"https://api.github.com/repos/link-assistant/agent/commits{/sha}","git_commits_url":"https://api.github.com/repos/link-assistant/agent/git/commits{/sha}","comments_url":"https://api.github.com/repos/link-assistant/agent/comments{/number}","issue_comment_url":"https://api.github.com/repos/link-assistant/agent/issues/comments{/number}","contents_url":"https://api.github.com/repos/link-assistant/agent/contents/{+path}","compare_url":"https://api.github.com/repos/link-assistant/agent/compare/{base}...{head}","merges_url":"https://api.github.com/repos/link-assistant/agent/merges","archive_url":"https://api.github.com/repos/link-assistant/agent/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/link-assistant/agent/downloads","issues_url":"https://api.github.com/repos/link-assistant/agent/issues{/number}","pulls_url":"https://api.github.com/repos/link-assistant/agent/pulls{/number}","milestones_url":"https://api.github.com/repos/link-assistant/agent/milestones{/number}","notifications_url":"https://api.github.com/repos/link-assistant/agent/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/link-assistant/agent/labels{/name}","releases_url":"https://api.github.com/repos/link-assistant/agent/releases{/id}","deployments_url":"https://api.github.com/repos/link-assistant/agent/deployments","created_at":"2025-11-18T18:30:53Z","updated_at":"2026-08-11T06:59:14Z","pushed_at":"2026-08-11T06:59:43Z","git_url":"git://github.com/link-assistant/agent.git","ssh_url":"git@github.com:link-assistant/agent.git","clone_url":"https://github.com/link-assistant/agent.git","svn_url":"https://github.com/link-assistant/agent","homepage":null,"size":12209,"stargazers_count":7,"watchers_count":7,"language":"TypeScript","has_issues":true,"has_projects":true,"has_downloads":false,"has_wiki":true,"has_pages":false,"has_discussions":false,"forks_count":1,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":4,"license":{"key":"unlicense","name":"The Unlicense","spdx_id":"Unlicense","url":"https://api.github.com/licenses/unlicense","node_id":"MDc6TGljZW5zZTE1"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"has_pull_requests":true,"pull_request_creation_policy":"all","topics":[],"visibility":"public","forks":1,"open_issues":4,"watchers":7,"default_branch":"main"}},"base":{"label":"link-assistant:main","ref":"main","sha":"a5bf90d8efddfdf460dd2d849c526eacef2296b6","user":{"login":"link-assistant","id":245352401,"node_id":"O_kgDODp_H0Q","avatar_url":"https://avatars.githubusercontent.com/u/245352401?v=4","gravatar_id":"","url":"https://api.github.com/users/link-assistant","html_url":"https://github.com/link-assistant","followers_url":"https://api.github.com/users/link-assistant/followers","following_url":"https://api.github.com/users/link-assistant/following{/other_user}","gists_url":"https://api.github.com/users/link-assistant/gists{/gist_id}","starred_url":"https://api.github.com/users/link-assistant/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/link-assistant/subscriptions","organizations_url":"https://api.github.com/users/link-assistant/orgs","repos_url":"https://api.github.com/users/link-assistant/repos","events_url":"https://api.github.com/users/link-assistant/events{/privacy}","received_events_url":"https://api.github.com/users/link-assistant/received_events","type":"Organization","user_view_type":"public","site_admin":false},"repo":{"id":1099231964,"node_id":"R_kgDOQYTy3A","name":"agent","full_name":"link-assistant/agent","private":false,"owner":{"login":"link-assistant","id":245352401,"node_id":"O_kgDODp_H0Q","avatar_url":"https://avatars.githubusercontent.com/u/245352401?v=4","gravatar_id":"","url":"https://api.github.com/users/link-assistant","html_url":"https://github.com/link-assistant","followers_url":"https://api.github.com/users/link-assistant/followers","following_url":"https://api.github.com/users/link-assistant/following{/other_user}","gists_url":"https://api.github.com/users/link-assistant/gists{/gist_id}","starred_url":"https://api.github.com/users/link-assistant/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/link-assistant/subscriptions","organizations_url":"https://api.github.com/users/link-assistant/orgs","repos_url":"https://api.github.com/users/link-assistant/repos","events_url":"https://api.github.com/users/link-assistant/events{/privacy}","received_events_url":"https://api.github.com/users/link-assistant/received_events","type":"Organization","user_view_type":"public","site_admin":false},"html_url":"https://github.com/link-assistant/agent","description":"Thin agent based on OpenCode CLI (without TUI)","fork":false,"url":"https://api.github.com/repos/link-assistant/agent","forks_url":"https://api.github.com/repos/link-assistant/agent/forks","keys_url":"https://api.github.com/repos/link-assistant/agent/keys{/key_id}","collaborators_url":"https://api.github.com/repos/link-assistant/agent/collaborators{/collaborator}","teams_url":"https://api.github.com/repos/link-assistant/agent/teams","hooks_url":"https://api.github.com/repos/link-assistant/agent/hooks","issue_events_url":"https://api.github.com/repos/link-assistant/agent/issues/events{/number}","events_url":"https://api.github.com/repos/link-assistant/agent/events","assignees_url":"https://api.github.com/repos/link-assistant/agent/assignees{/user}","branches_url":"https://api.github.com/repos/link-assistant/agent/branches{/branch}","tags_url":"https://api.github.com/repos/link-assistant/agent/tags","blobs_url":"https://api.github.com/repos/link-assistant/agent/git/blobs{/sha}","git_tags_url":"https://api.github.com/repos/link-assistant/agent/git/tags{/sha}","git_refs_url":"https://api.github.com/repos/link-assistant/agent/git/refs{/sha}","trees_url":"https://api.github.com/repos/link-assistant/agent/git/trees{/sha}","statuses_url":"https://api.github.com/repos/link-assistant/agent/statuses/{sha}","languages_url":"https://api.github.com/repos/link-assistant/agent/languages","stargazers_url":"https://api.github.com/repos/link-assistant/agent/stargazers","contributors_url":"https://api.github.com/repos/link-assistant/agent/contributors","subscribers_url":"https://api.github.com/repos/link-assistant/agent/subscribers","subscription_url":"https://api.github.com/repos/link-assistant/agent/subscription","commits_url":"https://api.github.com/repos/link-assistant/agent/commits{/sha}","git_commits_url":"https://api.github.com/repos/link-assistant/agent/git/commits{/sha}","comments_url":"https://api.github.com/repos/link-assistant/agent/comments{/number}","issue_comment_url":"https://api.github.com/repos/link-assistant/agent/issues/comments{/number}","contents_url":"https://api.github.com/repos/link-assistant/agent/contents/{+path}","compare_url":"https://api.github.com/repos/link-assistant/agent/compare/{base}...{head}","merges_url":"https://api.github.com/repos/link-assistant/agent/merges","archive_url":"https://api.github.com/repos/link-assistant/agent/{archive_format}{/ref}","downloads_url":"https://api.github.com/repos/link-assistant/agent/downloads","issues_url":"https://api.github.com/repos/link-assistant/agent/issues{/number}","pulls_url":"https://api.github.com/repos/link-assistant/agent/pulls{/number}","milestones_url":"https://api.github.com/repos/link-assistant/agent/milestones{/number}","notifications_url":"https://api.github.com/repos/link-assistant/agent/notifications{?since,all,participating}","labels_url":"https://api.github.com/repos/link-assistant/agent/labels{/name}","releases_url":"https://api.github.com/repos/link-assistant/agent/releases{/id}","deployments_url":"https://api.github.com/repos/link-assistant/agent/deployments","created_at":"2025-11-18T18:30:53Z","updated_at":"2026-08-11T06:59:14Z","pushed_at":"2026-08-11T06:59:43Z","git_url":"git://github.com/link-assistant/agent.git","ssh_url":"git@github.com:link-assistant/agent.git","clone_url":"https://github.com/link-assistant/agent.git","svn_url":"https://github.com/link-assistant/agent","homepage":null,"size":12209,"stargazers_count":7,"watchers_count":7,"language":"TypeScript","has_issues":true,"has_projects":true,"has_downloads":false,"has_wiki":true,"has_pages":false,"has_discussions":false,"forks_count":1,"mirror_url":null,"archived":false,"disabled":false,"open_issues_count":4,"license":{"key":"unlicense","name":"The Unlicense","spdx_id":"Unlicense","url":"https://api.github.com/licenses/unlicense","node_id":"MDc6TGljZW5zZTE1"},"allow_forking":true,"is_template":false,"web_commit_signoff_required":false,"has_pull_requests":true,"pull_request_creation_policy":"all","topics":[],"visibility":"public","forks":1,"open_issues":4,"watchers":7,"default_branch":"main"}},"_links":{"self":{"href":"https://api.github.com/repos/link-assistant/agent/pulls/296"},"html":{"href":"https://github.com/link-assistant/agent/pull/296"},"issue":{"href":"https://api.github.com/repos/link-assistant/agent/issues/296"},"comments":{"href":"https://api.github.com/repos/link-assistant/agent/issues/296/comments"},"review_comments":{"href":"https://api.github.com/repos/link-assistant/agent/pulls/296/comments"},"review_comment":{"href":"https://api.github.com/repos/link-assistant/agent/pulls/comments{/number}"},"commits":{"href":"https://api.github.com/repos/link-assistant/agent/pulls/296/commits"},"statuses":{"href":"https://api.github.com/repos/link-assistant/agent/statuses/1d82f28f0ea1d621fedb1cddbf02ddbef0ad5c1d"}},"author_association":"CONTRIBUTOR","auto_merge":null,"assignee":{"login":"konard","id":1431904,"node_id":"MDQ6VXNlcjE0MzE5MDQ=","avatar_url":"https://avatars.githubusercontent.com/u/1431904?v=4","gravatar_id":"","url":"https://api.github.com/users/konard","html_url":"https://github.com/konard","followers_url":"https://api.github.com/users/konard/followers","following_url":"https://api.github.com/users/konard/following{/other_user}","gists_url":"https://api.github.com/users/konard/gists{/gist_id}","starred_url":"https://api.github.com/users/konard/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/konard/subscriptions","organizations_url":"https://api.github.com/users/konard/orgs","repos_url":"https://api.github.com/users/konard/repos","events_url":"https://api.github.com/users/konard/events{/privacy}","received_events_url":"https://api.github.com/users/konard/received_events","type":"User","user_view_type":"public","site_admin":false},"active_lock_reason":null}]✅ Found PR #296 containing commit
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7147444Z {"url":"https://api.github.com/repos/link-assistant/agent/releases/368380439","assets_url":"https://api.github.com/repos/link-assistant/agent/releases/368380439/assets","upload_url":"https://uploads.github.com/repos/link-assistant/agent/releases/368380439/assets{?name,label}","html_url":"https://github.com/link-assistant/agent/releases/tag/js-v0.26.0","id":368380439,"author":{"login":"github-actions[bot]","id":41898282,"node_id":"MDM6Qm90NDE4OTgyODI=","avatar_url":"https://avatars.githubusercontent.com/in/15368?v=4","gravatar_id":"","url":"https://api.github.com/users/github-actions%5Bbot%5D","html_url":"https://github.com/apps/github-actions","followers_url":"https://api.github.com/users/github-actions%5Bbot%5D/followers","following_url":"https://api.github.com/users/github-actions%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/github-actions%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/github-actions%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/github-actions%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/github-actions%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/github-actions%5Bbot%5D/repos","events_url":"https://api.github.com/users/github-actions%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/github-actions%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"node_id":"RE_kwDOQYTy3M4V9QoX","tag_name":"js-v0.26.0","target_commitish":"main","name":"[js] 0.26.0","draft":false,"immutable":false,"prerelease":false,"created_at":"2026-08-11T06:59:07Z","updated_at":"2026-08-11T06:59:47Z","published_at":"2026-08-11T06:59:43Z","assets":[],"tarball_url":"https://api.github.com/repos/link-assistant/agent/tarball/js-v0.26.0","zipball_url":"https://api.github.com/repos/link-assistant/agent/zipball/js-v0.26.0","body":"feat: emit `model_resolved`, a machine-readable model routing event\n\nEvery run now emits exactly one `model_resolved` event on stdout — on every\nresolution path (`--model provider/model`, `--model <bare id>`, and the default)\n— immediately after the model is resolved and before the first `step_start` and\nthe first upstream request. It reports `requested`, `selector`, `providerID`,\n`modelID`, `source` (`cli` | `config` | `default`) and `matchesRequest`, so a\ncaller can verify routing without matching the human-readable\n`using explicit provider/model` log message, which is unchanged.\n\nThe Claude stream-json standard now also reports the resolved model on its `init`\nevent as `\"model\": \"<providerID>/<modelID>\"`.\n\n**Related Pull Request:** #296\n\n---\n\n[![npm version](https://img.shields.io/badge/npm-0.26.0-blue.svg)](https://www.npmjs.com/package/@link-assistant/agent/v/0.26.0)"}✅ Formatted release notes for v0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7166298Z    - Added link to PR #296
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7166767Z    - Added shields.io npm badge
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7167160Z    - Cleaned up formatting
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7214636Z ✅ Formatted release notes for js-v0.26.0
+Release	UNKNOWN STEP	2026-08-11T06:59:47.7383846Z Post job cleanup.
+Release	UNKNOWN STEP	2026-08-11T06:59:47.8768651Z Post job cleanup.
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9653776Z [command]/usr/bin/git version
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9695130Z git version 2.54.0
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9769595Z Temporarily overriding HOME='/home/runner/work/_temp/c67b0056-6d45-4e9f-9fd8-fde009e3fb70' before making global git config changes
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9771167Z Adding repository directory to the temporary git global config as a safe directory
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9776494Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agent/agent
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9809570Z Removing SSH command configuration
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9817153Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Release	UNKNOWN STEP	2026-08-11T06:59:47.9858511Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0098029Z Removing HTTP extra header
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0117332Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0159189Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0414614Z Removing includeIf entries pointing to credentials config files
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0425721Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0456255Z includeif.gitdir:/home/runner/work/agent/agent/.git.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0457416Z includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0458438Z includeif.gitdir:/github/workspace/.git.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0459464Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0471143Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/agent/agent/.git.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0501682Z /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0514174Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/agent/agent/.git.path /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0567454Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0600339Z /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0613955Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/agent/agent/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0654314Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0679647Z /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0688190Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0724942Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0750386Z /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0761882Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config
+Release	UNKNOWN STEP	2026-08-11T06:59:48.0808193Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Release	UNKNOWN STEP	2026-08-11T06:59:48.1027032Z Removing credentials config '/home/runner/work/_temp/git-credentials-64a880eb-25c1-4584-90ac-19e37fd70ffc.config'
+Release	UNKNOWN STEP	2026-08-11T06:59:48.1179405Z Cleaning up orphan processes
