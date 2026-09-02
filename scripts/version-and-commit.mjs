@@ -22,14 +22,13 @@ import {
   parseJsRootConfig,
 } from './js-paths.mjs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
+// Load dependencies through the shared use-m loader, which normalizes the
+// CommonJS namespace shape Node.js 23+ returns (see scripts/use-module.mjs).
+import { useModule } from './use-module.mjs';
 
 // Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+const { $ } = await useModule('command-stream');
+const { makeConfig } = await useModule('lino-arguments');
 
 // Parse CLI arguments using lino-arguments
 const config = makeConfig({

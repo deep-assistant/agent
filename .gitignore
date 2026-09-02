@@ -145,3 +145,8 @@ tmp/
 data/api-cache/
 js/data/api-cache/
 ci-logs/
+
+# Investigation evidence committed on purpose: the CI logs, GitHub API dumps and
+# analysis for an issue live under dev/log/issues/<issue>/pulls/<pr>/ and must
+# survive the generic "logs", "*.log" and "ci-logs/" rules above.
+!dev/log/**
