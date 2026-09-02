@@ -258,7 +258,9 @@ function main() {
     // Configure git
     exec('git config user.name "github-actions[bot]"');
     exec(
-      'git config user.email "github-actions[bot]@users.noreply.github.com"'
+      // The 41898282+ prefix links the commit to the github-actions[bot]
+      // account; without it the release commit is "unattributed".
+      'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"'
     );
 
     // Pull latest changes from remote before starting

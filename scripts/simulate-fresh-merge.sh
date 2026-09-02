@@ -24,7 +24,11 @@ if [ -z "${BASE_REF:-}" ]; then
   exit 1
 fi
 
-git config user.email "github-actions[bot]@users.noreply.github.com"
+# The 41898282+ prefix links the commit to the github-actions[bot]
+# account. Without it the merge commit is "unattributed", and a ruleset
+# with require_extra_approval_for_unattributed_changes demands a human
+# approval before an automated pull request can be merged.
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git config user.name "github-actions[bot]"
 
 git fetch origin "$BASE_REF"

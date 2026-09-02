@@ -164,7 +164,9 @@ async function main() {
   try {
     // Configure git
     await $`git config user.name "github-actions[bot]"`;
-    await $`git config user.email "github-actions[bot]@users.noreply.github.com"`;
+    // The 41898282+ prefix links the commit to the github-actions[bot]
+    // account; without it the release commit is "unattributed".
+    await $`git config user.email "41898282+github-actions[bot]@users.noreply.github.com"`;
 
     // Check if remote main has advanced (handles re-runs after partial success)
     console.log('Checking for remote changes...');
