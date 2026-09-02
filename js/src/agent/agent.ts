@@ -1,7 +1,7 @@
 import { Config } from '../config/file-config';
 import z from 'zod';
 import { Provider } from '../provider/provider';
-import { generateObject, type ModelMessage } from 'ai';
+import { generateObject } from 'ai';
 import PROMPT_GENERATE from './generate.txt';
 import { SystemPrompt } from '../session/system';
 import { Instance } from '../project/instance';
@@ -138,13 +138,14 @@ export namespace Agent {
     const existing = await list();
     const result = await generateObject({
       temperature: 0.3,
+      // The system prompt belongs in `system`, not in `prompt`: the AI SDK
+      // warns that a system message inside the prompt enables prompt
+      // injection, and providers are free to treat it as ordinary content.
+      system: system.map((content) => ({
+        role: 'system' as const,
+        content,
+      })),
       prompt: [
-        ...system.map(
-          (item): ModelMessage => ({
-            role: 'system',
-            content: item,
-          })
-        ),
         {
           role: 'user',
           content: `Create an agent configuration based on this request: \"${input.description}\".\n\nIMPORTANT: The following identifiers already exist and must NOT be used: ${existing.map((i) => i.name).join(', ')}\n  Return ONLY the JSON object, no other text, do not wrap in backticks`,
